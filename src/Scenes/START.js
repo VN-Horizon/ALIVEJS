@@ -3,9 +3,9 @@ async function loadStartScene(hasGallery=false) {
     const startScene = await loadScene("UI/START");
 
     let exitBtn = hasGallery ? startScene.getObjectByName("EXIT2") : startScene.getObjectByName("EXIT1");
-    
-    toButton(startScene.getObjectByName("START"), {callback: () => {
-        console.log('START button clicked');
+
+    toButton(startScene.getObjectByName("START"), {callback: async () => {
+        await pushDialogWindow();
     }});
     toButton(startScene.getObjectByName("LOAD"), {callback: () => {
         console.log('LOAD button clicked');
