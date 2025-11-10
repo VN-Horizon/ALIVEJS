@@ -11,11 +11,10 @@ class GameEngine {
             init: null,
             update: null,
             updatePost: null,
-            render: null,
-            renderPost: null
         };
 
         this.scenes = []; // Array to hold all scenes
+        this.scenePaths = []; // Array to hold scene paths
     }
 
     createContainer() {
@@ -24,12 +23,10 @@ class GameEngine {
         return $container[0];
     }
 
-    registerCallbacks(init, update, updatePost, render, renderPost) {
+    registerCallbacks(init, update, updatePost) {
         this.callbacks.init = init;
         this.callbacks.update = update;
         this.callbacks.updatePost = updatePost;
-        this.callbacks.render = render;
-        this.callbacks.renderPost = renderPost;
     }
 
     start() {
@@ -71,25 +68,11 @@ class GameEngine {
             this.callbacks.updatePost(this.deltaTime);
         }
 
-        if (this.callbacks.render) {
-            this.callbacks.render(this.deltaTime);
-        }
-
-        this.renderScenes();
-
-        if (this.callbacks.renderPost) {
-            this.callbacks.renderPost(this.deltaTime);
-        }
-
         requestAnimationFrame(this.gameLoop);
     };
 
     updateScenes(deltaTime) {
         this.scenes.forEach(scene => scene.update(deltaTime));
-    }
-
-    renderScenes() {
-        this.scenes.forEach(scene => scene.render());
     }
 
     getObjectByName(name) {
@@ -116,6 +99,7 @@ class GameEngine {
         
         // Add new scene
         this.scenes.push(scene);
+        this.scenePaths.push(scene.name);
         
         // Enable focusability only on the new scene
         scene.setFocusable(true);
@@ -127,6 +111,7 @@ class GameEngine {
         // Remove and destroy the top scene
         const scene = this.scenes.pop();
         scene.destroy();
+        this.scenePaths.pop();
         
         // Enable focus on the new top scene
         if (this.scenes.length > 0) {
@@ -145,9 +130,11 @@ class GameEngine {
     }
 
     clearAllScenes() {
-        while (this.scenes.length > 0) {
-            this.popScene();
-        }
+        while (this.scenes.length > 0) this.popScene();
+    }
+
+    isMountedScene(name) {
+        return this.scenePaths.includes(name);
     }
 
     getContainer() {
@@ -155,19 +142,6 @@ class GameEngine {
     }
 }
 
-// Global engine instance
-let gameEngine = null;
-
-function engineInit() {
-    gameEngine = new GameEngine('gameContainer');
-    gameEngine.start();
-}
-
-function getEngine() {
-    return gameEngine;
-}
 
 // Export as globals
 window.GameEngine = GameEngine;
-window.engineInit = engineInit;
-window.getEngine = getEngine;

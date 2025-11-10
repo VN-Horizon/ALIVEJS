@@ -22,7 +22,7 @@ class SceneElement {
         this.createDOMElement();
         if (data.path) this.loadImage(data.path);
         if (parent) parent.addChild(this);
-        this.syncDOM();
+        this.update(1);
     }
 
     // Backward-compatible property accessors
@@ -41,8 +41,8 @@ class SceneElement {
             display: this.visible ? 'block' : 'none',
             opacity: this.opacity,
             'mix-blend-mode': this.blendMode,
-            transform: `translate(${this.x}px, ${this.y}px) rotate(${this.rotation}rad)` ,
-            'z-index': this.zIndex,
+            transform: `translate(${this.transform.x}px, ${this.transform.y}px) rotate(${this.transform.rotation}rad)` ,
+            'z-index': this.transform.z,
             ...extra
         };
     }
@@ -90,10 +90,10 @@ class SceneElement {
         $(this.domElement).css(this.buildBaseStyle());
     }
 
-    syncDOM() {
+    update(deltaTime) {
         if (!this.domElement) return;
         
-        const engine = getEngine();
+        const engine = window.getEngine();
         const $element = $(this.domElement);
         
         if (this.parent) {
@@ -109,12 +109,6 @@ class SceneElement {
         this.updateDOMStyle();
 
         this.children.forEach(child => {
-            child.syncDOM();
-        });
-    }
-
-    update(deltaTime) {
-        this.children.forEach(child => {
             child.update(deltaTime);
         });
     }
@@ -126,8 +120,44 @@ class SceneElement {
         $(this.domElement)?.remove();
         this.domElement = null;
     }
+
+    hide() {
+        this.visible = false;
+        this.updateDOMStyle();
+    }
+
+    show() {
+        this.visible = true;
+        this.updateDOMStyle();
+    }
+}
+
+function preserveLayerIndex(oldElement, newElement) {
+    const parent = oldElement.parent;
+    let childIndex = -1;
+    if (parent) {
+        childIndex = parent.children.indexOf(oldElement);
+    }
+    oldElement.destroy();
+    
+    if (parent && childIndex >= 0) {
+        // Remove new element from end
+        const newIndex = parent.children.indexOf(newElement);
+        
+        // Insert at original position
+        if (newIndex > -1) parent.children.splice(newIndex, 1);
+        parent.children.splice(childIndex, 0, newElement);
+        
+        // Reorder DOM elements to match children array order
+        parent.children.forEach((child) => {
+            if (child.domElement && child.domElement.parentNode === parent.domElement) {
+                $(parent.domElement).append(child.domElement);
+            }
+        });
+    }
 }
 
 // Export as global
 window.SceneElement = SceneElement;
+window.preserveLayerIndex = preserveLayerIndex;
 

@@ -5,12 +5,17 @@ class Scene {
         this.sceneObjects = [];
         this.isFocusable = false;
         this.lastFocusedElement = null; // Store the last focused element
+        this.onDestroyCallbacks = [];
+        this.onBeforeFocusCallbacks = [];
+        this.onBeforeUnfocusCallbacks = [];
+        this.onAfterFocusCallbacks = [];
+        this.onAfterUnfocusCallbacks = [];
     }
 
     addObject(obj) {
         if (!this.sceneObjects.includes(obj)) {
             this.sceneObjects.push(obj);
-            obj.syncDOM?.();
+            obj.update?.();
         }
     }
 
@@ -55,6 +60,8 @@ class Scene {
 
     setFocusable(focusable) {
         this.isFocusable = focusable;
+        if(focusable) this.onBeforeFocusCallbacks.forEach(callback => callback());
+        else this.onBeforeUnfocusCallbacks.forEach(callback => callback());
         // Recursively update focusability for all objects in this scene
         this.sceneObjects.forEach(obj => this.updateObjectFocusability(obj));
         
@@ -65,29 +72,31 @@ class Scene {
                 $lastFocused.focus();
             }
         }
+        if(focusable) this.onAfterFocusCallbacks.forEach(callback => callback());
+        else this.onAfterUnfocusCallbacks.forEach(callback => callback());
     }
 
     updateObjectFocusability(obj) {
         if (obj.domElement) {
             const $element = $(obj.domElement);
             
-            if (this.isFocusable) {
+            if (this.isFocusable && $element.hasClass('non-focusable')) {
                 // Enable focus if the element was originally focusable
-                if ($element.hasClass('focusable')) {
-                    $element.attr('tabindex', '0');
-                    $element.css('pointer-events', 'auto');
-                }
+                $element.css('pointer-events', 'auto');
+                $element.removeClass('non-focusable');
+                $element.addClass('focusable');
             } else {
                 // Disable focus
                 if ($element.hasClass('focusable')) {
                     // Store the last focused element before disabling
                     if ($element.is(':focus')) this.lastFocusedElement = obj.domElement;
-                    $element.attr('tabindex', '-1');
                     $element.css('pointer-events', 'none');
                     // Remove focus if currently focused
                     if ($element.is(':focus')) {
                         $element.blur();
                     }
+                    $element.removeClass('focusable');
+                    $element.addClass('non-focusable');
                 }
             }
         }
@@ -99,6 +108,7 @@ class Scene {
     }
 
     destroy() {
+        this.onDestroyCallbacks.forEach(callback => callback());
         this.sceneObjects.forEach(obj => obj.destroy?.());
         this.sceneObjects = [];
     }
@@ -107,8 +117,12 @@ class Scene {
         this.sceneObjects.forEach(obj => obj.update?.(deltaTime));
     }
 
-    render() {
-        this.sceneObjects.forEach(obj => obj.render?.());
+    hide() {
+        this.sceneObjects.forEach(obj => obj.hide?.());
+    }
+
+    show() {
+        this.sceneObjects.forEach(obj => obj.show?.());
     }
 }
 

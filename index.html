@@ -16,6 +16,10 @@
     <script src="./src/Graphics.SceneElement.js"></script>
     <script src="./src/Graphics.Background.js"></script>
     <script src="./src/Graphics.Button.js"></script>
+    <!-- Scene Scripts -->
+    <script src="./src/Scenes/START.js"></script>
+    <script src="./src/Scenes/WINDOW.js"></script>
+    <script src="./src/Scenes/SYSTEM.js"></script>
     <style>
         * {
             margin: 0;
@@ -31,14 +35,16 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: Arial, sans-serif;
+            user-select: none;
+            -webkit-user-select: none; /* For Safari */
+            -ms-user-select: none; /* For IE 10 and 11 */
         }
 
         #gameContainer {
             position: fixed;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%) scale(1.75);
             width: 640px;
             height: 480px;
             overflow: hidden;
@@ -88,6 +94,12 @@
     <div id="black-overlay" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0); display: block; z-index: 114514;"></div>
 
     <script>
+        let gameEngine = null;
+
+        notUnityEngine = new GameEngine('gameContainer');
+        notUnityEngine.start();
+        window.getEngine = () => notUnityEngine;
+
         async function main() {
             try {
                 console.log('Initializing application...');
@@ -95,113 +107,21 @@
                 initBGM();
                 await loadStartScene();
                 await pushDialogWindow();
+                $('#black-overlay').fadeOut(600);
             } catch (error) {
                 alert(`Failed to initialize:\n${error.message}`);
                 console.error(error);
             }
         }
-        async function loadStartScene(hasGallery=false) {
-            const startScene = await loadScene("UI/START");
-            const engine = window.getEngine();
-            
-            // Get objects from the scene, not directly from engine
-            let exitBtn = hasGallery ? startScene.getObjectByName("EXIT2") : startScene.getObjectByName("EXIT1");
-            
-            toButton(startScene.getObjectByName("START"), {callback: () => {
-                console.log('START button clicked');
-            }});
-            toButton(startScene.getObjectByName("LOAD"), {callback: () => {
-                console.log('LOAD button clicked');
-            }});
-            toButton(startScene.getObjectByName("CONFIG"), {callback: () => {
-                console.log('CONFIG button clicked');
-            }});
-            if (hasGallery) {
-                toButton(startScene.getObjectByName("GALLERY"), {callback: () => {
-                    console.log('GALLERY button clicked');
-                }});
-            }
-            exitBtn = toButton(exitBtn, {callback: exit});
 
-            setExitListener(() => {
-                console.log('Exit listener triggered', exitBtn);
-                // if already focused, exit
-                if ($(exitBtn.domElement).is(":focus")) exit();
-                $(exitBtn.domElement).focus();
-            });
-            
-            playBGM("M07");
-            $('#black-overlay').fadeOut(600);
-        }
-
-        function exit() {
+        window.exit = () => {
             $('#black-overlay').fadeIn(600, () => {
                 window.close();
                 $(gameContainer).remove();
             });
-        }
+        };
 
-        async function pushPauseScreen() {
-            const pauseScene = await loadScene("UI/SYSTEM", false);
-            const engine = window.getEngine();
-            
-            // Get objects from the pause scene
-            toButton(pauseScene.getObjectByName("SAVE"));
-            console.log(pauseScene.getObjectByName("SAVE"));
-            // toButton(pauseScene.getObjectByName("LOAD"));
-            // toButton(pauseScene.getObjectByName("CONFIG"));
-            toButton(pauseScene.getObjectByName("EXIT"));
-            
-            feather = pauseScene.getObjectByName("羽セット");
-            toBackground(feather.findChildByName("光玉(奥)"), {
-                scrollSpeedY: -100,
-            });
-            toBackground(feather.findChildByName("光玉(中)"), {
-                scrollSpeedY: -200,
-            });
-            toBackground(feather.findChildByName("光玉(前)"), {
-                scrollSpeedY: -300,
-            });
-        }
-
-        async function pushDialogWindow() {
-            const dialogWindow = await loadScene("UI/WINDOW", false);
-            
-            // Remove objects from the dialog scene
-            dialogWindow.removeObject(dialogWindow.getObjectByName("メッセージ文字"));
-            dialogWindow.removeObject(dialogWindow.getObjectByName("選択肢文字"));
-            dialogWindow.removeObject(dialogWindow.getObjectByName("名前ウィンドウ"));
-            dialogWindow.removeObject(dialogWindow.getObjectByName("名前文字"));
-            
-            toButton(dialogWindow.getObjectByName("システムボタン"), {
-                clickedChildIndex: 1,
-                callback: async () => {
-                    await pushPauseScreen();
-                }
-            });
-            // toButton(dialogWindow.getObjectByName("選択肢１"), {
-            //     clickedChildIndex: 1,
-            //     callback: async () => {
-            //         console.log("選択肢１が選ばれました");
-            //     }
-            // });
-            // toButton(dialogWindow.getObjectByName("選択肢2"), {
-            //     clickedChildIndex: 1,
-            //     callback: async () => {
-            //         console.log("選択肢2が選ばれました");
-            //     }
-            // });
-            // toButton(dialogWindow.getObjectByName("選択肢3"), {
-            //     clickedChildIndex: 1,
-            //     callback: async () => {
-            //         console.log("選択肢3が選ばれました");
-            //     }
-            // });
-        }
-
-        engineInit();
         main();
-
     </script>
 </body>
 </html>

@@ -34,7 +34,7 @@ class Background extends SceneElement {
             }))
             [0];
         
-        this.syncDOM();
+        super.update(1);
     }
 
     async loadImage(path) {
@@ -61,18 +61,20 @@ class Background extends SceneElement {
     }
 
     update(deltaTime) {
-        if (this.scrollSpeed.x === 0 && this.scrollSpeed.y === 0) {
-            return;
-        }
+        // Always call parent update to handle position/style changes
+        super.update(deltaTime);
+        
+        // Handle scroll offset
+        if ((this.scrollSpeed?.x || 0) !== 0 || (this.scrollSpeed?.y || 0) !== 0) {
+            if(isNaN(this.scrollOffset.x) || isNaN(this.scrollOffset.y)) {
+                this.scrollOffset.x = 0;
+                this.scrollOffset.y = 0;
+            }
+            this.scrollOffset.x += this.scrollSpeed.x * deltaTime;
+            this.scrollOffset.y += this.scrollSpeed.y * deltaTime;
 
-        if(isNaN(this.scrollOffset.x) || isNaN(this.scrollOffset.y)) {
-            this.scrollOffset.x = 0;
-            this.scrollOffset.y = 0;
+            this.updateScrollPosition();
         }
-        this.scrollOffset.x += this.scrollSpeed.x * deltaTime;
-        this.scrollOffset.y += this.scrollSpeed.y * deltaTime;
-
-        this.updateScrollPosition();
     }
 }
 
@@ -82,7 +84,7 @@ function toBackground(element, options = {}) {
         backgroundPosition = 'center',
         backgroundRepeat = 'repeat',
         scrollSpeedX = 0,
-        scrollSpeedY = 0,
+        scrollSpeedY = 0
     } = options;
 
     if (!element || !element.sceneData) {
@@ -90,22 +92,20 @@ function toBackground(element, options = {}) {
         return null;
     }
 
-    console.log('Elevating element to Background:', element);
-
     const backgroundData = {
         ...element.sceneData,
         backgroundSize,
         backgroundPosition,
         backgroundRepeat,
         scrollSpeedX,
-        scrollSpeedY
+        scrollSpeedY,
     };
 
     const background = new Background(backgroundData, element.parent, element.scenePath);
     background.loadImage(element.sceneData.path);
 
-    // Destroy original element
-    element.destroy();
+    // Preserve the layer index in the parent's children array
+    preserveLayerIndex(element, background);
 
     return background;
 }

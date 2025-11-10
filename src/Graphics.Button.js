@@ -4,10 +4,9 @@ class Button extends SceneElement {
         
         super(data, parent, scenePath);
 
-        this.sizes = data.sizes || { normal: { width: 100, height: 50 }, hovered: { width: 100, height: 50 }, clicked: { width: 100, height: 50 } };
-        this.width = this.sizes.normal.width;
-        this.height = this.sizes.normal.height;
-        this.pos = data.pos || { normal: { x: 0, y: 0 }, hovered: { x: 0, y: 0 }, clicked: { x: 0, y: 0 } };
+        this.transforms = data.transforms || [];
+        this.width = this.transforms[0]?.[2] || 10;
+        this.height = this.transforms[0]?.[3] || 10;
 
         this.images = data.images;
         this.onClickHandler = null;
@@ -36,7 +35,7 @@ class Button extends SceneElement {
             })
             [0];
         
-        this.syncDOM();
+        super.update(1);
     }
 
     injectCSSRules() {
@@ -47,13 +46,12 @@ class Button extends SceneElement {
         }
 
         const sheet = $styleSheet[0].sheet;
-        sheet.insertRule(`#${this.buttonId} { background-image: url('${this.images[0]}'); width: ${this.sizes.normal.width}px; height: ${this.sizes.normal.height}px; transform: translate(${this.pos.normal.x}px, ${this.pos.normal.y}px); }`, sheet.cssRules.length);
-        sheet.insertRule(`#${this.buttonId}:hover, #${this.buttonId}:focus { background-image: url('${this.images[1]}'); width: ${this.sizes.hovered.width}px; height: ${this.sizes.hovered.height}px; transform: translate(${this.pos.hovered.x}px, ${this.pos.hovered.y}px); outline: none; }`, sheet.cssRules.length);
-        sheet.insertRule(`#${this.buttonId}:active, #${this.buttonId}.active:focus { background-image: url('${this.images[2]}'); width: ${this.sizes.clicked.width}px; height: ${this.sizes.clicked.height}px; transform: translate(${this.pos.clicked.x}px, ${this.pos.clicked.y}px); }`, sheet.cssRules.length);
+        sheet.insertRule(`#${this.buttonId} { background-image: url('${this.images[0]}'); width: ${this.transforms[0]?.[2] || 10}px; height: ${this.transforms[0]?.[3] || 10}px; transform: translate(${this.transforms[0]?.[0] || 0}px, ${this.transforms[0]?.[1] || 0}px); }`, sheet.cssRules.length);
+        sheet.insertRule(`#${this.buttonId}:hover, #${this.buttonId}:focus { background-image: url('${this.images[1]}'); width: ${this.transforms[1]?.[2] || 10}px; height: ${this.transforms[1]?.[3] || 10}px; transform: translate(${this.transforms[1]?.[0] || 0}px, ${this.transforms[1]?.[1] || 0}px); outline: none; }`, sheet.cssRules.length);
+        sheet.insertRule(`#${this.buttonId}:active, #${this.buttonId}.active:focus { background-image: url('${this.images[2]}'); width: ${this.transforms[2]?.[2] || 10}px; height: ${this.transforms[2]?.[3] || 10}px; transform: translate(${this.transforms[2]?.[0] || 0}px, ${this.transforms[2]?.[1] || 0}px); }`, sheet.cssRules.length);
     }
 
     setupClickListener() {
-        console.log('Setting up click listener for button:', this);
         if (!this.domElement) return;
         
         $(this.domElement).on('click', () => {
@@ -79,58 +77,45 @@ class Button extends SceneElement {
 
 function toButton(group, options = {}) {
     const {
-        disabledChildIndex = 0,
-        normalChildIndex = 0,
-        hoveredChildIndex = 1,
-        clickedChildIndex = 2,
+        stateIndexes = [0, 1, 2, 0],
+        defaultTransform = [null, null, null, null],
         callback = null
     } = options;
 
-    if (!group.children || group.children.length === 0) {
-        console.error('Group must have at least 1 children to elevate to Button');
+    if (!Array.isArray(group.children) || group.children.length === 0) {
+        console.error('Group must have children to elevate to Button');
         return null;
     }
 
-    const normalLayer = group.children[normalChildIndex];
-    const hoveredLayer = group.children[hoveredChildIndex];
-    const clickedLayer = group.children[clickedChildIndex];
-    const disabledLayer = group.children[disabledChildIndex];
+    const transforms = [];
+    const images = [];
 
-    console.log('Creating button from group:', group.children);
-    if (!normalLayer || !hoveredLayer || !clickedLayer || !disabledLayer) {
-        console.error('One or more child layers not found at specified indices');
-        return null;
-    }
+    stateIndexes.forEach((stateIndex) => {
+        const layer = stateIndex >= 0 ? group.children[stateIndex] : null;
+
+        transforms.push([
+            layer?.x || defaultTransform[0] || 0, layer?.y || defaultTransform[1] || 0,
+            layer?.width || defaultTransform[2] || 10, layer?.height || defaultTransform[3] || 10
+        ]);
+        images.push(layer ? (layer.domElement?.src || layer.sceneData.path) : '');
+    });
 
     const buttonData = {
         ...group.sceneData,
-        pos: {
-            normal: { x: normalLayer.x, y: normalLayer.y },
-            hovered: { x: hoveredLayer.x, y: hoveredLayer.y },
-            clicked: { x: clickedLayer.x, y: clickedLayer.y },
-            disabled: { x: disabledLayer.x, y: disabledLayer.y }
-        },
-        sizes: {
-            normal: { width: normalLayer.width, height: normalLayer.height },
-            hovered: { width: hoveredLayer.width, height: hoveredLayer.height },
-            clicked: { width: clickedLayer.width, height: clickedLayer.height },
-            disabled: { width: disabledLayer.width, height: disabledLayer.height }
-        },
-        images:[
-            normalLayer.domElement?.src || normalLayer.sceneData.path,
-            hoveredLayer.domElement?.src || hoveredLayer.sceneData.path,
-            clickedLayer.domElement?.src || clickedLayer.sceneData.path,
-            disabledLayer.domElement?.src || disabledLayer.sceneData.path
-        ],
+        transforms,
+        images,
         zIndex: group.zIndex,
         callback
     };
 
     const button = new Button(buttonData, group.parent, group.scenePath);
+    window.getEngine().getTopScene().addObject(button);
 
-    // Remove original group and its children
+    // Destroy all children first
     group.children.forEach(child => child.destroy());
-    group.destroy();
+    
+    // Preserve the layer index in the parent's children array
+    preserveLayerIndex(group, button);
 
     return button;
 }

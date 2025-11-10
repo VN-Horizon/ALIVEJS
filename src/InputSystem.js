@@ -9,15 +9,41 @@ const NAVIGATION_KEYS = {
 
 let confirmListener = null;
 let exitListener = null;
+// Single-flight guard state for exit listener to prevent duplicate scene pushes
+let exitListenerInFlight = false;
+let exitListenerOptions = { singleFlight: false };
+window.overrideRightKeys = false;
 
 function setConfirmListener(fn) { confirmListener = fn; }
-function setExitListener(fn) { exitListener = fn; }
-function clearKeyboardListeners() { confirmListener = null; exitListener = null; }
+function setExitListener(fn, options = {}) {
+    exitListenerOptions = { singleFlight: true, ...options };
+    // Wrap the original listener if singleFlight enabled
+    if (!fn) { exitListener = null; return; }
+    if (!exitListenerOptions.singleFlight) {
+        exitListener = fn;
+        return;
+    }
+    exitListener = async (e) => {
+        if (exitListenerInFlight) return; // drop repeated triggers while running
+        try {
+            exitListenerInFlight = true;
+            const result = fn(e);
+            // Support both sync and async handlers
+            if (result && typeof result.then === 'function') {
+                await result;
+            }
+        } finally {
+            exitListenerInFlight = false;
+        }
+    };
+}
+function clearKeyboardListeners() { confirmListener = null; exitListener = null; exitListenerInFlight = false; }
 
 $(document).on('keydown', function(e) {
     const $focused = $('.focusable:focus');
+    const op = NAVIGATION_KEYS[e.keyCode];
     if(!$focused.length && (Object.keys(NAVIGATION_KEYS).includes(e.keyCode.toString()))) {
-        $('.focusable').first().focus(); return;
+        $('.focusable')[{'prev': 'last', 'next': 'first'}[op]]().focus(); return;
     }
     if(CONFIRM_KEYS.includes(e.keyCode)) {
         $focused.addClass('active'); e.preventDefault(); return;
@@ -25,7 +51,6 @@ $(document).on('keydown', function(e) {
     if(CANCEL_KEYS.includes(e.keyCode) && exitListener) {
         exitListener(e); e.preventDefault(); return;
     }
-    const op = NAVIGATION_KEYS[e.keyCode];
     if(!op) return;
     let $current = $focused;
     $current.removeClass('active');
@@ -52,7 +77,22 @@ $(document).on('keyup', function(e) {
         }
     }
 });
+$(document).on('contextmenu', function(e) {
+    if(exitListener && !window.overrideRightKeys) {
+        exitListener(e); e.preventDefault();
+    }
+});
 
+window.setOverrideRightKeys = function(override) {
+    window.overrideRightKeys = override;
+    // remove all right-click listeners if overriding
+    $(document).off('contextmenu');
+    $(document).on('contextmenu', function(e) {
+        if(exitListener && !window.overrideRightKeys) {
+            exitListener(e); e.preventDefault();
+        }
+    });
+};
 // Gamepad support
 let gamepadState = {
     buttons: [],
