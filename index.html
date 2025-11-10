@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alive Remake</title>
+    <script src="./lib/jquery-3.7.1.min.js"></script>
+    <script src="./lib/protobuf.min.js"></script>
+    <!-- Module Scripts -->
+    <script src="./src/NotUnityEngine.js"></script>
+    <script src="./src/Scene.js"></script>
+    <script src="./src/InputSystem.js"></script>
+    <script src="./src/SceneManagement.js"></script>
+    <script src="./src/Events.js"></script>
+    <script src="./src/Audio.js"></script>
+    <script src="./src/Graphics.SceneElement.js"></script>
+    <script src="./src/Graphics.Background.js"></script>
+    <script src="./src/Graphics.Button.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+        }
+
+        #gameContainer {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 640px;
+            height: 480px;
+            overflow: hidden;
+            background: #000;
+        }
+
+        #gameContainer > button {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: auto;
+            border: none;
+            cursor: pointer;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            overflow: hidden;
+            background-color: transparent;
+        }
+
+        #gameContainer div, #gameContainer img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        #audiounlock {
+            position: fixed;
+            top: 0;left: 0;width: 100%;height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;justify-content: center;align-items: center;
+            z-index: 9999;cursor: pointer;
+            font-size: 3rem;
+        }
+        #audiounlock.hidden { display: none; }
+
+        @keyframes pauseBgAnim {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 100%; }
+        }
+    </style>
+
+</head>
+<body>
+    <div id="audiounlock hidden"><h1>👉 🔓🔊 👈</h1></div>
+    <div id="black-overlay" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0); display: block; z-index: 114514;"></div>
+
+    <script>
+        async function main() {
+            try {
+                console.log('Initializing application...');
+                const events = await loadEvents();
+                initBGM();
+                await loadStartScene();
+                await pushDialogWindow();
+            } catch (error) {
+                alert(`Failed to initialize:\n${error.message}`);
+                console.error(error);
+            }
+        }
+        async function loadStartScene(hasGallery=false) {
+            const startScene = await loadScene("UI/START");
+            const engine = window.getEngine();
+            
+            // Get objects from the scene, not directly from engine
+            let exitBtn = hasGallery ? startScene.getObjectByName("EXIT2") : startScene.getObjectByName("EXIT1");
+            
+            toButton(startScene.getObjectByName("START"), {callback: () => {
+                console.log('START button clicked');
+            }});
+            toButton(startScene.getObjectByName("LOAD"), {callback: () => {
+                console.log('LOAD button clicked');
+            }});
+            toButton(startScene.getObjectByName("CONFIG"), {callback: () => {
+                console.log('CONFIG button clicked');
+            }});
+            if (hasGallery) {
+                toButton(startScene.getObjectByName("GALLERY"), {callback: () => {
+                    console.log('GALLERY button clicked');
+                }});
+            }
+            exitBtn = toButton(exitBtn, {callback: exit});
+
+            setExitListener(() => {
+                console.log('Exit listener triggered', exitBtn);
+                // if already focused, exit
+                if ($(exitBtn.domElement).is(":focus")) exit();
+                $(exitBtn.domElement).focus();
+            });
+            
+            playBGM("M07");
+            $('#black-overlay').fadeOut(600);
+        }
+
+        function exit() {
+            $('#black-overlay').fadeIn(600, () => {
+                window.close();
+                $(gameContainer).remove();
+            });
+        }
+
+        async function pushPauseScreen() {
+            const pauseScene = await loadScene("UI/SYSTEM", false);
+            const engine = window.getEngine();
+            
+            // Get objects from the pause scene
+            toButton(pauseScene.getObjectByName("SAVE"));
+            console.log(pauseScene.getObjectByName("SAVE"));
+            // toButton(pauseScene.getObjectByName("LOAD"));
+            // toButton(pauseScene.getObjectByName("CONFIG"));
+            toButton(pauseScene.getObjectByName("EXIT"));
+            
+            feather = pauseScene.getObjectByName("羽セット");
+            toBackground(feather.findChildByName("光玉(奥)"), {
+                scrollSpeedY: -100,
+            });
+            toBackground(feather.findChildByName("光玉(中)"), {
+                scrollSpeedY: -200,
+            });
+            toBackground(feather.findChildByName("光玉(前)"), {
+                scrollSpeedY: -300,
+            });
+        }
+
+        async function pushDialogWindow() {
+            const dialogWindow = await loadScene("UI/WINDOW", false);
+            
+            // Remove objects from the dialog scene
+            dialogWindow.removeObject(dialogWindow.getObjectByName("メッセージ文字"));
+            dialogWindow.removeObject(dialogWindow.getObjectByName("選択肢文字"));
+            dialogWindow.removeObject(dialogWindow.getObjectByName("名前ウィンドウ"));
+            dialogWindow.removeObject(dialogWindow.getObjectByName("名前文字"));
+            
+            toButton(dialogWindow.getObjectByName("システムボタン"), {
+                clickedChildIndex: 1,
+                callback: async () => {
+                    await pushPauseScreen();
+                }
+            });
+            // toButton(dialogWindow.getObjectByName("選択肢１"), {
+            //     clickedChildIndex: 1,
+            //     callback: async () => {
+            //         console.log("選択肢１が選ばれました");
+            //     }
+            // });
+            // toButton(dialogWindow.getObjectByName("選択肢2"), {
+            //     clickedChildIndex: 1,
+            //     callback: async () => {
+            //         console.log("選択肢2が選ばれました");
+            //     }
+            // });
+            // toButton(dialogWindow.getObjectByName("選択肢3"), {
+            //     clickedChildIndex: 1,
+            //     callback: async () => {
+            //         console.log("選択肢3が選ばれました");
+            //     }
+            // });
+        }
+
+        engineInit();
+        main();
+
+    </script>
+</body>
+</html>

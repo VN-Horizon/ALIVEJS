@@ -1,0 +1,1 @@
+syntax="proto3";package events;message Instruction{int32 type=1;repeated int32 params=2;repeated string string_params=3;}message EventMapping{int32 evId=1;bool flag1=2;string evFunc=3;repeated Instruction instructions=4;repeated int32 return_values=5;bool has_choices=6;}message EventMappings{repeated string text_pool=1;repeated EventMapping events=2;}
