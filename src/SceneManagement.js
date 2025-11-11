@@ -47,6 +47,7 @@ async function loadScene(path, options = {
 function createSceneObjects(children, parent, scenePath, scene) {
     if (!children || !Array.isArray(children)) return;
     children.forEach(childData => {
+        if(currentExclusionList.includes(childData.name)) return;
         const obj = new SceneElement(childData, parent, scenePath);
         // Track root objects for cleanup
         if (!parent) {
@@ -55,7 +56,6 @@ function createSceneObjects(children, parent, scenePath, scene) {
                 console.error('Scene is not defined for root object addition');
                 return;
             }
-            if(currentExclusionList.includes(childData.name)) return;
             scene.addObject(obj);
         }
 

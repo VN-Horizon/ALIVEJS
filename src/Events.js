@@ -1,17 +1,11 @@
-window.screenplayContext = {
-    blocks: [],
-    textPool: [],
-    currentBlockIndex: 0,
-    currentInstructionIndex: 0,
-    evIdToBlockIndex: {},
-};
-
 function initScreenplayContext(blocks, textPool) {
-    window.screenplayContext.blocks = blocks;
-    window.screenplayContext.textPool = textPool || [];
-    window.screenplayContext.currentBlockIndex = 0;
-    window.screenplayContext.currentInstructionIndex = 0;
-    window.screenplayContext.evIdToBlockIndex = {};
+    window.screenplayContext = {
+        blocks: blocks || [],
+        textPool: textPool || [],
+        currentBlockIndex: 0,
+        currentInstructionIndex: 0,
+        evIdToBlockIndex: {},
+    };
     
     blocks.forEach((block, i) => {
         const evId = block.evId;
@@ -46,20 +40,38 @@ function resolveStrings(instruction, textPool) {
     return result;
 }
 
-function extractDialogData(lineText) {
-    if (!lineText) {
-        return { mode: 0, name: '', content: '' };
+function extractDialogData(lineText)
+{
+    // 获取引号所在位置
+    if (!lineText) return ['', lineText, 'Hidden'];
+    let quoteIndex = lineText.indexOf('「');
+
+    if (quoteIndex <= 0) return ['', lineText, 'Hidden'];
+
+    let candidate = lineText.slice(0, quoteIndex).trim();
+    if (candidate.length <= 0 || candidate.length >= 8)
+        return ['', lineText, 'Hidden'];
+
+    // 检测角色名称显示模式
+    let mode = 'Display';
+    let name = candidate;
+    let content = lineText.substring(quoteIndex + 1, lineText.length - quoteIndex - 1).trim();
+    if (candidate.length > 4 && candidate.startsWith("・・") && candidate.endsWith("・・")) {
+        mode = 'Special';
+        name = candidate.substring(2, candidate.length - 3).trim();
+    } else if (candidate.length > 2 && candidate.startsWith("・") && candidate.endsWith("・")) {
+        mode = 'Hidden';
+        name = candidate.substring(1, candidate.length - 1).trim();
     }
-    const match = lineText.match(/^\[(\d+)\](.+?):(.+)$/);
-    if (match) {
-        return {
-            mode: parseInt(match[1]),
-            name: match[2].trim(),
-            content: match[3].trim()
-        };
+
+    // 如果提取的名字不在角色列表中，则将整行作为内容并隐藏名字显示
+    console.log(content, name);
+    if (!window.AllowedCharacterNames.includes(name))
+    {
+        return ['', lineText, 'Hidden'];
     }
-    
-    return { mode: 0, name: '', content: lineText };
+
+    return [name, content, mode];
 }
 
 function updateBlockIndex(eventBlock, returnValueIndex = 0) {
@@ -76,15 +88,18 @@ function updateBlockIndex(eventBlock, returnValueIndex = 0) {
     ctx.currentInstructionIndex++;
 }
 
+function dispatchEvent(type, detail = {}) {
+    document.dispatchEvent(new CustomEvent(type, { detail, bubbles: true, cancelable: true }));
+}
+
 function execUntilNextLine(decisionIndex = -1) {
     const ctx = window.screenplayContext;
     
     while (true) {
         if (decisionIndex !== -1) {
-            const currentEvent = getCurrentEvent();
-            updateBlockIndex(currentEvent, decisionIndex);
+            updateBlockIndex(getCurrentEvent(), decisionIndex);
             decisionIndex = -1;
-            window.scrPlayHandlers?.['ResetLineCounter']?.forEach(fn => fn());
+            dispatchEvent('ResetLineCounter');
             continue;
         }
         
@@ -98,26 +113,27 @@ function execUntilNextLine(decisionIndex = -1) {
             stringParams: resolveStrings(instruction, ctx.textPool)
         };
         
-        window.scrPlayHandlers?.[instruction.type]?.forEach(fn => fn(resolvedInstruction));
+        dispatchEvent(instruction.type, resolvedInstruction);
         
         switch (resolvedInstruction.type) {
             case 'PlayDialog':
                 updateBlockIndex(currentEvent);
                 const lineText = resolvedInstruction.stringParams[0];
                 const lineData = extractDialogData(lineText);
-                window.scrPlayHandlers?.['PlayDialogInternal']?.forEach(fn => fn({
-                    params: [lineData.mode],
-                    stringParams: [lineData.content, lineData.name]
-                }));
-                return [lineData.content];
+                console.log(lineText)
+                dispatchEvent('PlayDialogInternal', {
+                    params: [lineData[2]],
+                    stringParams: [lineData[0], lineData[1]]
+                });
+                return [lineData[0]];
 
             case 'ShowDecision':
-                const options = resolvedInstruction.stringParams.filter(s => s && s.length > 0);
-                window.scrPlayHandlers?.['ShowDecisionInternal']?.forEach(fn => fn({
+                const stringParams = resolvedInstruction.stringParams.filter(s => s && s.length > 0);
+                dispatchEvent('ShowDecisionInternal', {
                     params: [],
-                    stringParams: options
-                }));
-                return options;
+                    stringParams
+                });
+                return stringParams;
         }
         
         updateBlockIndex(currentEvent);
@@ -143,8 +159,6 @@ async function loadEvents() {
             window.EventMappings.events || [],
             window.EventMappings.textPool || []
         );
-
-        console.log(execUntilNextLine());
 
         return window.EventMappings;
     } catch (error) {

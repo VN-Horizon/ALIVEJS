@@ -21,7 +21,7 @@ body {
     position: fixed;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%) scale(1.75);
+    transform: translate(-50%, -50%);
     width: 640px;
     height: 480px;
     overflow: hidden;
@@ -42,7 +42,7 @@ body {
     background-color: transparent;
 }
 
-#gameContainer div, #gameContainer img {
+#gameContainer div, #gameContainer img, #gameContainer span {
     position: absolute;
     top: 0;
     left: 0;

@@ -15,7 +15,8 @@ class Scene {
     addObject(obj) {
         if (!this.sceneObjects.includes(obj)) {
             this.sceneObjects.push(obj);
-            obj.update?.();
+            obj.update?.(1);
+            return obj;
         }
     }
 

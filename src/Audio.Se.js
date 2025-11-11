@@ -1,0 +1,34 @@
+const seList = {};
+let currentSE = null;
+
+function initSE() {
+    for (let i = 1; i < 37; i++) {
+        const audioElement = new Audio(`/assets/audio/se/SE_${i.toString().padStart(2, '0')}.mp3`);
+        audioElement.loop = false;
+        audioElement.volume = 0.5;
+        const trackName = `${i.toString().padStart(2, '0')}`;
+        seList[trackName] = audioElement;
+    }
+    console.log('SE initialized');
+}
+
+function playSE(name) {
+    if (!window.isAudioUnlocked()) {
+        console.error('Audio locked');
+        return;
+    }
+    if (currentSE) {
+        currentSE.pause();
+        currentSE.currentTime = 0;
+    }
+    currentSE = seList[name];
+    if (currentSE) {
+        currentSE.play().catch(err => {
+            console.warn('Play SE failed:', err);
+        });
+    }
+}
+
+
+window.initSE = initSE;
+window.playSE = playSE;

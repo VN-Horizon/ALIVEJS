@@ -2,12 +2,12 @@ class SceneElement {
     constructor(data, parent = null, scenePath = '') {
         // Core transform grouped
         this.transform = {
-            x: data.left || 0,
-            y: data.top || 0,
-            z: data.zIndex || 0,
-            width: data.width || 1,
-            height: data.height || 1,
-            rotation: data.rotation || 0
+            x: data.transform?.x || data.left || 0,
+            y: data.transform?.y || data.top || 0,
+            z: data.transform?.z || data.zIndex || 0,
+            width: data.transform?.width || data.width || 1,
+            height: data.transform?.height || data.height || 1,
+            rotation: data.transform?.rotation || data.rotation || 0
         };
 
         this.sceneData = data;
@@ -43,7 +43,7 @@ class SceneElement {
             'mix-blend-mode': this.blendMode,
             transform: `translate(${this.transform.x}px, ${this.transform.y}px) rotate(${this.transform.rotation}rad)` ,
             'z-index': this.transform.z,
-            ...extra
+            ...extra,
         };
     }
 
