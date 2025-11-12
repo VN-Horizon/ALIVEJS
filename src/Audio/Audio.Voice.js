@@ -1,6 +1,7 @@
+import { isAudioUnlocked } from './Audio.🔓.js';
+import { CharacterNameToVoiceKey } from '../Constants.js';
 
-
-window.CharacterLineCounts = {};
+export const CharacterLineCounts = {};
 
 function GetVoiceEventName(index) {
     var currentIndex = (index).toString().padStart(4, '0');
@@ -15,7 +16,7 @@ function GetCharacterVoiceName(characterName) {
 }
 
 
-function OnPlayDialog(instruction)
+export function OnPlayDialog(instruction)
 {
     var voiceName = instruction.stringParams[1];
     var blockIndex = instruction.params[0];
@@ -25,14 +26,14 @@ function OnPlayDialog(instruction)
     if (voiceName == "祐二" || !voiceKey) return;
 
     // Initialize line count if character hasn't spoken yet
-    window.CharacterLineCounts[voiceKey] = (window.CharacterLineCounts[voiceKey] || 0) + 1;
+    CharacterLineCounts[voiceKey] = (CharacterLineCounts[voiceKey] || 0) + 1;
 
-    var lineCount = window.CharacterLineCounts[voiceKey];
+    var lineCount = CharacterLineCounts[voiceKey];
 
     PlayCharacterVoice(voiceKey, eventName, lineCount.toString().padStart(3, '0'));
 
     // Increment line count after playing
-    window.CharacterLineCounts[voiceKey]++;
+    CharacterLineCounts[voiceKey]++;
 }
 
 
@@ -43,7 +44,7 @@ characterAudioElement.loop = false;
 characterAudioElement.volume = 0.7;
 
 function PlayCharacterVoice(characterKey, eventName, lineNumber) {
-    if (!window.isAudioUnlocked()) {
+    if (!isAudioUnlocked()) {
         console.error('Audio locked');
         return;
     }

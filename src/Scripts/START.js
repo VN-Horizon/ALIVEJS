@@ -2,7 +2,7 @@ import { loadScene } from '../Scene/SceneManagement.js';
 import { toButton } from '../Graphics/Graphics.Button.js';
 import { setExitListener, setOverrideRightKeys } from '../InputSystem/InputSystem.Keyboard.js';
 import { playBGM } from '../Audio/Audio.Bgm.js';
-import { pushDialogWindow } from './WINDOW.js';
+import { pushDialogWindow } from './WINDOW/WINDOW.js';
 
 export async function loadStartScene(hasGallery=false) {
     const startScene = await loadScene("UI/START");

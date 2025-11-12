@@ -6,59 +6,12 @@
     <title>Alive Remake</title>
     <script src="./lib/jquery-3.7.1.min.js"></script>
     <script src="./lib/protobuf.min.js"></script>
-    <!-- Module Scripts -->
-    <script src="./src/NotUnityEngine.js"></script>
-    <script src="./src/Scene.js"></script>
-    <script src="./src/InputSystem.js"></script>
-    <script src="./src/SceneManagement.js"></script>
-    <script src="./src/Constants.js"></script>
-    <script src="./src/Events.js"></script>
-    <script src="./src/Audio.🔓.js"></script>
-    <script src="./src/Audio.Bgm.js"></script>
-    <script src="./src/Audio.Se.js"></script>
-    <script src="./src/Audio.Voice.js"></script>
-    <script src="./src/Graphics.SceneElement.js"></script>
-    <script src="./src/Graphics.Background.js"></script>
-    <script src="./src/Graphics.Button.js"></script>
-    <script src="./src/Graphics.TextMessPoor.js"></script>
-    <!-- Scene Scripts -->
-    <script src="./src/Scenes/START.js"></script>
-    <script src="./src/Scenes/WINDOW.js"></script>
-    <script src="./src/Scenes/SYSTEM.js"></script>
-    <link rel="stylesheet" href="./src/NotUnityPlayer.css">
+    <!-- ES6 Module Entry Point -->
+    <script type="module" src="./src/main.js"></script>
+    <link rel="stylesheet" href="./src/styles/NotUnityPlayer.css">
 </head>
 <body>
     <div id="audiounlock hidden"><h1>👉 🔓🔊 👈</h1></div>
     <div id="black-overlay" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0); display: block; z-index: 114514;"></div>
-
-    <script>
-        let gameEngine = null;
-
-        notUnityEngine = new GameEngine('gameContainer');
-        notUnityEngine.start();
-        window.getEngine = () => notUnityEngine;
-
-        async function main() {
-            try {
-                console.log('Initializing application...');
-                const events = await loadEvents();
-                initBGM();
-                await loadStartScene();
-                $('#black-overlay').fadeOut(600);
-            } catch (error) {
-                alert(`Failed to initialize:\n${error.message}`);
-                console.error(error);
-            }
-        }
-
-        window.exit = () => {
-            $('#black-overlay').fadeIn(600, () => {
-                window.close();
-                $(gameContainer).remove();
-            });
-        };
-
-        main();
-    </script>
 </body>
 </html>

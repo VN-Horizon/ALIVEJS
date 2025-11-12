@@ -1,5 +1,5 @@
 
-window.AllowedCharacterNames = [
+export const AllowedCharacterNames = [
     "祐二",
     "柚木",
     "祐里子",
@@ -17,7 +17,7 @@ window.AllowedCharacterNames = [
     "繭"
 ];
 
-window.CharacterNameToVoiceKey = {
+export const CharacterNameToVoiceKey = {
     "祐二": "",
     "柚木": "YUZUKI",
     "祐里子": "YURIKO",

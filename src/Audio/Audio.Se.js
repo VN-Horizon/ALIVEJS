@@ -1,7 +1,9 @@
+import { isAudioUnlocked } from './Audio.🔓.js';
+
 const seList = {};
 let currentSE = null;
 
-function initSE() {
+export function initSE() {
     for (let i = 1; i < 37; i++) {
         const audioElement = new Audio(`/assets/audio/se/SE_${i.toString().padStart(2, '0')}.mp3`);
         audioElement.loop = false;
@@ -12,8 +14,8 @@ function initSE() {
     console.log('SE initialized');
 }
 
-function playSE(name) {
-    if (!window.isAudioUnlocked()) {
+export function playSE(name) {
+    if (!isAudioUnlocked()) {
         console.error('Audio locked');
         return;
     }
@@ -28,7 +30,3 @@ function playSE(name) {
         });
     }
 }
-
-
-window.initSE = initSE;
-window.playSE = playSE;

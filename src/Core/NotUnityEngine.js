@@ -1,4 +1,4 @@
-class GameEngine {
+export class GameEngine {
     constructor(containerId = 'gameContainer') {
         this.container = $(`#${containerId}`)[0] || this.createContainer();
         this.running = false;
@@ -141,7 +141,3 @@ class GameEngine {
         return this.container;
     }
 }
-
-
-// Export as globals
-window.GameEngine = GameEngine;

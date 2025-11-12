@@ -1,8 +1,11 @@
-class Button extends SceneElement {
-    constructor(data, parent = null, scenePath = '') {
+import { FocusableElement } from './Graphics.FocusableElement.js';
+import { preserveLayerIndex } from './Graphics.SceneElement.js';
+
+export class Button extends FocusableElement {
+    constructor(data, parent = null, scene) {
         data.isButton = true;
         
-        super(data, parent, scenePath);
+        super(data, parent, scene);
 
         this.transforms = data.transforms || [];
         this.width = this.transforms[0]?.[2] || 10;
@@ -12,6 +15,8 @@ class Button extends SceneElement {
         this.onClickHandler = null;
         this.buttonId = `btn-${Math.random().toString(36).substr(2, 9)}`;
         this.isButton = true;
+        this.transform.z = data.z || 0;
+        this.cursor = data.cursor || 'pointer';
         
         this.recreateDOMAsButton();
         this.injectCSSRules();
@@ -19,23 +24,25 @@ class Button extends SceneElement {
     }
 
     recreateDOMAsButton() {
+        let classNames = ''
         if (this.domElement) {
+            classNames = $(this.domElement).attr('class').split(' ');
             $(this.domElement).remove();
         }
         
         this.domElement = $('<button>')
             .attr('id', this.buttonId)
-            .addClass('focusable')
             .attr('layer-name', this.sceneData.name || 'Button')
+            .attr('class', classNames)
             .css({
                 opacity: this.opacity,
                 'mix-blend-mode': this.blendMode,
-                'z-index': this.zIndex,
+                cursor: this.cursor,
                 display: this.visible ? 'block' : 'none'
             })
             [0];
         
-        super.update(1);
+        super.syncDom();
     }
 
     injectCSSRules() {
@@ -54,7 +61,14 @@ class Button extends SceneElement {
     setupClickListener() {
         if (!this.domElement) return;
         
-        $(this.domElement).on('click', () => {
+        $(this.domElement).on('click', (e) => {
+            // Block click when disabled (manual or via scene)
+            const sceneEnabled = this.scene ? this.scene.isFocusable : true;
+            const effectiveEnabled = this.manualEnabled === true ? true : (this.manualEnabled === false ? false : sceneEnabled);
+            if (!effectiveEnabled) {
+                e.preventDefault();
+                return;
+            }
             if (this.onClickHandler) this.onClickHandler();
         });
     }
@@ -66,20 +80,24 @@ class Button extends SceneElement {
 
     updateDOMStyle() {
         if (!this.domElement) return;
+        const baseZOffset = this.scene?.baseZOffset || 0;
         $(this.domElement).css({
             opacity: this.opacity,
-            'z-index': this.zIndex,
+            'z-index': this.transform.z + baseZOffset,
             'mix-blend-mode': this.blendMode,
-            display: this.visible ? 'block' : 'none'
+            display: this.visible ? 'block' : 'none',
+            cursor: this.cursor
         });
     }
 }
 
-function toButton(group, options = {}) {
+export function toButton(group, options = {}) {
     const {
         stateIndexes = [0, 1, 2, 0],
         defaultTransform = [null, null, null, null],
-        callback = null
+        z = 0, cursor = 'pointer',
+        callback = null,
+        focusable = true
     } = options;
 
     if (!Array.isArray(group.children) || group.children.length === 0) {
@@ -103,12 +121,14 @@ function toButton(group, options = {}) {
     const buttonData = {
         ...group.sceneData,
         transforms,
+        z, cursor,
         images,
         zIndex: group.zIndex,
-        callback
+        callback,
+        focusable
     };
 
-    const button = new Button(buttonData, group.parent, group.scenePath);
+    const button = new Button(buttonData, group.parent, group.scene);
     window.getEngine().getTopScene().addObject(button);
 
     // Destroy all children first
@@ -119,6 +139,3 @@ function toButton(group, options = {}) {
 
     return button;
 }
-
-window.Button = Button;
-window.toButton = toButton;

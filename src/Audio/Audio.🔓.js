@@ -1,10 +1,10 @@
-audioUnlocked = false;
+let audioUnlocked = false;
 
-function setAudioUnlocked(unlocked) {
+export function setAudioUnlocked(unlocked) {
     audioUnlocked = unlocked;
 }
 
-function isAudioUnlocked() {
+export function isAudioUnlocked() {
     return audioUnlocked;
 }
 
@@ -26,6 +26,3 @@ $(function() {
     };
     $(document).one('click touchend keydown', unlockAudio);
 });
-
-window.setAudioUnlocked = setAudioUnlocked;
-window.isAudioUnlocked = isAudioUnlocked;

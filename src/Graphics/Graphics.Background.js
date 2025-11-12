@@ -1,8 +1,10 @@
-class Background extends SceneElement {
-    constructor(data, parent = null, scenePath = '') {
+import { SceneElement, preserveLayerIndex } from './Graphics.SceneElement.js';
+
+export class Background extends SceneElement {
+    constructor(data, parent = null, scene = null) {
         data.isBackground = true;
 
-        super(data, parent, scenePath);
+        super(data, parent, scene);
         
         this.backgroundId = `bg-${Math.random().toString(36).substr(2, 9)}`;
         this.backgroundImageUrl = null;
@@ -34,11 +36,11 @@ class Background extends SceneElement {
             }))
             [0];
         
-        super.update(1);
+            super.syncDom();
     }
 
     async loadImage(path) {
-        const fullImagePath = `/assets/scenes/${this.scenePath}/${path}.webp`;
+        const fullImagePath = `/assets/scenes/${this.scene.name}/${path}.webp`;
         this.updateBackgroundImage(fullImagePath);
     }
 
@@ -61,9 +63,6 @@ class Background extends SceneElement {
     }
 
     update(deltaTime) {
-        // Always call parent update to handle position/style changes
-        super.update(deltaTime);
-        
         // Handle scroll offset
         if ((this.scrollSpeed?.x || 0) !== 0 || (this.scrollSpeed?.y || 0) !== 0) {
             if(isNaN(this.scrollOffset.x) || isNaN(this.scrollOffset.y)) {
@@ -78,7 +77,7 @@ class Background extends SceneElement {
     }
 }
 
-function toBackground(element, options = {}) {
+export function toBackground(element, options = {}) {
     const {
         backgroundSize = 'cover',
         backgroundPosition = 'center',
@@ -101,7 +100,7 @@ function toBackground(element, options = {}) {
         scrollSpeedY,
     };
 
-    const background = new Background(backgroundData, element.parent, element.scenePath);
+    const background = new Background(backgroundData, element.parent, element.scene);
     background.loadImage(element.sceneData.path);
 
     // Preserve the layer index in the parent's children array
@@ -109,7 +108,3 @@ function toBackground(element, options = {}) {
 
     return background;
 }
-
-// Export as globals
-window.Background = Background;
-window.toBackground = toBackground;

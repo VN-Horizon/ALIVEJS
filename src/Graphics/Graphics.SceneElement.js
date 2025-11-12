@@ -1,5 +1,5 @@
-class SceneElement {
-    constructor(data, parent = null, scenePath = '') {
+export class SceneElement {
+    constructor(data, parent = null, scene = null) {
         // Core transform grouped
         this.transform = {
             x: data.transform?.x || data.left || 0,
@@ -10,19 +10,20 @@ class SceneElement {
             rotation: data.transform?.rotation || data.rotation || 0
         };
 
-        this.sceneData = data;
-        this.scenePath = scenePath;
-        this.domElement = null;
-        this.visible = data.visible !== false;
-        this.opacity = data.opacity ?? 1;
-        this.blendMode = data.blendMode || 'normal';
-        this.parent = parent;
-        this.children = [];
+    this.sceneData = data;
+    this.scene = scene; // reference to owning Scene to access baseZOffset
+    this.domElement = null;
+    this.visible = data.visible !== false;
+    this.originallyVisible = this.visible; // Store original visibility state
+    this.opacity = data.opacity ?? 1;
+    this.blendMode = data.blendMode || 'normal';
+    this.parent = parent;
+    this.children = [];
 
-        this.createDOMElement();
-        if (data.path) this.loadImage(data.path);
-        if (parent) parent.addChild(this);
-        this.update(1);
+    this.createDOMElement();
+    if (data.path) this.loadImage(data.path);``
+    if (parent) parent.addChild(this);
+    this.update(1);
     }
 
     // Backward-compatible property accessors
@@ -35,6 +36,7 @@ class SceneElement {
 
     // Build base style object
     buildBaseStyle(extra = {}) {
+        const zBase = this.scene?.baseZOffset || 0;
         return {
             width: `${this.width}px`,
             height: `${this.height}px`,
@@ -42,7 +44,7 @@ class SceneElement {
             opacity: this.opacity,
             'mix-blend-mode': this.blendMode,
             transform: `translate(${this.transform.x}px, ${this.transform.y}px) rotate(${this.transform.rotation}rad)` ,
-            'z-index': this.transform.z,
+            'z-index': zBase + this.transform.z,
             ...extra,
         };
     }
@@ -58,19 +60,22 @@ class SceneElement {
             .css(this.buildBaseStyle())[0];
         if (hasChildren) $(this.domElement).css('overflow', 'visible');
         else $(this.domElement).attr('alt', this.sceneData.name || 'Scene Element');
+        this.syncDom();
     }
 
     async loadImage(path) {
         if (this.domElement.tagName === 'DIV') {
             return;
         }
-        const fullImagePath = `/assets/scenes/${this.scenePath}/${path}.webp`;
+        const fullImagePath = `/assets/scenes/${this.scene.name}/${path}.webp`;
         $(this.domElement).attr('src', fullImagePath);
+        this.syncDom();
     }
 
     addChild(child) {
         this.children.push(child);
         child.parent = this;
+        this.syncDom();
     }
 
     removeChild(child) {
@@ -79,6 +84,7 @@ class SceneElement {
             this.children.splice(index, 1);
             child.parent = null;
         }
+        this.syncDom();
     }
 
     findChildByName(name) {
@@ -91,6 +97,12 @@ class SceneElement {
     }
 
     update(deltaTime) {
+        this.children.forEach(child => {
+            child.update(deltaTime);
+        });
+    }
+
+    syncDom() {
         if (!this.domElement) return;
         
         const engine = window.getEngine();
@@ -107,10 +119,6 @@ class SceneElement {
         }
 
         this.updateDOMStyle();
-
-        this.children.forEach(child => {
-            child.update(deltaTime);
-        });
     }
 
     destroy() {
@@ -121,18 +129,29 @@ class SceneElement {
         this.domElement = null;
     }
 
-    hide() {
+    hide(fromParent = false) {
+        if(fromParent){
+            // Store original visibility state when hiding from parent
+            this.originallyVisible = this.visible;
+        }
         this.visible = false;
         this.updateDOMStyle();
+        this.children.forEach(child => child.hide(true));
     }
 
-    show() {
-        this.visible = true;
+    show(fromParent = false) {
+        if(fromParent){
+            // Restore original visibility state when showing from parent
+            this.visible = this.originallyVisible;
+        } else {
+            this.visible = true;
+        }
         this.updateDOMStyle();
+        this.children.forEach(child => child.show(true));
     }
 }
 
-function preserveLayerIndex(oldElement, newElement) {
+export function preserveLayerIndex(oldElement, newElement) {
     const parent = oldElement.parent;
     let childIndex = -1;
     if (parent) {
@@ -156,8 +175,3 @@ function preserveLayerIndex(oldElement, newElement) {
         });
     }
 }
-
-// Export as global
-window.SceneElement = SceneElement;
-window.preserveLayerIndex = preserveLayerIndex;
-

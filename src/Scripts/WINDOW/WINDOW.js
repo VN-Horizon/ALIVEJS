@@ -1,11 +1,11 @@
-import { loadScene } from '../Scene/SceneManagement.js';
-import { Button, toButton } from '../Graphics/Graphics.Button.js';
-import { TMP_Text, TMP_TypeWriter } from '../Graphics/Graphics.TextMessPoor.js';
-import { setExitListener, setOverrideRightKeys } from '../InputSystem/InputSystem.Keyboard.js';
-import { execUntilNextLine } from '../Core/Events.js';
+import { loadScene } from '../../Scene/SceneManagement.js';
+import { Button, toButton } from '../../Graphics/Graphics.Button.js';
+import { TMP_Text, TMP_TypeWriter } from '../../Graphics/Graphics.TextMessPoor.js';
+import { setExitListener, setOverrideRightKeys } from '../../InputSystem/InputSystem.Keyboard.js';
+import { execUntilNextLine } from '../../Core/Events.js';
 import { initSelectionsBox } from './WINDOW.SelectionsBox.js';
 import { _hideDialogWindow } from './WINDOW.DialogHider.js';
-import { pushPauseScreen } from './SYSTEM.js';
+import { pushPauseScreen } from '../SYSTEM.js';
 
 export async function pushDialogWindow() {
     const dialogWindow = await loadScene("UI/WINDOW", {

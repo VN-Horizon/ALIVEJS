@@ -1,7 +1,9 @@
-class TMP_Text extends SceneElement {
-    constructor(data, parent = null, scenePath = '') {
-        super(data, parent, scenePath);
-        
+import { SceneElement } from './Graphics.SceneElement.js';
+
+export class TMP_Text extends SceneElement {
+    constructor(data, parent = null, scene = null) {
+        super(data, parent, scene);
+
         this.text = data.text || '';
         this.fontSize = data.fontSize || 16;
         this.fontFamily = data.fontFamily || '';
@@ -17,6 +19,7 @@ class TMP_Text extends SceneElement {
             .attr('layer-name', this.sceneData.name || '')
             .text(this.text)
             .css(this.buildBaseStyle())[0];
+        super.syncDom();
     }
 
     buildBaseStyle(extra = {}) {
@@ -56,9 +59,9 @@ class TMP_Text extends SceneElement {
     }
 }
 
-class TMP_TypeWriter extends TMP_Text {
-    constructor(data, parent = null, scenePath = '') {
-        super(data, parent, scenePath);
+export class TMP_TypeWriter extends TMP_Text {
+    constructor(data, parent = null, scene = null) {
+        super(data, parent, scene);
         
         this.fullText = this.text;
         this.currentCharIndex = 0;
@@ -110,7 +113,3 @@ class TMP_TypeWriter extends TMP_Text {
         this.setText('');
     }
 }
-
-// Export as global
-window.TextMessPoor = TMP_Text;
-window.TMP_TypeWriter = TMP_TypeWriter;

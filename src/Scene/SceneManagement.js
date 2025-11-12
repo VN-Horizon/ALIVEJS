@@ -1,7 +1,13 @@
+import { Scene } from './Scene.js';
+import { SceneElement } from '../Graphics/Graphics.SceneElement.js';
+
 const currentExclusionList = [];
 const loadingScenes = new Set();
 
-async function loadScene(path, options = {
+// Global counter to ensure newer scenes always stack above older ones
+let __sceneZCounter = 0;
+
+export async function loadScene(path, options = {
     override: false, singleInstance: true, exclusionList: []
 }) {
     console.log(`Loading scene: ${path}`);
@@ -29,9 +35,11 @@ async function loadScene(path, options = {
             console.error('Engine not initialized');
             return null;
         }
-        const scene = new Scene(path, engine);
+        // Each newly loaded scene gets a increasing base z offset.
+        const scene = new Scene(path, engine, __sceneZCounter * 114514); // large gap to avoid overlap
+        __sceneZCounter++;
         if (sceneData.children) {
-            createSceneObjects(sceneData.children, null, path, scene);
+            createSceneObjects(sceneData.children, null, scene);
         }
         engine.pushScene(scene);
         console.log('Scene loaded successfully:', path);
@@ -44,11 +52,11 @@ async function loadScene(path, options = {
     }
 }
 
-function createSceneObjects(children, parent, scenePath, scene) {
+function createSceneObjects(children, parent, scene) {
     if (!children || !Array.isArray(children)) return;
     children.forEach(childData => {
         if(currentExclusionList.includes(childData.name)) return;
-        const obj = new SceneElement(childData, parent, scenePath);
+    const obj = new SceneElement(childData, parent, scene);
         // Track root objects for cleanup
         if (!parent) {
             // Add to scene
@@ -61,19 +69,15 @@ function createSceneObjects(children, parent, scenePath, scene) {
 
         // Recursively create children
         if (childData.children && childData.children.length) {
-            createSceneObjects(childData.children, obj, scenePath, scene);
+            createSceneObjects(childData.children, obj, scene);
         }
     });
 }
 
-function destroyScene() {
+export function destroyScene() {
     const engine = window.getEngine();
     if (engine) {
         // Pop the top scene from the engine
         engine.popScene();
     }
 }
-
-// Export as globals
-window.loadScene = loadScene;
-window.destroyScene = destroyScene;
