@@ -38,12 +38,28 @@ export async function loadBackgroundScene() {
         portrait.updateBackgroundImage(stringParams.length >= 2 ? `/assets/scenes/Portraits/${stringParams[0]}/${stringParams[1]}.webp` : null);
     };
 
+    // Handler to restore background image from saved state
+    const restoreBgImgHandler = (e) => {
+        const { backgroundImage } = e.detail;
+        backgroundCG.updateBackgroundImage(backgroundImage);
+    };
+
+    // Handler to restore portrait image from saved state
+    const restoreCharaImgHandler = (e) => {
+        const { backgroundImage } = e.detail;
+        portrait.updateBackgroundImage(backgroundImage);
+    };
+
     document.addEventListener('SetBgImg', setBgImgHandler);
     document.addEventListener('SetCharaImg', setCharaImgHandler);
+    document.addEventListener('RestoreBgImg', restoreBgImgHandler);
+    document.addEventListener('RestoreCharaImg', restoreCharaImgHandler);
 
     backgroundScene.onDestroyCallbacks.push(() => {
         document.removeEventListener('SetBgImg', setBgImgHandler);
         document.removeEventListener('SetCharaImg', setCharaImgHandler);
+        document.removeEventListener('RestoreBgImg', restoreBgImgHandler);
+        document.removeEventListener('RestoreCharaImg', restoreCharaImgHandler);
     });
     return backgroundScene;
 }

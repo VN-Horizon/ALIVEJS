@@ -21,6 +21,9 @@ export function initScreenplayContext(blocks, textPool) {
         const evId = block.evId;
         ScreenplayContext.evIdToBlockIndex[evId] = i;
     });
+    
+    // Expose ScreenplayContext globally for GameSave.js
+    window.ScreenplayContext = ScreenplayContext;
 }
 
 export function getCurrentEvent() {

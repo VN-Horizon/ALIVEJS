@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Load Save</title>
+    <title>Save/Load</title>
     <style>
         * {
             margin: 0;
@@ -148,7 +148,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Load Save</h1>
+        <h1 id="title">Load Save</h1>
         
         <div class="save-list" id="saveList">
             <div class="empty-message">No save files found</div>
@@ -156,51 +156,70 @@
 
         <div class="button-container">
             <button class="cancel-btn" id="cancelBtn">Cancel</button>
-            <button class="load-btn" id="loadBtn" disabled>Load</button>
+            <button class="load-btn" id="actionBtn" disabled>Load</button>
         </div>
     </div>
 
     <script>
+        const SAVE_KEY_PREFIX = 'alive_save_';
+        const MAX_SAVE_SLOTS = 20;
+        
         const saveList = document.getElementById('saveList');
         const cancelBtn = document.getElementById('cancelBtn');
-        const loadBtn = document.getElementById('loadBtn');
-        let selectedSave = null;
+        const actionBtn = document.getElementById('actionBtn');
+        const titleElement = document.getElementById('title');
+        let selectedSlot = null;
+        
+        // Get mode from URL parameters (save or load)
+        const urlParams = new URLSearchParams(window.location.search);
+        const mode = urlParams.get('mode') || 'load';
+        
+        // Update UI based on mode
+        if (mode === 'save') {
+            titleElement.textContent = 'Save Game';
+            actionBtn.textContent = 'Save';
+        } else {
+            titleElement.textContent = 'Load Game';
+            actionBtn.textContent = 'Load';
+        }
 
-        const mockSaves = [
-            {
-                id: 1,
-                name: 'Save 1',
-                date: '2025-11-13 10:30:45',
-                scene: 'Chapter 1 - Beginning'
-            },
-            {
-                id: 2,
-                name: 'Save 2',
-                date: '2025-11-12 15:20:10',
-                scene: 'Chapter 2 - The Journey'
-            },
-            {
-                id: 3,
-                name: 'Save 3',
-                date: '2025-11-11 08:45:33',
-                scene: 'Chapter 1 - Beginning'
-            },
-            {
-                id: 4,
-                name: 'Save 4',
-                date: '2025-11-10 20:15:22',
-                scene: 'Chapter 3 - Revelations'
-            },
-            {
-                id: 5,
-                name: 'Save 5',
-                date: '2025-11-09 13:50:17',
-                scene: 'Chapter 2 - The Journey'
+        function getAllSaves() {
+            const saves = [];
+            
+            for (let i = 0; i < MAX_SAVE_SLOTS; i++) {
+                const saveKey = SAVE_KEY_PREFIX + i;
+                const saveData = localStorage.getItem(saveKey);
+                
+                if (saveData) {
+                    try {
+                        const gameState = JSON.parse(saveData);
+                        saves.push({
+                            slotIndex: i,
+                            ...gameState
+                        });
+                    } catch (error) {
+                        console.error(`Failed to parse save in slot ${i}:`, error);
+                    }
+                } else if (mode === 'save') {
+                    // Show empty slots in save mode
+                    saves.push({
+                        slotIndex: i,
+                        isEmpty: true
+                    });
+                }
             }
-        ];
+            
+            return saves;
+        }
+
+        function formatDate(isoString) {
+            if (!isoString) return 'N/A';
+            const date = new Date(isoString);
+            return date.toLocaleString();
+        }
 
         function renderSaveList(saves) {
-            if (saves.length === 0) {
+            if (saves.length === 0 && mode === 'load') {
                 saveList.innerHTML = '<div class="empty-message">No save files found</div>';
                 return;
             }
@@ -209,44 +228,64 @@
             saves.forEach(save => {
                 const saveItem = document.createElement('div');
                 saveItem.className = 'save-item';
-                saveItem.dataset.saveId = save.id;
+                saveItem.dataset.slotIndex = save.slotIndex;
                 
-                saveItem.innerHTML = `
-                    <h3>${save.name}</h3>
-                    <p>Scene: ${save.scene}</p>
-                    <p>Date: ${save.date}</p>
-                `;
+                if (save.isEmpty) {
+                    saveItem.innerHTML = `
+                        <h3>Slot ${save.slotIndex + 1} - Empty</h3>
+                        <p>Click to save here</p>
+                    `;
+                } else {
+                    saveItem.innerHTML = `
+                        <h3>Slot ${save.slotIndex + 1}</h3>
+                        <p>Event: ${save.eventName || 'Unknown'}</p>
+                        <p>Block: ${save.currentBlockIndex}, Instruction: ${save.currentInstructionIndex}</p>
+                        <p>Date: ${formatDate(save.timestamp)}</p>
+                    `;
+                }
 
-                saveItem.addEventListener('click', () => selectSave(save.id));
+                saveItem.addEventListener('click', () => selectSlot(save.slotIndex));
                 saveList.appendChild(saveItem);
             });
         }
 
-        function selectSave(saveId) {
+        function selectSlot(slotIndex) {
             const items = document.querySelectorAll('.save-item');
             items.forEach(item => {
-                if (item.dataset.saveId == saveId) {
+                if (item.dataset.slotIndex == slotIndex) {
                     item.classList.add('selected');
-                    selectedSave = saveId;
+                    selectedSlot = slotIndex;
                 } else {
                     item.classList.remove('selected');
                 }
             });
-            loadBtn.disabled = false;
+            actionBtn.disabled = false;
         }
 
         cancelBtn.addEventListener('click', () => {
             console.log('Cancel clicked');
+            if (window.opener) {
+                window.opener.postMessage({ type: 'save-load-cancelled' }, '*');
+            }
             window.close();
         });
 
-        loadBtn.addEventListener('click', () => {
-            if (selectedSave !== null) {
-                console.log('Loading save:', selectedSave);
+        actionBtn.addEventListener('click', () => {
+            if (selectedSlot !== null) {
+                console.log(`${mode} clicked for slot:`, selectedSlot);
+                if (window.opener) {
+                    window.opener.postMessage({ 
+                        type: mode === 'save' ? 'save-game' : 'load-game',
+                        slotIndex: selectedSlot 
+                    }, '*');
+                }
+                window.close();
             }
         });
 
-        renderSaveList(mockSaves);
+        // Load and render saves
+        const saves = getAllSaves();
+        renderSaveList(saves);
     </script>
 </body>
 </html>
