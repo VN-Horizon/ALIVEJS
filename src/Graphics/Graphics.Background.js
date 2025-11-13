@@ -8,9 +8,10 @@ export class Background extends SceneElement {
         
         this.backgroundId = `bg-${Math.random().toString(36).substr(2, 9)}`;
         this.backgroundImageUrl = null;
-        this.backgroundSize = data.backgroundSize || 'cover';
+        this.backgroundSize = data.backgroundSize || 'auto';
         this.backgroundPosition = data.backgroundPosition || 'center';
         this.backgroundRepeat = data.backgroundRepeat || 'no-repeat';
+        this.transition = data.transition || null;
         
         // Infinite scroll properties
         this.scrollSpeed = {
@@ -32,7 +33,9 @@ export class Background extends SceneElement {
             .attr('layer-name', this.sceneData.name || 'Background')
             .css(this.buildBaseStyle({
                 'background-size': this.backgroundSize,
-                'background-repeat': this.backgroundRepeat
+                'background-repeat': this.backgroundRepeat,
+                'background-position': this.backgroundPosition,
+                'transition': this.transition || 'none',
             }))
             [0];
         
@@ -52,7 +55,7 @@ export class Background extends SceneElement {
     }
 
     updateScrollPosition() {
-        if (!this.domElement) return;
+        if (!this.domElement || (this.scrollSpeed?.x || 0) == 0 && (this.scrollSpeed?.y || 0) == 0) return;
         $(this.domElement).css('background-position', `${this.scrollOffset?.x || 0}px ${this.scrollOffset?.y || 0}px`);
     }
 
@@ -83,7 +86,8 @@ export function toBackground(element, options = {}) {
         backgroundPosition = 'center',
         backgroundRepeat = 'repeat',
         scrollSpeedX = 0,
-        scrollSpeedY = 0
+        scrollSpeedY = 0,
+        transition = null,
     } = options;
 
     if (!element || !element.sceneData) {
@@ -98,6 +102,7 @@ export function toBackground(element, options = {}) {
         backgroundRepeat,
         scrollSpeedX,
         scrollSpeedY,
+        transition,
     };
 
     const background = new Background(backgroundData, element.parent, element.scene);

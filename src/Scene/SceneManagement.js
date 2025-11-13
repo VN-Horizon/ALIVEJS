@@ -1,5 +1,6 @@
 import { Scene } from './Scene.js';
 import { SceneElement } from '../Graphics/Graphics.SceneElement.js';
+import { AnimatedSceneElement } from '../Graphics/Graphics.AnimatedSceneElement.js';
 
 const currentExclusionList = [];
 const loadingScenes = new Set();
@@ -56,7 +57,9 @@ function createSceneObjects(children, parent, scene) {
     if (!children || !Array.isArray(children)) return;
     children.forEach(childData => {
         if(currentExclusionList.includes(childData.name)) return;
-    const obj = new SceneElement(childData, parent, scene);
+    // Use AnimatedSceneElement for elements marked as animated
+    const ElementClass = childData.animated ? AnimatedSceneElement : SceneElement;
+    const obj = new ElementClass(childData, parent, scene);
         // Track root objects for cleanup
         if (!parent) {
             // Add to scene
@@ -70,6 +73,11 @@ function createSceneObjects(children, parent, scene) {
         // Recursively create children
         if (childData.children && childData.children.length) {
             createSceneObjects(childData.children, obj, scene);
+        }
+        
+        // Initialize animation frames if this is an AnimatedSceneElement
+        if (obj instanceof AnimatedSceneElement) {
+            obj.initializeFrames();
         }
     });
 }

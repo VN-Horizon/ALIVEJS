@@ -130,7 +130,7 @@ export function execUntilNextLine(decisionIndex = -1) {
                 const lineText = resolvedInstruction.stringParams[0];
                 const lineData = extractDialogData(lineText);
                 dispatchEvent('PlayDialogInternal', {
-                    params: [lineData[2]],
+                    params: [lineData[2], ScreenplayContext.currentBlockIndex],
                     stringParams: [lineData[0], lineData[1]]
                 });
                 return [lineData[0]];

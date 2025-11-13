@@ -1,11 +1,13 @@
 import { GameEngine } from './Core/NotUnityEngine.js';
 import { loadEvents } from './Core/Events.js';
-import { initBGM } from './Audio/Audio.Bgm.js';
 import { loadStartScene } from './Scripts/START.js';
 import './InputSystem/InputSystem.Keyboard.js';
 import './InputSystem/InputSystem.Gamepad.js';
 
 import './Audio/Audio.🔓.js';
+import { initBGM } from './Audio/Audio.Bgm.js';
+import './Audio/Audio.Voice.js';
+import { initSE } from './Audio/Audio.Se.js';
 
 let notUnityEngine = new GameEngine('gameContainer');
 notUnityEngine.start();
@@ -17,6 +19,7 @@ async function main() {
         console.log('Initializing application...');
         const events = await loadEvents();
         initBGM();
+        initSE();
         await loadStartScene();
         $('#black-overlay').fadeOut(600);
     } catch (error) {

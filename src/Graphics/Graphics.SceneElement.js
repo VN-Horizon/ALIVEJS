@@ -10,20 +10,21 @@ export class SceneElement {
             rotation: data.transform?.rotation || data.rotation || 0
         };
 
-    this.sceneData = data;
-    this.scene = scene; // reference to owning Scene to access baseZOffset
-    this.domElement = null;
-    this.visible = data.visible !== false;
-    this.originallyVisible = this.visible; // Store original visibility state
-    this.opacity = data.opacity ?? 1;
-    this.blendMode = data.blendMode || 'normal';
-    this.parent = parent;
-    this.children = [];
+        this.anchor = data.anchor || 'top-left'; // 'top-left', 'top-right', 'bottom-left', 'bottom-right'
+        this.sceneData = data;
+        this.scene = scene; // reference to owning Scene to access baseZOffset
+        this.domElement = null;
+        this.visible = data.visible !== false;
+        this.originallyVisible = this.visible; // Store original visibility state
+        this.opacity = data.opacity ?? 1;
+        this.blendMode = data.blendMode || 'normal';
+        this.parent = parent;
+        this.children = [];
 
-    this.createDOMElement();
-    if (data.path) this.loadImage(data.path);``
-    if (parent) parent.addChild(this);
-    this.update(1);
+        this.createDOMElement();
+        if (data.path) this.loadImage(data.path);
+        if (parent) parent.addChild(this);
+        this.update(1);
     }
 
     // Backward-compatible property accessors
@@ -37,13 +38,24 @@ export class SceneElement {
     // Build base style object
     buildBaseStyle(extra = {}) {
         const zBase = this.scene?.baseZOffset || 0;
+        let x = this.transform.x;
+        let y = this.transform.y;
+        let translateX = x;
+        let translateY = y;
+        // Support for anchor positioning
+        switch (this.anchor) {
+            case 'top-right': translateX = x - this.width; break;
+            case 'bottom-left': translateY = y - this.height; break;
+            case 'bottom-right': translateX = x - this.width; translateY = y - this.height; break;
+            default: break;
+        }
         return {
             width: `${this.width}px`,
             height: `${this.height}px`,
             display: this.visible ? 'block' : 'none',
             opacity: this.opacity,
             'mix-blend-mode': this.blendMode,
-            transform: `translate(${this.transform.x}px, ${this.transform.y}px) rotate(${this.transform.rotation}rad)` ,
+            transform: `translate(${translateX}px, ${translateY}px) rotate(${this.transform.rotation}rad)` ,
             'z-index': zBase + this.transform.z,
             ...extra,
         };

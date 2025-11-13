@@ -84,6 +84,12 @@ export class TMP_TypeWriter extends TMP_Text {
             return;
         }
 
+        // Skip animation immediately if skipping is enabled
+        if (window.skipping) {
+            this.cancelAnimation();
+            return;
+        }
+
         this.timeAccumulator += deltaTime;
         const timePerChar = 1.0 / this.charsPerSecond;
 

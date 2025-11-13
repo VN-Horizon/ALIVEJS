@@ -1,1 +1,166 @@
-{"children": [{"name": "病気照れ", "visible": true, "path": "病気照れ", "left": 205, "top": 63, "width": 261, "height": 417}, {"name": "病気喜", "visible": true, "path": "病気喜", "left": 205, "top": 62, "width": 248, "height": 418}, {"name": "病気通常", "visible": true, "path": "病気通常", "left": 210, "top": 60, "width": 255, "height": 420}, {"name": "風邪気味", "visible": true, "path": "風邪気味", "left": 0, "top": 61, "width": 578, "height": 419}, {"name": "泣き", "visible": true, "path": "泣き", "left": 0, "top": 23, "width": 640, "height": 457}, {"name": "恥", "visible": true, "path": "恥", "left": 441, "top": 22, "width": 36, "height": 35}, {"name": "キス", "visible": true, "path": "キス", "left": 23, "top": 22, "width": 588, "height": 458}, {"name": "嫉妬", "visible": true, "path": "嫉妬", "left": 84, "top": 20, "width": 542, "height": 460}, {"name": "照れ笑い", "visible": true, "path": "照れ笑い", "left": 13, "top": 20, "width": 611, "height": 460}, {"name": "照れ", "visible": true, "path": "照れ", "left": 87, "top": 21, "width": 550, "height": 459}, {"name": "ご機嫌", "visible": true, "path": "ご機嫌", "left": 43, "top": 19, "width": 501, "height": 461}, {"name": "疑問", "visible": true, "path": "疑問", "left": 41, "top": 0, "width": 596, "height": 480}, {"name": "驚き", "visible": true, "path": "驚き", "left": 25, "top": 21, "width": 521, "height": 459}, {"name": "憂い", "visible": true, "path": "憂い", "left": 2, "top": 22, "width": 574, "height": 458}, {"name": "哀", "visible": true, "path": "哀", "left": 36, "top": 22, "width": 560, "height": 458}, {"name": "怒", "visible": true, "path": "怒", "left": 26, "top": 19, "width": 547, "height": 461}, {"name": "喜", "visible": true, "path": "喜", "left": 0, "top": 22, "width": 559, "height": 458}, {"name": "通常", "visible": true, "path": "通常", "left": 62, "top": 20, "width": 578, "height": 460}]}
+{
+  "children": [
+    {
+      "name": "病気照れ",
+      "visible": true,
+      "path": "病気照れ",
+      "left": 205,
+      "top": 63,
+      "width": 466,
+      "height": 417
+    },
+    {
+      "name": "病気喜",
+      "visible": true,
+      "path": "病気喜",
+      "left": 205,
+      "top": 62,
+      "width": 453,
+      "height": 418
+    },
+    {
+      "name": "病気通常",
+      "visible": true,
+      "path": "病気通常",
+      "left": 210,
+      "top": 60,
+      "width": 465,
+      "height": 420
+    },
+    {
+      "name": "風邪気味",
+      "visible": true,
+      "path": "風邪気味",
+      "left": 0,
+      "top": 61,
+      "width": 578,
+      "height": 419
+    },
+    {
+      "name": "泣き",
+      "visible": true,
+      "path": "泣き",
+      "left": 0,
+      "top": 23,
+      "width": 640,
+      "height": 457
+    },
+    {
+      "name": "恥",
+      "visible": true,
+      "path": "恥",
+      "left": 441,
+      "top": 22,
+      "width": 477,
+      "height": 458
+    },
+    {
+      "name": "キス",
+      "visible": true,
+      "path": "キス",
+      "left": 23,
+      "top": 22,
+      "width": 611,
+      "height": 458
+    },
+    {
+      "name": "嫉妬",
+      "visible": true,
+      "path": "嫉妬",
+      "left": 84,
+      "top": 20,
+      "width": 626,
+      "height": 460
+    },
+    {
+      "name": "照れ笑い",
+      "visible": true,
+      "path": "照れ笑い",
+      "left": 13,
+      "top": 20,
+      "width": 624,
+      "height": 460
+    },
+    {
+      "name": "照れ",
+      "visible": true,
+      "path": "照れ",
+      "left": 87,
+      "top": 21,
+      "width": 637,
+      "height": 459
+    },
+    {
+      "name": "ご機嫌",
+      "visible": true,
+      "path": "ご機嫌",
+      "left": 43,
+      "top": 19,
+      "width": 544,
+      "height": 461
+    },
+    {
+      "name": "疑問",
+      "visible": true,
+      "path": "疑問",
+      "left": 41,
+      "top": 0,
+      "width": 637,
+      "height": 480
+    },
+    {
+      "name": "驚き",
+      "visible": true,
+      "path": "驚き",
+      "left": 25,
+      "top": 21,
+      "width": 546,
+      "height": 459
+    },
+    {
+      "name": "憂い",
+      "visible": true,
+      "path": "憂い",
+      "left": 2,
+      "top": 22,
+      "width": 576,
+      "height": 458
+    },
+    {
+      "name": "哀",
+      "visible": true,
+      "path": "哀",
+      "left": 36,
+      "top": 22,
+      "width": 596,
+      "height": 458
+    },
+    {
+      "name": "怒",
+      "visible": true,
+      "path": "怒",
+      "left": 26,
+      "top": 19,
+      "width": 573,
+      "height": 461
+    },
+    {
+      "name": "喜",
+      "visible": true,
+      "path": "喜",
+      "left": 0,
+      "top": 22,
+      "width": 559,
+      "height": 458
+    },
+    {
+      "name": "通常",
+      "visible": true,
+      "path": "通常",
+      "left": 62,
+      "top": 20,
+      "width": 640,
+      "height": 460
+    }
+  ]
+}

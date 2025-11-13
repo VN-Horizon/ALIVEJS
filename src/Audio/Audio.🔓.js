@@ -12,14 +12,14 @@ export function isAudioUnlocked() {
 // Initialize audio unlock mechanism
 $(function() {
     const unlockAudio = () => {
-        const $overlay = $('#audiounlock');
-        if(!$overlay.length) return;
+        // const $overlay = $('#audiounlock');
+        // if(!$overlay.length) return;
         if (isAudioUnlocked()) return;
         const silentAudio = new Audio();
         silentAudio.src = 'data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAAB9AAACABAAZGF0YQIAAAAAAA==';
         silentAudio.play().then(() => {
             setAudioUnlocked(true);
-            $overlay.addClass('hidden');
+            $('#audiounlock')?.addClass('hidden');
         }).catch(err => {
             console.warn('Audio unlock failed:', err);
         });

@@ -5,7 +5,7 @@ require('ag-psd/initialize-canvas');
 const { readPsd } = require('ag-psd');
 
 const PSD_SRC_DIR = __dirname;
-const OUTPUT_BASE_DIR = path.join(PSD_SRC_DIR, '..', 'scenes');
+const OUTPUT_BASE_DIR = path.join(PSD_SRC_DIR, '..', 'assets', 'scenes');
 
 /**
  * Get all PSD files from subdirectories
@@ -181,8 +181,8 @@ async function processPsd(psdFile) {
 
     // Handle CG files: render entire PSD as image
     if (psdFile.isLayerless) {
-    //   const success = await exportPsdAsImage(psd, psdFile.name, outputDir);
-    const success = true; // Temporarily disabled
+      const success = await exportPsdAsImage(psd, psdFile.name, outputDir);
+    // const success = true; // Temporarily disabled
       return { success, psdFile, outputDir, layerCount: success ? 1 : 0 };
     }
 
@@ -195,9 +195,9 @@ async function processPsd(psdFile) {
     console.log(`✓ JSON saved: ${path.relative(PSD_SRC_DIR, jsonPath)}`);
 
     // Export layers as PNG
-    // const layerCount = await exportLayers(psd, psdFile.name, outputDir);
-    // console.log(`✓ Exported ${layerCount} layers`);
-    const layerCount = 0; // Temporarily disabled
+    const layerCount = await exportLayers(psd, psdFile.name, outputDir);
+    console.log(`✓ Exported ${layerCount} layers`);
+    // const layerCount = 0; // Temporarily disabled
 
     return { success: true, psdFile, outputDir, layerCount };
   } catch (error) {

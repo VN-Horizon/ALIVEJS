@@ -5,8 +5,10 @@ export class FocusableElement extends SceneElement {
         super(data, parent, scene);
 
         this.manualEnabled = null;
+        this.permanentlyNonFocusable = data && data.focusable === false;
 
-        if (data && data.focusable === false) {
+        if (this.permanentlyNonFocusable) {
+            console.log('Element ' + (data.name || '') + ' set as non-focusable by data.');
             $(this.domElement).attr('tabindex', '-1').addClass('non-focusable');
         } else {
             $(this.domElement).addClass('focusable');
@@ -40,6 +42,11 @@ export class FocusableElement extends SceneElement {
 
     updateFocusability() {
         if (!this.domElement) return;
+        // If permanently non-focusable via data.focusable === false, never enable
+        if (this.permanentlyNonFocusable) {
+            this.applyInteractableState(false);
+            return;
+        }
         if (this.manualEnabled === true) {
             this.applyInteractableState(true);
             return;

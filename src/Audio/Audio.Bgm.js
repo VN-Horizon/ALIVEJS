@@ -38,3 +38,12 @@ export function stopBGM() {
         currentBGM = null;
     }
 }
+
+document.addEventListener("PlayBgm", (e) => {
+    const { stringParams } = e.detail;
+    if (stringParams.length >= 1) {
+        playBGM(stringParams[0]);
+    } else {
+        stopBGM();
+    }
+});

@@ -18,10 +18,11 @@ function GetCharacterVoiceName(characterName) {
 
 export function OnPlayDialog(instruction)
 {
-    var voiceName = instruction.stringParams[1];
-    var blockIndex = instruction.params[0];
+    var voiceName = instruction.stringParams[0];
+    var blockIndex = instruction.params[1];
     var voiceKey = GetCharacterVoiceName(voiceName);
     var eventName = GetVoiceEventName(blockIndex + 1);
+    console.log(`Playing voice`, instruction, voiceKey, eventName);
 
     if (voiceName == "祐二" || !voiceKey) return;
 
@@ -30,10 +31,8 @@ export function OnPlayDialog(instruction)
 
     var lineCount = CharacterLineCounts[voiceKey];
 
+    if (window.skipping === true) return;
     PlayCharacterVoice(voiceKey, eventName, lineCount.toString().padStart(3, '0'));
-
-    // Increment line count after playing
-    CharacterLineCounts[voiceKey]++;
 }
 
 
@@ -49,9 +48,19 @@ function PlayCharacterVoice(characterKey, eventName, lineNumber) {
         return;
     }
     characterAudioElement.pause();
-    characterAudioElement.src = `/assets/audio/voice/${characterKey}.${eventName}.${lineNumber}.mp3`;
+    characterAudioElement.src = `/assets/audio/voice/${characterKey}.${eventName}.${lineNumber}.ogg`;
     isCharacterAudioPlaying = true;
     characterAudioElement.play().catch(err => {
         console.warn('Play character voice failed:', err);
     });
 }
+
+document.addEventListener("PlayDialogInternal", (e) => {
+    OnPlayDialog(e.detail);
+});
+
+document.addEventListener("ResetLineCounter", (e) => {
+    for (const key in CharacterLineCounts) {
+        CharacterLineCounts[key] = 0;
+    }
+});

@@ -14,6 +14,9 @@ let exitListenerInFlight = false;
 let exitListenerOptions = { singleFlight: false };
 let overrideRightKeys = false;
 
+// Skipping state
+window.skipping = false;
+
 export function setConfirmListener(fn) { confirmListener = fn; }
 export function setExitListener(fn, options = {}) {
     exitListenerOptions = { singleFlight: true, ...options };
@@ -51,6 +54,17 @@ export function setOverrideRightKeys(override) {
 }
 
 $(document).on('keydown', function(e) {
+    // Handle Ctrl key for skipping
+    if (e.keyCode === 17 && !window.skipping) { // Ctrl key
+        window.skipping = true;
+        // Trigger the first line advance immediately
+        setTimeout(() => {
+            if (window.skipping) {
+                document.dispatchEvent(new CustomEvent('SkipModeStarted', { bubbles: true }));
+            }
+        }, 50);
+    }
+    
     const $focused = $('.focusable:focus');
     const op = NAVIGATION_KEYS[e.keyCode];
     if(!$focused.length && (Object.keys(NAVIGATION_KEYS).includes(e.keyCode.toString()))) {
@@ -76,6 +90,11 @@ $(document).on('keydown', function(e) {
     }
 });
 $(document).on('keyup', function(e) {
+    // Handle Ctrl key release to stop skipping
+    if (e.keyCode === 17 && window.skipping) { // Ctrl key
+        window.skipping = false;
+    }
+    
     if(CONFIRM_KEYS.includes(e.keyCode)) {
         const $focused = $('.focusable:focus');
         if($focused.length) {

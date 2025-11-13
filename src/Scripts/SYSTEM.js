@@ -14,8 +14,10 @@ export async function pushPauseScreen() {
     toBackground(feather.findChildByName("光玉(奥)"), { scrollSpeedY: -100 });
     const bg2 = toBackground(feather.findChildByName("光玉(中)"), { scrollSpeedY: -200});
     const bg3 = toBackground(feather.findChildByName("光玉(前)"), { scrollSpeedY: -300});
-    bg2.y = 0;
-    bg3.y = 0;
+    bg2.transform.y = 0;
+    bg3.transform.y = 0;
+    bg2.syncDom();
+    bg3.syncDom();
     setExitListener(() => { destroyScene(); });
     setOverrideRightKeys(false);
 }

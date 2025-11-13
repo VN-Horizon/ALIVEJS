@@ -1,1 +1,121 @@
-{"children": [{"name": "照れ２", "visible": true, "path": "照れ２", "left": 107, "top": 59, "width": 403, "height": 421}, {"name": "照れ", "visible": true, "path": "照れ", "left": 190, "top": 60, "width": 283, "height": 420}, {"name": "微笑み", "visible": true, "path": "微笑み", "left": 91, "top": 64, "width": 418, "height": 416}, {"name": "ご機嫌", "visible": true, "path": "ご機嫌", "left": 100, "top": 61, "width": 333, "height": 419}, {"name": "虚ろ", "visible": true, "path": "虚ろ", "left": 203, "top": 59, "width": 257, "height": 421}, {"name": "疑問", "visible": true, "path": "疑問", "left": 172, "top": 67, "width": 278, "height": 413}, {"name": "驚き２", "visible": true, "path": "驚き２", "left": 110, "top": 60, "width": 462, "height": 420}, {"name": "驚き", "visible": true, "path": "驚き", "left": 183, "top": 65, "width": 265, "height": 415}, {"name": "哀", "visible": true, "path": "哀", "left": 180, "top": 65, "width": 260, "height": 415}, {"name": "怒", "visible": true, "path": "怒", "left": 164, "top": 63, "width": 343, "height": 417}, {"name": "喜", "visible": true, "path": "喜", "left": 179, "top": 58, "width": 249, "height": 422}, {"name": "通常２", "visible": true, "path": "通常２", "left": 190, "top": 66, "width": 255, "height": 414}, {"name": "通常", "visible": true, "path": "通常", "left": 173, "top": 62, "width": 323, "height": 418}]}
+{
+  "children": [
+    {
+      "name": "照れ２",
+      "visible": true,
+      "path": "照れ２",
+      "left": 107,
+      "top": 59,
+      "width": 510,
+      "height": 421
+    },
+    {
+      "name": "照れ",
+      "visible": true,
+      "path": "照れ",
+      "left": 190,
+      "top": 60,
+      "width": 473,
+      "height": 420
+    },
+    {
+      "name": "微笑み",
+      "visible": true,
+      "path": "微笑み",
+      "left": 91,
+      "top": 64,
+      "width": 509,
+      "height": 416
+    },
+    {
+      "name": "ご機嫌",
+      "visible": true,
+      "path": "ご機嫌",
+      "left": 100,
+      "top": 61,
+      "width": 433,
+      "height": 419
+    },
+    {
+      "name": "虚ろ",
+      "visible": true,
+      "path": "虚ろ",
+      "left": 203,
+      "top": 59,
+      "width": 460,
+      "height": 421
+    },
+    {
+      "name": "疑問",
+      "visible": true,
+      "path": "疑問",
+      "left": 172,
+      "top": 67,
+      "width": 450,
+      "height": 413
+    },
+    {
+      "name": "驚き２",
+      "visible": true,
+      "path": "驚き２",
+      "left": 110,
+      "top": 60,
+      "width": 572,
+      "height": 420
+    },
+    {
+      "name": "驚き",
+      "visible": true,
+      "path": "驚き",
+      "left": 183,
+      "top": 65,
+      "width": 448,
+      "height": 415
+    },
+    {
+      "name": "哀",
+      "visible": true,
+      "path": "哀",
+      "left": 180,
+      "top": 65,
+      "width": 440,
+      "height": 415
+    },
+    {
+      "name": "怒",
+      "visible": true,
+      "path": "怒",
+      "left": 164,
+      "top": 63,
+      "width": 507,
+      "height": 417
+    },
+    {
+      "name": "喜",
+      "visible": true,
+      "path": "喜",
+      "left": 179,
+      "top": 58,
+      "width": 428,
+      "height": 422
+    },
+    {
+      "name": "通常２",
+      "visible": true,
+      "path": "通常２",
+      "left": 190,
+      "top": 66,
+      "width": 445,
+      "height": 414
+    },
+    {
+      "name": "通常",
+      "visible": true,
+      "path": "通常",
+      "left": 173,
+      "top": 62,
+      "width": 496,
+      "height": 418
+    }
+  ]
+}

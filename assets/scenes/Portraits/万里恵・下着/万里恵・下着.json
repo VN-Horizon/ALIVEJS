@@ -1,1 +1,13 @@
-{"children": [{"name": "ねぼけ", "visible": true, "path": "ねぼけ", "left": 210, "top": 36, "width": 235, "height": 445}]}
+{
+  "children": [
+    {
+      "name": "ねぼけ",
+      "visible": true,
+      "path": "ねぼけ",
+      "left": 210,
+      "top": 36,
+      "width": 445,
+      "height": 445
+    }
+  ]
+}

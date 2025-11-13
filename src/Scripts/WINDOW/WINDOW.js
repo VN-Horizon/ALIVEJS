@@ -6,6 +6,7 @@ import { execUntilNextLine } from '../../Core/Events.js';
 import { initSelectionsBox } from './WINDOW.SelectionsBox.js';
 import { _hideDialogWindow } from './WINDOW.DialogHider.js';
 import { pushPauseScreen } from '../SYSTEM.js';
+import { Background } from '../../Graphics/Graphics.Background.js';
 
 export async function pushDialogWindow() {
     const dialogWindow = await loadScene("UI/WINDOW", {
@@ -15,7 +16,7 @@ export async function pushDialogWindow() {
             "選択肢文字",
             "名前ウィンドウ",
             "名前文字",
-            ...Array.from({length: 10}, (_, i) => `真鍮枠(${i})`)
+            "枠アニメ",
         ]
     });
 
@@ -93,25 +94,77 @@ export async function pushDialogWindow() {
 
         // Animate the dialog text
         dialogText.animateText(dialogContent + ' ▾');
+        
+        // Auto-advance when skipping
+        if (window.skipping) {
+            setTimeout(() => {
+                if (window.skipping) {
+                    onNextLineRequest();
+                }
+            }, 0);
+        }
     };
+
+    const backgroundCG = dialogWindow.addObject(new Background({
+        name: "BackgroundCG",
+        transform: { x: 0, y: 0, width: 640, height: 480 },
+        zIndex: -1,
+        transition: 'background-image 0.5s ease-in-out'
+    }));
+    
+    // Update transition based on skipping state
+    const updateTransition = () => {
+        const transition = window.skipping ? 'none' : 'background-image 0.5s ease-in-out';
+        $(backgroundCG.domElement).css('transition', transition);
+        $(portrait.domElement).css('transition', window.skipping ? 'none' : 'background-image 0.5s ease-in-out, background-size 0s linear');
+    };
+    setInterval(updateTransition, 50);
+
+    const portrait = dialogWindow.addObject(new Background({
+        name: "PortraitCG",
+        transform: { x: 0, y: 0, width: 640, height: 480 },
+        zIndex: -1,
+        backgroundPosition: 'left bottom',
+        transition: 'background-image 0.5s ease-in-out, background-size 0s linear',
+    }));
+    $(portrait.domElement).css({'background-size': 'none'});
+
+    document.addEventListener('SetBgImg', (e) => {
+        const { stringParams } = e.detail;
+        backgroundCG.updateBackgroundImage(stringParams.length >= 2 ? `/assets/scenes/BG/${stringParams[0]}/${stringParams[1]}.webp` : null);
+    });
+
+    document.addEventListener('SetCharaImg', (e) => {
+        const { stringParams } = e.detail;
+        portrait.updateBackgroundImage(stringParams.length >= 2 ? `/assets/scenes/Portraits/${stringParams[0]}/${stringParams[1]}.webp` : null);
+    });
+
     document.addEventListener('PlayDialogInternal', playDialogHandler);
     dialogWindow.onDestroyCallbacks.push(() => {
         document.removeEventListener('PlayDialogInternal', playDialogHandler);
+    });
+
+    // Handle skip mode starting
+    const skipModeStartHandler = () => {
+        if (window.skipping) {
+            onNextLineRequest();
+        }
+    };
+    document.addEventListener('SkipModeStarted', skipModeStartHandler);
+    dialogWindow.onDestroyCallbacks.push(() => {
+        document.removeEventListener('SkipModeStarted', skipModeStartHandler);
     });
 
     setExitListener(() => pushPauseScreen());
     dialogWindow.onAfterFocusCallbacks.push(() => {
         setOverrideRightKeys(true);
         setExitListener(() => pushPauseScreen());
-        // setConfirmListener(onNextLineRequest);
         $(document).on('contextmenu', _hideDialogWindow);
     });
     setOverrideRightKeys(true);
-    // setConfirmListener(onNextLineRequest);
     $(document).on('contextmenu', _hideDialogWindow);
     dialogWindow.onDestroyCallbacks.push(() => {
         setOverrideRightKeys(false);
-        // setConfirmListener(null);
         $(document).off('contextmenu', _hideDialogWindow);
     });
 
@@ -125,7 +178,7 @@ export function onNextLineRequest() {
     const dialogText = dialogWindow.getObjectByName("DialogText");
     if (!dialogText) return;
     
-    if (dialogText.isAnimating) {
+    if (dialogText.isAnimating && !window.skipping) {
         dialogText.cancelAnimation();
         return;
     }

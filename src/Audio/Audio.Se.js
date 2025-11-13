@@ -8,7 +8,7 @@ export function initSE() {
         const audioElement = new Audio(`/assets/audio/se/SE_${i.toString().padStart(2, '0')}.mp3`);
         audioElement.loop = false;
         audioElement.volume = 0.5;
-        const trackName = `${i.toString().padStart(2, '0')}`;
+        const trackName = `se_${i.toString().padStart(2, '0')}`;
         seList[trackName] = audioElement;
     }
     console.log('SE initialized');
@@ -30,3 +30,8 @@ export function playSE(name) {
         });
     }
 }
+
+document.addEventListener("PlaySe", (e) => {
+    if (window.skipping === true) return;
+    playSE(e.detail.stringParams[0]);
+});
