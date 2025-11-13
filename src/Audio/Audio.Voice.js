@@ -22,7 +22,6 @@ export function OnPlayDialog(instruction)
     var blockIndex = instruction.params[1];
     var voiceKey = GetCharacterVoiceName(voiceName);
     var eventName = GetVoiceEventName(blockIndex + 1);
-    console.log(`Playing voice`, instruction, voiceKey, eventName);
 
     if (voiceName == "祐二" || !voiceKey) return;
 

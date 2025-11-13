@@ -9,7 +9,11 @@ export async function pushPauseScreen() {
     toButton(pauseScene.getObjectByName("SAVE"));
     toButton(pauseScene.getObjectByName("LOAD"));
     toButton(pauseScene.getObjectByName("CONFIG"));
-    toButton(pauseScene.getObjectByName("EXIT"));
+    toButton(pauseScene.getObjectByName("EXIT"), {
+        callback: () => {
+            window.exit();
+        }
+    });
     const feather = pauseScene.getObjectByName("羽セット");
     toBackground(feather.findChildByName("光玉(奥)"), { scrollSpeedY: -100 });
     const bg2 = toBackground(feather.findChildByName("光玉(中)"), { scrollSpeedY: -200});

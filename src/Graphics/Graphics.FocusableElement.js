@@ -33,20 +33,19 @@ export class FocusableElement extends SceneElement {
         } else {
             if (this.scene && $el.is(':focus')) this.scene.lastFocusedElement = this.domElement;
             $el.css('pointer-events', 'none');
-            $el.attr('tabindex', '-1');
             $el.prop('disabled', true);
+            $el.attr('tabindex', '-1');
             if ($el.is(':focus')) $el.blur();
             $el.removeClass('focusable').addClass('non-focusable');
+        }
+        if(this.permanentlyNonFocusable) {
+            $el.attr('tabindex', '-1').addClass('non-focusable');
+            if ($el.is(':focus')) $el.blur();
         }
     }
 
     updateFocusability() {
         if (!this.domElement) return;
-        // If permanently non-focusable via data.focusable === false, never enable
-        if (this.permanentlyNonFocusable) {
-            this.applyInteractableState(false);
-            return;
-        }
         if (this.manualEnabled === true) {
             this.applyInteractableState(true);
             return;

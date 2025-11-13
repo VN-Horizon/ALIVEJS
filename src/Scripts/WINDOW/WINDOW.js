@@ -6,9 +6,9 @@ import { execUntilNextLine } from '../../Core/Events.js';
 import { initSelectionsBox } from './WINDOW.SelectionsBox.js';
 import { _hideDialogWindow } from './WINDOW.DialogHider.js';
 import { pushPauseScreen } from '../SYSTEM.js';
-import { Background } from '../../Graphics/Graphics.Background.js';
 
 export async function pushDialogWindow() {
+    
     const dialogWindow = await loadScene("UI/WINDOW", {
         exclusionList: [
             "通常クリック範囲",
@@ -104,40 +104,6 @@ export async function pushDialogWindow() {
             }, 0);
         }
     };
-
-    const backgroundCG = dialogWindow.addObject(new Background({
-        name: "BackgroundCG",
-        transform: { x: 0, y: 0, width: 640, height: 480 },
-        zIndex: -1,
-        transition: 'background-image 0.5s ease-in-out'
-    }));
-    
-    // Update transition based on skipping state
-    const updateTransition = () => {
-        const transition = window.skipping ? 'none' : 'background-image 0.5s ease-in-out';
-        $(backgroundCG.domElement).css('transition', transition);
-        $(portrait.domElement).css('transition', window.skipping ? 'none' : 'background-image 0.5s ease-in-out, background-size 0s linear');
-    };
-    setInterval(updateTransition, 50);
-
-    const portrait = dialogWindow.addObject(new Background({
-        name: "PortraitCG",
-        transform: { x: 0, y: 0, width: 640, height: 480 },
-        zIndex: -1,
-        backgroundPosition: 'left bottom',
-        transition: 'background-image 0.5s ease-in-out, background-size 0s linear',
-    }));
-    $(portrait.domElement).css({'background-size': 'none'});
-
-    document.addEventListener('SetBgImg', (e) => {
-        const { stringParams } = e.detail;
-        backgroundCG.updateBackgroundImage(stringParams.length >= 2 ? `/assets/scenes/BG/${stringParams[0]}/${stringParams[1]}.webp` : null);
-    });
-
-    document.addEventListener('SetCharaImg', (e) => {
-        const { stringParams } = e.detail;
-        portrait.updateBackgroundImage(stringParams.length >= 2 ? `/assets/scenes/Portraits/${stringParams[0]}/${stringParams[1]}.webp` : null);
-    });
 
     document.addEventListener('PlayDialogInternal', playDialogHandler);
     dialogWindow.onDestroyCallbacks.push(() => {

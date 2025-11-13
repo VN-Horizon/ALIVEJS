@@ -3,13 +3,16 @@ import { toButton } from '../Graphics/Graphics.Button.js';
 import { setExitListener, setOverrideRightKeys } from '../InputSystem/InputSystem.Keyboard.js';
 import { playBGM } from '../Audio/Audio.Bgm.js';
 import { pushDialogWindow } from './WINDOW/WINDOW.js';
+import { initGallery } from './GALLERY.js';
+import { loadBackgroundScene } from './BACKGROUND.js';
 
-export async function loadStartScene(hasGallery=false) {
+export async function loadStartScene(hasGallery=true) {
     const startScene = await loadScene("UI/START");
 
     let exitBtn = hasGallery ? startScene.getObjectByName("EXIT2") : startScene.getObjectByName("EXIT1");
 
     toButton(startScene.getObjectByName("START"), {callback: async () => {
+        await loadBackgroundScene();
         await pushDialogWindow();
     }});
     toButton(startScene.getObjectByName("LOAD"), {callback: () => {
@@ -20,7 +23,7 @@ export async function loadStartScene(hasGallery=false) {
     }});
     if (hasGallery) {
         toButton(startScene.getObjectByName("GALLERY"), {callback: () => {
-            console.log('GALLERY button clicked');
+            initGallery();
         }});
     }
     exitBtn = toButton(exitBtn, {callback: window.exit});
@@ -31,6 +34,16 @@ export async function loadStartScene(hasGallery=false) {
         } else {
             $(exitBtn.domElement).focus();
         }
+    });
+
+    startScene.onAfterFocusCallbacks.push(() => {
+        setExitListener(() => {
+            if ($(exitBtn.domElement).is(":focus")) {
+                window.exit();
+            } else {
+                $(exitBtn.domElement).focus();
+            }
+        });
     });
     
     playBGM("M07");

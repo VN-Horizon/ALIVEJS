@@ -4,7 +4,7 @@ import { AnimatedSceneElement } from '../../Graphics/Graphics.AnimatedSceneEleme
 import { SceneElement } from '../../Graphics/Graphics.SceneElement.js';
 
 export function initSelectionsBox(dialogWindow) {
-    let isSelectionsBoxVisible = false;
+    window.isSelecting = false;
     let animationInProgress = false;
     const selectionButtons = [null, null, null];
 
@@ -13,10 +13,7 @@ export function initSelectionsBox(dialogWindow) {
             z: 10,
             stateIndexes: [-1,0,1,-1],
             defaultTransform: [64, 238 + (i-1) * 29, 514, 28],
-            callback: async () => {
-                console.log(`選択肢${i}が選ばれました`);
-                dialogWindow.getObjectByName("DialogText").animateText(`你选择了选项${i}。你说得对，但是原神是一款由米哈游自主研发的开放世界冒险游戏。`);
-            }
+            callback: () => OnSelectionCallback(i),
         });
         selectionButtons[i - 1].hide();
     }
@@ -71,67 +68,88 @@ export function initSelectionsBox(dialogWindow) {
         dialogWindow._frameAnimation = frameAnim;
     });
 
+    const OnSelectionCallback = (i) => {
+        document.dispatchEvent(new CustomEvent('MakeDecisionInternal', {
+            detail: { params: [i - 1] }
+        }));
+        closeSelectionsBox();
+    };
+
     // Get references to UI elements
     const selectingDialogBox = dialogWindow.getObjectByName("選択中");
     const normalDialogBox = dialogWindow.getObjectByName("通常");
     const sayDialogBox = dialogWindow.getObjectByName("吹き出し");
 
-    // Toggle function for selections box
-    const toggleSelectionsBox = () => {
+    const openSelectionsBox = () => {
         if (animationInProgress) return;
+        animationInProgress = true;
+        window.isSelecting = true;
         
         const frameAnim = dialogWindow._frameAnimation;
         if (!frameAnim) return;
 
-        animationInProgress = true;
-        isSelectionsBoxVisible = !isSelectionsBoxVisible;
-
-        if (isSelectionsBoxVisible) {
-            // Show animation (forward: frames 0-9)
-            selectingDialogBox?.show();
-            normalDialogBox?.hide();
-            sayDialogBox?.hide();
-            dialogWindow.getObjectByName("NextLineButton")?.hide();
-            
-            frameAnim.show();
-            frameAnim.setFrame(0);
-            frameAnim.onComplete = () => {
-                animationInProgress = false;
-                selectionsText.show();
-                selectionButtons.forEach(btn => btn.show());
-            };
-            frameAnim.play();
-        } else {
-            // Hide animation (reverse: frames 9-0)
-            frameAnim.setFrame(9);
-            frameAnim.fps = -60; // Negative fps for reverse playback
-            selectionsText.hide();
-            selectionButtons.forEach(btn => btn.hide());
-            frameAnim.onComplete = () => {
-                frameAnim.hide();
-                frameAnim.fps = 60; // Reset fps
-                selectingDialogBox?.hide();
-                dialogWindow.getObjectByName("NextLineButton")?.show();
-                dialogWindow.getObjectByName("NextLineButton")?.setFocus();
-                
-                // Restore previous dialog box state
-                const nameText = dialogWindow.getObjectByName("NameText");
-                if (nameText && nameText.text && nameText.text !== '祐二') {
-                    sayDialogBox?.show();
-                } else {
-                    normalDialogBox?.show();
-                }
-                
-                animationInProgress = false;
-            };
-            frameAnim.play();
-        }
+        // Show animation (forward: frames 0-9)
+        selectingDialogBox?.show();
+        normalDialogBox?.hide();
+        sayDialogBox?.hide();
+        dialogWindow.getObjectByName("NextLineButton")?.hide();
+        
+        frameAnim.show();
+        frameAnim.setFrame(0);
+        frameAnim.onComplete = () => {
+            animationInProgress = false;
+            selectionsText.show();
+            selectionButtons.forEach(btn => btn.show());
+        };
+        frameAnim.play();
     };
+
+    const closeSelectionsBox = (isSelectionsBoxVisible) => {
+        if (animationInProgress) return;
+        animationInProgress = true;
+        window.isSelecting = false;
+        
+        const frameAnim = dialogWindow._frameAnimation;
+        if (!frameAnim) return;
+        
+        // Hide animation (reverse: frames 9-0)
+        frameAnim.setFrame(9);
+        frameAnim.fps = -60; // Negative fps for reverse playback
+        selectionsText.hide();
+        selectionButtons.forEach(btn => btn.hide());
+        frameAnim.onComplete = () => {
+            frameAnim.hide();
+            frameAnim.fps = 60; // Reset fps
+            selectingDialogBox?.hide();
+            dialogWindow.getObjectByName("NextLineButton")?.show();
+            dialogWindow.getObjectByName("NextLineButton")?.setFocus();
+            
+            // Restore previous dialog box state
+            const nameText = dialogWindow.getObjectByName("NameText");
+            if (nameText && nameText.text && nameText.text !== '祐二') {
+                sayDialogBox?.show();
+            } else {
+                normalDialogBox?.show();
+            }
+            
+            animationInProgress = false;
+        };
+        frameAnim.play();
+    }
+
+    document.addEventListener('ShowDecisionInternal', (e) => {
+        openSelectionsBox();
+        selectionsText.setText(e.detail.stringParams.join('\n'));
+    });
 
     // V key listener for toggling
     const vKeyHandler = (e) => {
         if (e.key === 'v' || e.key === 'V') {
-            toggleSelectionsBox();
+            if (window.isSelecting) {
+                closeSelectionsBox();
+            } else {
+                openSelectionsBox();
+            }
         }
     };
 

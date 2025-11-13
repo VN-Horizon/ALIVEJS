@@ -55,7 +55,7 @@ export function setOverrideRightKeys(override) {
 
 $(document).on('keydown', function(e) {
     // Handle Ctrl key for skipping
-    if (e.keyCode === 17 && !window.skipping) { // Ctrl key
+    if (e.keyCode === 17 && !window.skipping && !window.isSelecting) { // Ctrl key
         window.skipping = true;
         // Trigger the first line advance immediately
         setTimeout(() => {

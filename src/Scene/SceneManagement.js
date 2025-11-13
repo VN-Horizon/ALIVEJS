@@ -82,6 +82,18 @@ function createSceneObjects(children, parent, scene) {
     });
 }
 
+export function createBlankScene(name = 'Blank') {
+    const engine = window.getEngine();
+    if (!engine) {
+        console.error('Engine not initialized');
+        return null;
+    }
+    const scene = new Scene(name, engine, __sceneZCounter * 114514);
+    __sceneZCounter++;
+    engine.pushScene(scene);
+    return scene;
+}
+
 export function destroyScene() {
     const engine = window.getEngine();
     if (engine) {

@@ -8,6 +8,22 @@ const PSD_SRC_DIR = __dirname;
 const OUTPUT_BASE_DIR = path.join(PSD_SRC_DIR, '..', 'assets', 'scenes');
 
 /**
+ * Sanitize layer name to make it safe for file paths
+ */
+function sanitizeLayerName(name) {
+  if (!name) return 'unnamed';
+  
+  return name
+    .replace(/[\\\/]/g, '-')        // Replace \ and / with -
+    .replace(/\.\./g, '--')           // Replace .. with --
+    .replace(/[<>:"|?*]/g, '_')       // Replace other illegal Windows chars with _
+    .replace(/^\s+|\s+$/g, '')        // Trim whitespace
+    .replace(/^\.|\.$/, '_')          // Replace leading/trailing dots
+    .replace(/\s+/g, '_')             // Replace spaces with _
+    || 'unnamed';                      // Fallback if empty after sanitization
+}
+
+/**
  * Get all PSD files from subdirectories
  */
 async function getPsdFiles() {
@@ -15,7 +31,7 @@ async function getPsdFiles() {
   const entries = await fs.readdir(PSD_SRC_DIR, { withFileTypes: true });
 
   for (const entry of entries) {
-    if (entry.isDirectory() && entry.name !== 'node_modules') { // && entry.name == 'BG') {
+    if (entry.isDirectory() && entry.name !== 'node_modules' && (entry.name == 'UI' || entry.name == 'Calendar')) {
       const folderPath = path.join(PSD_SRC_DIR, entry.name);
       const files = await fs.readdir(folderPath);
 
@@ -40,6 +56,7 @@ async function getPsdFiles() {
  */
 function buildLayerHierarchy(psd) {
   function processLayer(layer, parentPath = '') {
+    const sanitizedName = sanitizeLayerName(layer.name);
     const layerData = {
       name: layer.name,
       visible: layer.visible !== false,
@@ -51,16 +68,10 @@ function buildLayerHierarchy(psd) {
     }
 
     if (parentPath) {
-      layerData.path = `${parentPath}-${layer.name}`;
+      layerData.path = `${parentPath}-${sanitizedName}`;
     } else {
-      layerData.path = layer.name;
+      layerData.path = sanitizedName;
     }
-
-    // // Add dimensions if available
-    // if (layer.width !== undefined && layer.height !== undefined) {
-    //   layerData.width = layer.width;
-    //   layerData.height = layer.height;
-    // }
 
     // Add position if available
     if (layer.left !== undefined && layer.top !== undefined) {
@@ -97,7 +108,8 @@ async function exportLayers(psd, psdFileName, outputDir) {
   async function exportLayer(layer, parentPath = '') {
     if (!layer) return;
 
-    const layerPath = parentPath ? `${parentPath}/${layer.name}` : layer.name;
+    const sanitizedName = sanitizeLayerName(layer.name);
+    const layerPath = parentPath ? `${parentPath}/${sanitizedName}` : sanitizedName;
 
     // Export layer as WebP if it's a visible layer with content
     if (layer.type !== 'group' && layer.visible !== false) {
@@ -105,7 +117,7 @@ async function exportLayers(psd, psdFileName, outputDir) {
         // Get layer canvas
         if (layer.canvas) {
           // Use group path in filename to avoid duplicates
-          const fileName = parentPath ? `${parentPath.replace(/\//g, '-')}-${layer.name}.png` : `${layer.name}.png`;
+          const fileName = parentPath ? `${parentPath.replace(/\//g, '-')}-${sanitizedName}.png` : `${sanitizedName}.png`;
           const filePath = path.join(outputDir, fileName);
           const buffer = layer.canvas.toBuffer('image/png');
           await fs.writeFile(filePath, buffer);

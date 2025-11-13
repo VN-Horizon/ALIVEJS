@@ -90,7 +90,8 @@ function updateBlockIndex(eventBlock, returnValueIndex = 0) {
     const currentEvent = getCurrentEvent();
 
     if (ScreenplayContext.currentInstructionIndex === currentEvent.instructions.length - 1) {
-        const nextEvId = eventBlock.ReturnValues[returnValueIndex];
+        console.log('Moving to next event block:', eventBlock);
+        const nextEvId = eventBlock.returnValues[returnValueIndex];
         ScreenplayContext.currentBlockIndex = ScreenplayContext.evIdToBlockIndex[nextEvId];
         ScreenplayContext.currentInstructionIndex = 0;
         return;
@@ -147,6 +148,11 @@ export function execUntilNextLine(decisionIndex = -1) {
         updateBlockIndex(currentEvent);
     }
 }
+
+document.addEventListener('MakeDecisionInternal', (e) => {
+    const decisionIndex = e.detail.params[0];
+    execUntilNextLine(decisionIndex);
+});
 
 export async function loadEvents() {
     try {

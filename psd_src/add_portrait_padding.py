@@ -79,7 +79,8 @@ def process_json_file(json_file_path, assets_dir):
         return False
 
 def main():
-    portraits_dir = Path("../assets/scenes/Portraits")
+    script_dir = Path(__file__).resolve().parent
+    portraits_dir = script_dir / "../assets/scenes/Portraits"
     
     if not portraits_dir.exists():
         print(f"Error: Portraits directory not found at {portraits_dir.absolute()}")

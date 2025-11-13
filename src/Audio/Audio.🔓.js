@@ -8,12 +8,8 @@ export function isAudioUnlocked() {
     return audioUnlocked;
 }
 
-
-// Initialize audio unlock mechanism
 $(function() {
     const unlockAudio = () => {
-        // const $overlay = $('#audiounlock');
-        // if(!$overlay.length) return;
         if (isAudioUnlocked()) return;
         const silentAudio = new Audio();
         silentAudio.src = 'data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAAB9AAACABAAZGF0YQIAAAAAAA==';
