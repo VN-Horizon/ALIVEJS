@@ -2,6 +2,7 @@ import { isAudioUnlocked } from './Audio.🔓.js';
 
 const bgmList = {};
 let currentBGM = null;
+let currentBGMName = null;
 
 export function initBGM() {
     for (let i = 0; i < 22; i++) {
@@ -23,12 +24,18 @@ export function playBGM(name) {
         currentBGM.pause();
         currentBGM.currentTime = 0;
     }
+    currentBGMName = name;
     currentBGM = bgmList[name];
     if (currentBGM) {
         currentBGM.play().catch(err => {
             console.warn('Play BGM failed:', err);
         });
     }
+}
+
+export function getCurrentBGM() {
+    console.log('Current BGM:', currentBGMName);
+    return currentBGMName;
 }
 
 export function stopBGM() {

@@ -37,7 +37,7 @@ async function initCGGallery() {
     });
 }
 
-async function gotoCharacterGallery(characterName) {
+export async function gotoCharacterGallery(characterName) {
     const characterGalleryScene = await loadScene(`UI/CG_${characterName}01`);
     for(let i = 3; i<=15; i++) {
         toButton(characterGalleryScene.sceneObjects[i], {
@@ -47,6 +47,10 @@ async function gotoCharacterGallery(characterName) {
             }
         });
     }
+    setExitListener(() => {
+        const engine = window.getEngine();
+        engine?.popScene();
+    });
 }
 
 async function initMusicGallery() {

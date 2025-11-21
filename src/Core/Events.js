@@ -1,4 +1,4 @@
-import { AllowedCharacterNames } from '../Constants.js';
+import { extractDialogData } from "../Utils/DialogHelper.js";
 
 let ScreenplayContext = {
     blocks: [],
@@ -7,6 +7,8 @@ let ScreenplayContext = {
     currentInstructionIndex: 0,
     evIdToBlockIndex: {},
 };
+
+let lastInstruction = null;
 
 export function initScreenplayContext(blocks, textPool) {
     ScreenplayContext = {
@@ -24,6 +26,10 @@ export function initScreenplayContext(blocks, textPool) {
     
     // Expose ScreenplayContext globally for GameSave.js
     window.ScreenplayContext = ScreenplayContext;
+}
+
+export function getCurrentBlockIndex() {
+    return ScreenplayContext.currentBlockIndex;
 }
 
 export function getCurrentEvent() {
@@ -53,44 +59,9 @@ export function resolveStrings(instruction, textPool) {
     return result;
 }
 
-export function extractDialogData(lineText)
-{
-    // 获取引号所在位置
-    if (!lineText) return ['', lineText, 'Hidden'];
-    let quoteIndex = lineText.indexOf('「');
-
-    if (quoteIndex <= 0) return ['', lineText, 'Hidden'];
-
-    let candidate = lineText.slice(0, quoteIndex).trim();
-    if (candidate.length <= 0 || candidate.length >= 8)
-        return ['', lineText, 'Hidden'];
-
-    // 检测角色名称显示模式
-    let mode = 'Display';
-    let name = candidate;
-    let closingQuoteIndex = lineText.lastIndexOf('」');
-    let content = closingQuoteIndex > quoteIndex 
-        ? lineText.substring(quoteIndex + 1, closingQuoteIndex).trim()
-        : lineText.substring(quoteIndex + 1).trim();
-    if (candidate.length > 4 && candidate.startsWith("・・") && candidate.endsWith("・・")) {
-        mode = 'Special';
-        name = candidate.substring(2, candidate.length - 3).trim();
-    } else if (candidate.length > 2 && candidate.startsWith("・") && candidate.endsWith("・")) {
-        mode = 'Hidden';
-        name = candidate.substring(1, candidate.length - 1).trim();
-    }
-
-    // 如果提取的名字不在角色列表中，则将整行作为内容并隐藏名字显示
-    if (!AllowedCharacterNames.includes(name))
-    {
-        return ['', lineText, 'Hidden'];
-    }
-
-    return [name, content, mode];
-}
-
 function updateBlockIndex(eventBlock, returnValueIndex = 0) {
     const currentEvent = getCurrentEvent();
+    lastInstruction = getCurrentInstruction();
 
     if (ScreenplayContext.currentInstructionIndex === currentEvent.instructions.length - 1) {
         console.log('Moving to next event block:', eventBlock);
@@ -112,18 +83,13 @@ export function execUntilNextLine(decisionIndex = -1) {
         if (decisionIndex !== -1) {
             updateBlockIndex(getCurrentEvent(), decisionIndex);
             decisionIndex = -1;
-            dispatchEvent('ResetLineCounter');
             continue;
         }
         
         const currentEvent = getCurrentEvent();
         const instruction = getCurrentInstruction();
         
-        const resolvedInstruction = {
-            type: instruction.type,
-            params: instruction.params,
-            stringParams: resolveStrings(instruction, ScreenplayContext.textPool)
-        };
+        const resolvedInstruction = resolveCurrentInstruction();
         console.log(`${ScreenplayContext.currentInstructionIndex} / ${currentEvent.instructions.length} /`, resolvedInstruction);
         
         dispatchEvent(instruction.type, resolvedInstruction);
@@ -134,7 +100,7 @@ export function execUntilNextLine(decisionIndex = -1) {
                 const lineText = resolvedInstruction.stringParams[0];
                 const lineData = extractDialogData(lineText);
                 dispatchEvent('PlayDialogInternal', {
-                    params: [lineData[2], ScreenplayContext.currentBlockIndex],
+                    params: [lineData[2], ScreenplayContext.currentBlockIndex, resolvedInstruction.params[1]],
                     stringParams: [lineData[0], lineData[1]]
                 });
                 return [lineData[0]];
@@ -150,6 +116,25 @@ export function execUntilNextLine(decisionIndex = -1) {
         
         updateBlockIndex(currentEvent);
     }
+}
+
+export function resolveLastInstruction() {
+    const instruction = lastInstruction;
+    if (!instruction) return null;
+    return {
+        type: instruction.type,
+        params: instruction.params,
+        stringParams: resolveStrings(instruction, ScreenplayContext.textPool)
+    };
+}
+export function resolveCurrentInstruction() {
+    const instruction = getCurrentInstruction();
+    if (!instruction) return null;
+    return {
+        type: instruction.type,
+        params: instruction.params,
+        stringParams: resolveStrings(instruction, ScreenplayContext.textPool)
+    };
 }
 
 document.addEventListener('MakeDecisionInternal', (e) => {
@@ -169,6 +154,7 @@ export async function loadEvents() {
             defaults: true, // includes default values
         });
 
+        console.log('Events loaded successfully!', eventMappings.events);
         console.log('Events loaded successfully!', eventMappings.events[0].instructions);
 
         // Initialize screenplay context with loaded data
@@ -176,6 +162,20 @@ export async function loadEvents() {
             eventMappings.events || [],
             eventMappings.textPool || []
         );
+
+        $(document).on('RestoreSave', (e) => {
+            const { currentBg, currentBgm, currentPortrait, currentBlockIndex, currentInstructionIndex } = e.detail;
+            window.ScreenplayContext.currentBlockIndex = currentBlockIndex || 0;
+            window.ScreenplayContext.currentInstructionIndex = currentInstructionIndex || 0;
+            document.dispatchEvent(new CustomEvent('RestoreGraphics', { 
+                detail: { bg: currentBg, character: currentPortrait } 
+            }));
+            document.dispatchEvent(new CustomEvent('PlayBgm', { 
+                detail: { stringParams: [currentBgm] } 
+            }));
+        });
+
+        document.dispatchEvent(new CustomEvent('EventsLoaded', { bubbles: true, cancelable: true }));
 
         return eventMappings;
     } catch (error) {

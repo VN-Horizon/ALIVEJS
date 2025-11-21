@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Save/Load</title>
+    <script src="./lib/jquery-3.7.1.min.js"></script>
+    <script src="/src/InputSystem/InputSystem.Gamepad.js" type="module"></script>
+    <script src="/src/InputSystem/InputSystem.Keyboard.js" type="module"></script>
     <style>
         * {
             margin: 0;
@@ -160,7 +163,8 @@
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        import { setExitListener } from '/src/InputSystem/InputSystem.Keyboard.js';
         const SAVE_KEY_PREFIX = 'alive_save_';
         const MAX_SAVE_SLOTS = 20;
         
@@ -227,7 +231,7 @@
             saveList.innerHTML = '';
             saves.forEach(save => {
                 const saveItem = document.createElement('div');
-                saveItem.className = 'save-item';
+                saveItem.className = 'save-item focusable';
                 saveItem.dataset.slotIndex = save.slotIndex;
                 
                 if (save.isEmpty) {
@@ -238,7 +242,6 @@
                 } else {
                     saveItem.innerHTML = `
                         <h3>Slot ${save.slotIndex + 1}</h3>
-                        <p>Event: ${save.eventName || 'Unknown'}</p>
                         <p>Block: ${save.currentBlockIndex}, Instruction: ${save.currentInstructionIndex}</p>
                         <p>Date: ${formatDate(save.timestamp)}</p>
                     `;
@@ -286,6 +289,10 @@
         // Load and render saves
         const saves = getAllSaves();
         renderSaveList(saves);
+
+        setExitListener(() => {
+            window.close();
+        });
     </script>
 </body>
 </html>

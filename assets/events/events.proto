@@ -4,23 +4,23 @@ package events;
 
 
 enum InstructionType {
-    PlayDialog = 0;
-    ShowDecision = 1;
-    PlayBgm = 2;
-    PlaySe = 3;
-    SetBgImg = 4;
-    SetCharaImg = 5;
-    SleepOrFade = 6;
-    TransitionToGraphics = 7;
-    TransitionToGraphicsFade = 8;
-    ShowCg = 9;
-    FadeSystemToBlack = 10;
-    SetGraphicsState = 11;
-    ToggleGraphicsFlag = 12;
-    ShakeScreen = 13;
-    ToggleStaffState = 14;
-    ShowStaffA = 15;
-    ShowStaffB = 16;
+  PlayDialog = 0;
+  ShowDecision = 1;
+  PlayBgm = 2;
+  PlaySe = 3;
+  SetBgImg = 4;
+  SetCharaImg = 5;
+  SleepOrFade = 6;
+  TransitionToGraphics = 7;
+  TransitionToGraphicsFade = 8;
+  ShowCg = 9;
+  FadeSystemToBlack = 10;
+  SetGraphicsState = 11;
+  ToggleGraphicsFlag = 12;
+  ShakeScreen = 13;
+  ToggleStaffState = 14;
+  ShowStaffA = 15;
+  ShowStaffB = 16;
 }
 
 
@@ -38,6 +38,7 @@ message EventMapping {
   repeated Instruction instructions = 4;
   repeated int32 return_values = 5;
   bool has_choices = 6;
+  repeated int32 from_events = 7;
 }
 
 

@@ -1,4 +1,4 @@
-import { setExitListener, setConfirmListener } from '../../InputSystem/InputSystem.Keyboard.js';
+import { setExitListener } from '../../InputSystem/InputSystem.Keyboard.js';
 import { pushPauseScreen } from '../SYSTEM.js';
 
 export function hideDialogWindow() {
@@ -16,8 +16,7 @@ export function showDialogWindow() {
 }
 
 export function _hideDialogWindow(e) {
-    hideDialogWindow(); 
-    setConfirmListener(null);
+    hideDialogWindow();
     $(document).off('contextmenu', _hideDialogWindow);
     $(document).on('contextmenu', _showDialogWindow);
     $(document).on('click', _showDialogWindow);
@@ -25,10 +24,6 @@ export function _hideDialogWindow(e) {
 }
 export function _showDialogWindow(e) {
     showDialogWindow();
-    // Import is handled separately since we can't use await in non-async function
-    import('./WINDOW.js').then(({ onNextLineRequest }) => {
-        setConfirmListener(onNextLineRequest);
-    });
     $(document).off('contextmenu', _showDialogWindow);
     $(document).on('contextmenu', _hideDialogWindow);
     $(document).off('click', _showDialogWindow);

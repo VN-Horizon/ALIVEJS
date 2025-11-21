@@ -9,7 +9,12 @@ import { initBGM } from './Audio/Audio.Bgm.js';
 import './Audio/Audio.Voice.js';
 import { initSE } from './Audio/Audio.Se.js';
 
+import { initEnginePane } from './Debug/EnginePane.js';
+import { initSceneGraphPane } from './Debug/SceneGraphPane.js';
+
 let notUnityEngine = new GameEngine('gameContainer');
+initEnginePane(notUnityEngine);
+initSceneGraphPane(notUnityEngine);
 notUnityEngine.start();
 
 window.getEngine = () => notUnityEngine;

@@ -30,36 +30,58 @@ export async function loadBackgroundScene() {
 
     const setBgImgHandler = (e) => {
         const { stringParams } = e.detail;
-        backgroundCG.updateBackgroundImage(stringParams.length >= 2 ? `/assets/scenes/BG/${stringParams[0]}/${stringParams[1]}.webp` : null);
+        if (stringParams.length < 2) return;
+        if (stringParams[0] === '0' || stringParams[1] === '0') {
+            backgroundCG.updateBackgroundImage(null);
+            return;
+        }
+        backgroundCG.updateBackgroundImage(`/assets/scenes/BG/${stringParams[0]}/${stringParams[1]}.webp`);
+    };
+    const transitionToGraphicsHandler = (e) => {
+        const { stringParams } = e.detail;
+        if (stringParams.length < 4) return;
+        if(stringParams[2] === '0' || stringParams[3] === '0') {
+            backgroundCG.updateBackgroundImage(`/assets/scenes/CG/BLACK/BLACK.webp`);
+            return;
+        }
+        backgroundCG.updateBackgroundImage(`/assets/scenes/BG/${stringParams[2]}/${stringParams[3]}.webp`);
+    };
+    const setCgHandler = (e) => {
+        const { stringParams } = e.detail;
+        if (stringParams.length < 1) return;
+        portrait.updateBackgroundImage(null);
+        backgroundCG.updateBackgroundImage(`/assets/scenes/CG/${stringParams[0].toUpperCase()}/${stringParams[0].toUpperCase()}.webp`);
     };
 
     const setCharaImgHandler = (e) => {
         const { stringParams } = e.detail;
-        portrait.updateBackgroundImage(stringParams.length >= 2 ? `/assets/scenes/Portraits/${stringParams[0]}/${stringParams[1]}.webp` : null);
+        if (stringParams.length < 2) return;
+        if (stringParams[0] === '0' || stringParams[1] === '0') {
+            portrait.updateBackgroundImage(null);
+            return;
+        }
+        portrait.updateBackgroundImage(`/assets/scenes/Portraits/${stringParams[0]}/${stringParams[1]}.webp`);
     };
 
     // Handler to restore background image from saved state
-    const restoreBgImgHandler = (e) => {
-        const { backgroundImage } = e.detail;
-        backgroundCG.updateBackgroundImage(backgroundImage);
+    const restoreGraphicsHandler = (e) => {
+        const { bg, character } = e.detail;
+        backgroundCG.updateBackgroundImage(bg);
+        portrait.updateBackgroundImage(character);
     };
 
-    // Handler to restore portrait image from saved state
-    const restoreCharaImgHandler = (e) => {
-        const { backgroundImage } = e.detail;
-        portrait.updateBackgroundImage(backgroundImage);
-    };
-
-    document.addEventListener('SetBgImg', setBgImgHandler);
-    document.addEventListener('SetCharaImg', setCharaImgHandler);
-    document.addEventListener('RestoreBgImg', restoreBgImgHandler);
-    document.addEventListener('RestoreCharaImg', restoreCharaImgHandler);
+    $(document).on('SetBgImg', setBgImgHandler);
+    $(document).on('TransitionToGraphics TransitionToGraphicsFade', transitionToGraphicsHandler);
+    $(document).on('ShowCg', setCgHandler);
+    $(document).on('SetCharaImg', setCharaImgHandler);
+    $(document).on('RestoreGraphics', restoreGraphicsHandler);
 
     backgroundScene.onDestroyCallbacks.push(() => {
-        document.removeEventListener('SetBgImg', setBgImgHandler);
-        document.removeEventListener('SetCharaImg', setCharaImgHandler);
-        document.removeEventListener('RestoreBgImg', restoreBgImgHandler);
-        document.removeEventListener('RestoreCharaImg', restoreCharaImgHandler);
+        $(document).off('SetBgImg', setBgImgHandler);
+        $(document).off('TransitionToGraphics TransitionToGraphicsFade', transitionToGraphicsHandler);
+        $(document).off('ShowCg', setCgHandler);
+        $(document).off('SetCharaImg', setCharaImgHandler);
+        $(document).off('RestoreGraphics', restoreGraphicsHandler);
     });
     return backgroundScene;
 }

@@ -1,36 +1,39 @@
 import { isAudioUnlocked } from './Audio.🔓.js';
-import { CharacterNameToVoiceKey } from '../Constants.js';
-
-export const CharacterLineCounts = {};
-
-function GetVoiceEventName(index) {
-    var currentIndex = (index).toString().padStart(4, '0');
-    return `REN${currentIndex}`;
-}
-
-function GetCharacterVoiceName(characterName) {
-    if (!CharacterNameToVoiceKey[characterName]) return "";
-    var voiceKey = CharacterNameToVoiceKey[characterName];
-    if (!voiceKey) return "";
-    return voiceKey;
-}
+import { resolveLastInstruction, getCurrentBlockIndex } from '../Core/Events.js';
+import { extractDialogData, GetCharacterVoiceName, GetVoiceEventName } from "../Utils/DialogHelper.js";
 
 
 export function OnPlayDialog(instruction)
 {
+    if(instruction.params.length < 3) return;
     var voiceName = instruction.stringParams[0];
     var blockIndex = instruction.params[1];
+    var lineCount = instruction.params[2];
     var voiceKey = GetCharacterVoiceName(voiceName);
     var eventName = GetVoiceEventName(blockIndex + 1);
+    console.log(instruction)
 
     if (voiceName == "祐二" || !voiceKey) return;
 
-    // Initialize line count if character hasn't spoken yet
-    CharacterLineCounts[voiceKey] = (CharacterLineCounts[voiceKey] || 0) + 1;
-
-    var lineCount = CharacterLineCounts[voiceKey];
 
     if (window.skipping === true) return;
+    PlayCharacterVoice(voiceKey, eventName, lineCount.toString().padStart(3, '0'));
+}
+
+export function PlayCurrentVoice() {
+    const instruction = resolveLastInstruction();
+    if(instruction.type !== "PlayDialog") return;
+    const lineText = instruction.stringParams[0];
+    const lineData = extractDialogData(lineText);
+    var voiceName = lineData[0];
+    var blockIndex = getCurrentBlockIndex();
+    var voiceKey = GetCharacterVoiceName(voiceName);
+    var eventName = GetVoiceEventName(blockIndex + 1);
+    var lineCount = instruction.params[1];
+    console.log("Playing current voice:", voiceName, eventName, lineCount, voiceKey);
+    if (voiceName == "祐二" || !voiceKey) return;
+    if (window.skipping === true) return;
+    if (lineCount == null) return;
     PlayCharacterVoice(voiceKey, eventName, lineCount.toString().padStart(3, '0'));
 }
 
@@ -58,8 +61,8 @@ document.addEventListener("PlayDialogInternal", (e) => {
     OnPlayDialog(e.detail);
 });
 
-document.addEventListener("ResetLineCounter", (e) => {
-    for (const key in CharacterLineCounts) {
-        CharacterLineCounts[key] = 0;
-    }
+window.PlayCurrentVoice = PlayCurrentVoice;
+// When skipping stops, try to resume the current voice line
+document.addEventListener("SkipModeEnded", () => {
+    PlayCurrentVoice();
 });

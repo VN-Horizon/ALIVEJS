@@ -1,5 +1,5 @@
 import { getCurrentEvent } from './Events.js';
-import { CharacterLineCounts } from '../Audio/Audio.Voice.js';
+import { getCurrentBGM } from '../Audio/Audio.Bgm.js';
 
 const SAVE_KEY_PREFIX = 'alive_save_';
 const MAX_SAVE_SLOTS = 20;
@@ -12,14 +12,14 @@ export function getCurrentGameState() {
     let currentPortrait = null;
     
     if (backgroundScene) {
-        const bgElement = backgroundScene.getObjectByName("BackgroundCG");
-        const portraitElement = backgroundScene.getObjectByName("PortraitCG");
-        
-        if (bgElement && bgElement.backgroundImage) {
-            currentBg = bgElement.backgroundImage;
+        const bgObject = backgroundScene.getObjectByName("BackgroundCG");
+        const portraitObject = backgroundScene.getObjectByName("PortraitCG");
+
+        if (bgObject && bgObject.backgroundImageUrl) {
+            currentBg = bgObject.backgroundImageUrl;
         }
-        if (portraitElement && portraitElement.backgroundImage) {
-            currentPortrait = portraitElement.backgroundImage;
+        if (portraitObject && portraitObject.backgroundImageUrl) {
+            currentPortrait = portraitObject.backgroundImageUrl;
         }
     }
     
@@ -28,10 +28,10 @@ export function getCurrentGameState() {
     
     return {
         currentBlockIndex: window.ScreenplayContext?.currentBlockIndex || 0,
-        currentInstructionIndex: window.ScreenplayContext?.currentInstructionIndex || 0,
+        currentInstructionIndex: window.ScreenplayContext?.currentInstructionIndex - 1 || 0,
         currentBg: currentBg,
+        currentBgm: getCurrentBGM(),
         currentPortrait: currentPortrait,
-        characterLineCounts: { ...CharacterLineCounts },
         timestamp: new Date().toISOString(),
         eventName: currentEvent?.evId || 'Unknown'
     };
@@ -116,34 +116,9 @@ export function applyGameState(gameState) {
         return false;
     }
     
-    // Update screenplay context
-    if (window.ScreenplayContext) {
-        window.ScreenplayContext.currentBlockIndex = gameState.currentBlockIndex || 0;
-        window.ScreenplayContext.currentInstructionIndex = gameState.currentInstructionIndex || 0;
-    }
-    
-    // Restore character line counts
-    if (gameState.characterLineCounts) {
-        for (const key in CharacterLineCounts) {
-            delete CharacterLineCounts[key];
-        }
-        for (const key in gameState.characterLineCounts) {
-            CharacterLineCounts[key] = gameState.characterLineCounts[key];
-        }
-    }
-    
-    // Dispatch events to update background and portrait
-    if (gameState.currentBg) {
-        document.dispatchEvent(new CustomEvent('RestoreBgImg', { 
-            detail: { backgroundImage: gameState.currentBg } 
-        }));
-    }
-    
-    if (gameState.currentPortrait) {
-        document.dispatchEvent(new CustomEvent('RestoreCharaImg', { 
-            detail: { backgroundImage: gameState.currentPortrait } 
-        }));
-    }
+    document.dispatchEvent(new CustomEvent('RestoreSave', { 
+        detail: gameState 
+    }));
     
     console.log('Game state applied:', gameState);
     return true;

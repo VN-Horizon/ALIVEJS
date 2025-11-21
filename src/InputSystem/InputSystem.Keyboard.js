@@ -93,6 +93,10 @@ $(document).on('keyup', function(e) {
     // Handle Ctrl key release to stop skipping
     if (e.keyCode === 17 && window.skipping) { // Ctrl key
         window.skipping = false;
+        // Notify systems that skip mode has ended so they can resume behaviors
+        try {
+            document.dispatchEvent(new CustomEvent('SkipModeEnded', { bubbles: true }));
+        } catch {}
     }
     
     if(CONFIRM_KEYS.includes(e.keyCode)) {

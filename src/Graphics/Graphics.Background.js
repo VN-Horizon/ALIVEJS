@@ -48,8 +48,9 @@ export class Background extends SceneElement {
     }
 
     updateBackgroundImage(backgroundImageUrl = null) {
-        if (!this.domElement || !backgroundImageUrl) return;
+        if (!this.domElement) return;
         this.backgroundImageUrl = backgroundImageUrl;
+        if(!backgroundImageUrl) this.backgroundImageUrl = '';
         $(this.domElement).css('background-image', `url('${this.backgroundImageUrl}')`);
         this.updateScrollPosition();
     }

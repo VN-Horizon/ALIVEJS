@@ -63,3 +63,14 @@ body {
     0% { background-position: 0 0; }
     100% { background-position: 0 100%; }
 }
+
+.debug-container {
+    position: fixed;
+    top: 0; left: 0; margin: 10px; display: flex; flex-direction: column; flex-wrap: wrap; gap: 10px; z-index: 99999; height: 100vh;
+}
+
+
+.pane-container {
+    min-width: 120px;
+    width: auto;
+}
