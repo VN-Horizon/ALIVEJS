@@ -1,52 +1,46 @@
 import { Pane } from '../../lib/tweakpane-4.0.5.min.js';
+import { execUntilNextLine } from '../Core/Events.js';
 import { createPaneContainer } from './DebugPane.js';
+
+const container = createPaneContainer();
+
+$(container).css({
+    height: '90vh',
+    position: 'fixed',
+    right: '10px',
+    top: '10px',
+});
 
 const pane = new Pane({
     title: 'Events Graph',
-    container: createPaneContainer(),
+    container: container,
 });
 
-let graphContainer = null;
 let simulation = null;
 let svgElement = null;
-let linkGroupElement = null;
-let nodeGroupElement = null;
 let currentWidth = 400;
-let currentHeight = 230;
-let lastBlockIndex = -1;
+let currentHeight = window.innerHeight * 0.9;
+let lastIndex = -1;
 
-export function initSceneGraphPane(engine) {
+export function initSceneGraphPane() {
     // Create a custom HTML container for the graph
     const container = document.createElement('div');
-    container.style.width = '100%';
-    container.style.height = '250px';
-    container.style.background = '#1a1a1a';
-    container.style.borderRadius = '2px';
-    container.style.overflow = 'hidden';
-    
+    container.style.width = `${currentWidth}px`;
+    container.style.height = `${currentHeight}px`;
     // Add it to the pane container
     pane.element.appendChild(container);
-    graphContainer = container;
-    
     // Create SVG with zoom/pan capability
-    const svg = d3.select(container)
+    svgElement = d3.select(container)
         .append('svg')
-        .attr('width', '100%')
-        .attr('height', '250px')
+        .attr('width', currentWidth)
+        .attr('height', currentHeight)
         .style('display', 'block');
     
-    svgElement = svg;
-    currentWidth = 300;
-    currentHeight = 250;
-    
     // Create a group for zoom/pan
-    const g = svg.append('g');
-    
+    const g = svgElement.append('g');
+
     const linkGroup = g.append('g').attr('class', 'links');
     const nodeGroup = g.append('g').attr('class', 'nodes');
-    
-    linkGroupElement = linkGroup;
-    nodeGroupElement = nodeGroup;
     
     // Add zoom behavior
     const zoom = d3.zoom()
@@ -55,7 +49,7 @@ export function initSceneGraphPane(engine) {
             g.attr('transform', event.transform);
         });
     
-    svg.call(zoom);
+    svgElement.call(zoom);
     
     // Store zoom for later use
     svgElement.zoom = zoom;
@@ -75,21 +69,14 @@ export function initSceneGraphPane(engine) {
         title: 'Refresh Graph',
     });
     refreshBtn.on('click', () => {
-        renderGraph(svg, linkGroup, nodeGroup, currentWidth, currentHeight);
+        renderGraph(svgElement, linkGroup, nodeGroup, currentWidth, currentHeight);
     });
     $(document).on('EventsLoaded', () => {
-        renderGraph(svg, linkGroup, nodeGroup, currentWidth, currentHeight);
+        renderGraph(svgElement, linkGroup, nodeGroup, currentWidth, currentHeight);
         updateCurrentEventHighlight();
-        ticked();
     });
 }
-
-function ticked() {
-    simulation.tick(1);
-    requestAnimationFrame(ticked);
-}
-
-function renderGraph(svg, linkGroup, nodeGroup, width, height) {
+function renderGraph(svgElement, linkGroup, nodeGroup, width, height) {
     const { nodes, links } = getEventsGraphData();
     
     // Stop existing simulation
@@ -99,31 +86,37 @@ function renderGraph(svg, linkGroup, nodeGroup, width, height) {
     
     // Create force simulation
     simulation = d3.forceSimulation(nodes)
+        // .alphaTarget(1)
+        .alphaDecay(0.001)
+        .alpha(2)
+        .alphaMin(0)
         .force('link', d3.forceLink(links)
             .id(d => d.id)
-            .distance(20))
+            .distance(20    ))
         .force('charge', d3.forceManyBody().strength(-20))
         .force('center', d3.forceCenter(width / 2, height / 2))
-        .force('collision', d3.forceCollide().radius(17));
+        .force('collision', d3.forceCollide().radius(15));
     
     // Update links with arrows
     const linkSelection = linkGroup
         .selectAll('line')
         .data(links)
         .join('line')
-        .attr('stroke', '#666')
-        .attr('stroke-width', 1.5)
-        .attr('stroke-opacity', 0.6)
-        .attr('marker-end', 'url(#arrowhead)');
+        .attr('stroke', d => d.color || '#666')
+        .attr('stroke-width', d => d.color !== '#666' ? 2.5 : 1.5)
+        .attr('stroke-opacity', d => d.color !== '#666' ? 0.8 : 0.6)
+        .attr('marker-end', d => d.color !== '#666' ? `url(#arrowhead-${d.color.substring(1)})` : 'url(#arrowhead)');
     
-    // Add arrow marker definition
-    svg.selectAll('defs').data([0]).join('defs')
-        .selectAll('marker')
+    // Add arrow marker definitions
+    const defs = svgElement.selectAll('defs').data([0]).join('defs');
+    
+    // Default arrow marker
+    defs.selectAll('marker#arrowhead')
         .data([0])
         .join('marker')
         .attr('id', 'arrowhead')
         .attr('viewBox', '-0 -5 10 10')
-        .attr('refX', 18)
+        .attr('refX', 24)
         .attr('refY', 0)
         .attr('orient', 'auto')
         .attr('markerWidth', 6)
@@ -133,6 +126,27 @@ function renderGraph(svg, linkGroup, nodeGroup, width, height) {
         .join('path')
         .attr('d', 'M 0,-5 L 10,0 L 0,5')
         .attr('fill', '#666');
+    
+    // Colored arrow markers for END paths
+    const uniqueColors = [...new Set(links.filter(l => l.color !== '#666').map(l => l.color))];
+    uniqueColors.forEach(color => {
+        const markerId = `arrowhead-${color.substring(1)}`;
+        defs.selectAll(`marker#${markerId}`)
+            .data([0])
+            .join('marker')
+            .attr('id', markerId)
+            .attr('viewBox', '-0 -5 10 10')
+            .attr('refX', 12)
+            .attr('refY', 0)
+            .attr('orient', 'auto')
+            .attr('markerWidth', 7)
+            .attr('markerHeight', 7)
+            .selectAll('path')
+            .data([0])
+            .join('path')
+            .attr('d', 'M 0,-5 L 10,0 L 0,5')
+            .attr('fill', color);
+    });
     
     // Update nodes
     const nodeSelection = nodeGroup
@@ -154,6 +168,19 @@ function renderGraph(svg, linkGroup, nodeGroup, width, height) {
         })
         .on('mouseleave', function() {
             d3.select(this).attr('stroke', null);
+        })
+        .on('click', function(event, d) {
+            if (d.index !== undefined && d.index >= 0) {
+                const screenplayContext = window.ScreenplayContext;
+                if (screenplayContext && screenplayContext.blocks[d.index]) {
+                    screenplayContext.currentBlockIndex = d.index;
+                    screenplayContext.currentInstructionIndex = 0;
+                    updateCurrentEventHighlight();
+                    execUntilNextLine();
+                    
+                    console.log(`Jumped to event block ${d.index} (evId: ${d.id})`);
+                }
+            }
         });
     
     // Add labels to nodes
@@ -164,8 +191,10 @@ function renderGraph(svg, linkGroup, nodeGroup, width, height) {
         .attr("class", "node-label")
         .attr("text-anchor", "middle")
         .attr("dy", 4)
-        .attr('fill', '#fff')
-        .attr('font-size', '10px')
+        .attr('fill', '#000')
+        .attr('font-size', '11px')
+        .attr('font-family', 'Segoe UI, Arial, sans-serif')
+        .style('pointer-events', 'none')
         .text(d => d.label || d.id);
     
     // Update positions on tick
@@ -175,13 +204,12 @@ function renderGraph(svg, linkGroup, nodeGroup, width, height) {
             .attr('y1', d => d.source.y)
             .attr('x2', d => d.target.x)
             .attr('y2', d => d.target.y);
-        
         nodeSelection
             .attr('transform', d => `translate(${d.x},${d.y})`);
     });
     
     // Store node selection for updates
-    svg.nodeSelection = nodeSelection;
+    svgElement.nodeSelection = nodeSelection;
 }
 
 function updateCurrentEventHighlight() {
@@ -189,58 +217,30 @@ function updateCurrentEventHighlight() {
     if (!screenplayContext || !svgElement || !svgElement.nodeSelection) {
         return;
     }
-    
-    const currentBlockIndex = screenplayContext.currentBlockIndex;
-    
-    // Only update if block index has changed
-    if (currentBlockIndex === lastBlockIndex) {
-        return;
-    }
-    
-    lastBlockIndex = currentBlockIndex;
-    
+
+    const currentIndex = screenplayContext.currentBlockIndex;
+    if (currentIndex === lastIndex) return;
+    lastIndex = currentIndex;
+
     // Update node colors
     svgElement.nodeSelection.selectAll('circle')
         .transition()
         .duration(300)
         .attr('fill', d => {
-            const event = screenplayContext.blocks[d.index];
-            
-            // Highlight current event
-            if (d.index === currentBlockIndex) {
-                return '#ff6b6b'; // red for current
-            }
-            
-            // Regular colors
-            if (event.hasChoices) {
-                return '#ff9ff3'; // pink for choices
-            } else if (event.evFunc && event.evFunc.length > 0) {
-                return '#feca57'; // yellow for functions
-            }
-            return '#4ecdc4'; // default teal
+            if(!d || !d.index || d.index < 0) return '#4ecdc4';
+            const blk = screenplayContext.blocks[d.index];
+            if (d.index === currentIndex) return '#ff6b6b';
+            if (blk && blk.hasChoices) return '#ff9ff3';
+            if (blk && blk.evFunc && blk.evFunc.length > 0) return '#feca57';
+            return '#4ecdc4';
         })
         .attr('r', d => {
-            if (d.index === currentBlockIndex) {
-                return (d.radius || 10) + 4; // Larger radius for current
-            }
+            if (d.index === currentIndex) return (d.radius || 10) + 4;
             return d.radius || 10;
         });
     
-    // Add pulse effect to current node
-    svgElement.nodeSelection.selectAll('circle')
-        .filter(d => d.index === currentBlockIndex)
-        .attr('stroke', '#fff')
-        .attr('stroke-width', 3)
-        .attr('stroke-opacity', 1)
-        .transition()
-        .duration(800)
-        .attr('stroke-opacity', 0.3)
-        .transition()
-        .duration(800)
-        .attr('stroke-opacity', 1);
-    
     // Center on current node
-    const currentNode = svgElement.nodeSelection.data().find(d => d.index === currentBlockIndex);
+    const currentNode = svgElement.nodeSelection.data().find(d => d.index === currentIndex);
     if (currentNode && currentNode.x && currentNode.y) {
         const transform = d3.zoomIdentity
             .scale(1)
@@ -254,27 +254,21 @@ function updateCurrentEventHighlight() {
 }
 
 function createDrag(simulation) {
-    function dragstarted(event) {
-        if (!event.active) simulation.alphaTarget(0.3).restart();
-        event.subject.fx = event.subject.x;
-        event.subject.fy = event.subject.y;
-    }
-    
-    function dragged(event) {
-        event.subject.fx = event.x;
-        event.subject.fy = event.y;
-    }
-    
-    function dragended(event) {
-        if (!event.active) simulation.alphaTarget(0);
-        event.subject.fx = null;
-        event.subject.fy = null;
-    }
-    
     return d3.drag()
-        .on('start', dragstarted)
-        .on('drag', dragged)
-        .on('end', dragended);
+        .on('start', (e) => {
+            if (!e.active) simulation.alphaTarget(0.3).restart();
+            e.subject.fx = e.subject.x;
+            e.subject.fy = e.subject.y;
+        })
+        .on('drag', (e) => {
+            e.subject.fx = e.x;
+            e.subject.fy = e.y;
+        })
+        .on('end', (e) => {
+            if (!e.active) simulation.alphaTarget(0);
+            e.subject.fx = null;
+            e.subject.fy = null;
+        });
 }
 
 function getEventsGraphData() {
@@ -282,58 +276,117 @@ function getEventsGraphData() {
     if (!screenplayContext || !screenplayContext.blocks) {
         return { nodes: [], links: [] };
     }
-    
-    const nodes = [];
     const links = [];
     const nodeMap = new Map();
-    
-    // Create nodes for each event
     screenplayContext.blocks.forEach((event, index) => {
         const evId = event.evId;
-        const nodeId = `ev_${evId}`;
-        
-        // Determine node color based on event properties
-        let color = '#4ecdc4'; // default teal
-        if (event.hasChoices) {
-            color = '#ff9ff3'; // pink for choice events
-        } else if (event.evFunc && event.evFunc.length > 0) {
-            color = '#feca57'; // yellow for events with functions
-        }
-        
-        // Check if this is the current event
-        if (index === screenplayContext.currentBlockIndex) {
-            color = '#ff6b6b'; // red for current event
-        }
-        
+        const nodeId = evId;
+        let color = '#4ecdc4';
+        if (event.hasChoices) color = '#ff9ff3';
+        else if (event.evFunc && event.evFunc.length > 0) color = '#feca57';
+        if (index === screenplayContext.currentBlockIndex) color = '#ff6b6b';
+
         const node = {
             id: nodeId,
             label: `${evId}`,
             color: color,
             radius: event.hasChoices ? 12 : 10,
-            evId: evId,
-            index: index
         };
         
-        nodes.push(node);
         nodeMap.set(evId, node);
     });
+    nodeMap.set(7090644, {id: 7090644, radius: 16, color: '#dd1effff', label: 'END'});
     
-    // Create links based on return_values and from_events
+    // Build links first
     screenplayContext.blocks.forEach((event) => {
-        const sourceId = `ev_${event.evId}`;
-        
-        // Links from return_values (outgoing connections)
+        const sourceId = event.evId;
         if (event.returnValues && event.returnValues.length > 0) {
             event.returnValues.forEach((targetEvId) => {
-                if (nodeMap.has(targetEvId)) {
-                    links.push({
-                        source: sourceId,
-                        target: `ev_${targetEvId}`
-                    });
-                }
+                if (!nodeMap.has(targetEvId)) return;
+                links.push({
+                    source: sourceId,
+                    target: targetEvId,
+                    color: '#666'
+                });
             });
         }
     });
     
-    return { nodes, links };
+    // Find all nodes that point to END (7090644)
+    const nodesPointingToEnd = links
+        .filter(link => link.target === 7090644)
+        .map(link => link.source);
+    
+    // Build adjacency map (reverse - who points to whom)
+    const incomingMap = new Map();
+    links.forEach(link => {
+        if (!incomingMap.has(link.target)) {
+            incomingMap.set(link.target, []);
+        }
+        incomingMap.get(link.target).push(link.source);
+    });
+    
+    // Color palette
+    const pathColors = [
+        '#ff6b6b', '#4ecdc4', '#f7b731', 
+        '#5f27cd', '#86d300ff', '#ff9ff3', '#fe57fbff',
+        '#b0e4efff', '#ff6348', '#1dd1a1',
+        '#c44569', '#dff800ff', '#778beb', '#e77f67'
+    ];
+    
+    // Trace back from each node pointing to END to find root nodes
+    const pathColorMap = new Map(); // Maps each node to its path color
+    let colorIndex = 0;
+    
+    nodesPointingToEnd.forEach(nodeId => {
+        // Trace backward to find root
+        const visited = new Set();
+        const traceBackToRoot = (currentNode) => {
+            if (visited.has(currentNode)) return currentNode;
+            visited.add(currentNode);
+            
+            const parents = incomingMap.get(currentNode) || [];
+            if (parents.length === 0) {
+                // This is a root node
+                return currentNode;
+            }
+            
+            // Continue tracing back through all parents
+            const roots = parents.map(parent => traceBackToRoot(parent));
+            return roots[0]; // Return first root found
+        };
+        
+        const rootNode = traceBackToRoot(nodeId);
+        
+        // Assign color based on root node
+        if (!pathColorMap.has(rootNode)) {
+            pathColorMap.set(rootNode, pathColors[colorIndex % pathColors.length]);
+            colorIndex++;
+        }
+        
+        const pathColor = pathColorMap.get(rootNode);
+        
+        // Now color all nodes in the path from root to END
+        const colorPath = (node, color) => {
+            if (pathColorMap.has(node) && pathColorMap.get(node) !== color) {
+                return; // Already colored by another path
+            }
+            pathColorMap.set(node, color);
+            
+            // Color all links from this node
+            links.forEach(link => {
+                if (link.source === node) {
+                    link.color = color;
+                    // Recursively color downstream
+                    if (link.target !== 7090644) {
+                        colorPath(link.target, color);
+                    }
+                }
+            });
+        };
+        
+        colorPath(rootNode, pathColor);
+    });
+
+    return { nodes: Array.from(nodeMap.values()), links };
 }

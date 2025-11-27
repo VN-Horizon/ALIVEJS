@@ -7,8 +7,9 @@ let c = 0;
 export function createPaneContainer() {
     const $paneContainer = $('<div class="pane-container"></div>');
     $paneContainer.css({
-        transform: 'translate(0px, 0px)',
-        transition: `transform 0.3s cubic-bezier(0, 0.87, 0.58, 1) ${c * 0.01}s`,
+        transform: 'scale(1)',
+        transition: `transform 0.2s cubic-bezier(0, 0.87, 0.13, 1) ${c * 0.05}s`,
+        transformOrigin: 'top left',
     });
     c++;
     $debugContainer.append($paneContainer);
@@ -27,7 +28,7 @@ $(document).on('keydown', (e) => {
         const $containers = $(".debug-container .pane-container");
         if(isShowing){
             $containers.each((index, element) => {
-                $(element).css('transform', 'translate(0px, 0px)');
+                $(element).css('transform', 'scale(1)');
             });
         } else {
             const screenWidth = window.innerWidth;
@@ -35,28 +36,7 @@ $(document).on('keydown', (e) => {
             
             $containers.each((index, element) => {
                 const $el = $(element);
-                const rect = element.getBoundingClientRect();
-                const elementWidth = rect.width;
-                const elementHeight = rect.height;
-                
-                const border = randomInt(0, 3);
-                let x, y;
-                
-                if (border === 0) { // Left border
-                    x = -rect.left - elementWidth - 20;
-                    y = randomInt(-rect.top, screenHeight - rect.top - elementHeight);
-                } else if (border === 1) { // Right border
-                    x = screenWidth - rect.left + 20;
-                    y = randomInt(-rect.top, screenHeight - rect.top - elementHeight);
-                } else if (border === 2) { // Top border
-                    x = randomInt(-rect.left, screenWidth - rect.left - elementWidth);
-                    y = -rect.top - elementHeight - 20;
-                } else { // Bottom border
-                    x = randomInt(-rect.left, screenWidth - rect.left - elementWidth);
-                    y = screenHeight - rect.top + 80;
-                }
-                
-                $el.css('transform', `translate(${x}px, ${y}px)`);
+                $el.css('transform', `scale(0)`);
             });
         }
     }
