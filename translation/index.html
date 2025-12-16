@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Load Binary File</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+    <h1>Load Translation Binary File</h1>
+    <input type="file" id="fileInput" />
+    <table id="outputTable">
+        <thead>
+            <tr>
+                <th>Second Column</th>
+                <th>Third Column</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Rows will be dynamically added here -->
+        </tbody>
+    </table>
+
+    <script>
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (!file) {
+                alert("No file selected!");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const buffer = e.target.result;
+                const dataView = new DataView(buffer);
+                let offset = 0;
+                const tableBody = document.getElementById('outputTable').querySelector('tbody');
+                tableBody.innerHTML = '';
+
+                try {
+                    while (offset < buffer.byteLength) {
+                        // Read the length of the first string
+                        const secondLength = dataView.getUint32(offset, true);
+                        offset += 4;
+
+                        // Read the first string
+                        const secondString = new TextDecoder('utf-8').decode(
+                            new Uint8Array(buffer, offset, secondLength)
+                        );
+                        offset += secondLength;
+
+                        // Read the length of the second string
+                        const thirdLength = dataView.getUint32(offset, true);
+                        offset += 4;
+
+                        // Read the second string
+                        const thirdString = new TextDecoder('utf-8').decode(
+                            new Uint8Array(buffer, offset, thirdLength)
+                        );
+                        offset += thirdLength;
+
+                        // Add a row to the table
+                        const row = document.createElement('tr');
+                        const secondCell = document.createElement('td');
+                        const thirdCell = document.createElement('td');
+
+                        secondCell.textContent = secondString;
+                        thirdCell.textContent = thirdString;
+
+                        row.appendChild(secondCell);
+                        row.appendChild(thirdCell);
+                        tableBody.appendChild(row);
+                    }
+                } catch (err) {
+                    console.error("Error parsing binary file:", err);
+                    alert("Failed to parse the binary file.");
+                }
+            };
+
+            reader.readAsArrayBuffer(file);
+        });
+    </script>
+</body>
+</html>
