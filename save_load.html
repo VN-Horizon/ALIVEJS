@@ -1,298 +1,303 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Save/Load</title>
-    <script src="./lib/jquery-3.7.1.min.js"></script>
-    <script src="/src/InputSystem/InputSystem.Gamepad.js" type="module"></script>
-    <script src="/src/InputSystem/InputSystem.Keyboard.js" type="module"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Save/Load</title>
+        <script src="./lib/jquery-3.7.1.min.js"></script>
+        <script src="/src/InputSystem/InputSystem.Gamepad.js" type="module"></script>
+        <script src="/src/InputSystem/InputSystem.Keyboard.js" type="module"></script>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
 
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #2c2c2c;
-            color: #ffffff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            padding: 20px;
-        }
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #2c2c2c;
+                color: #ffffff;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                padding: 20px;
+            }
 
-        .container {
-            background-color: #3a3a3a;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            width: 100%;
-            max-width: 600px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
+            .container {
+                background-color: #3a3a3a;
+                border-radius: 8px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+                width: 100%;
+                max-width: 600px;
+                padding: 20px;
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+            }
 
-        h1 {
-            text-align: center;
-            font-size: 24px;
-            color: #ffffff;
-        }
+            h1 {
+                text-align: center;
+                font-size: 24px;
+                color: #ffffff;
+            }
 
-        .save-list {
-            background-color: #2a2a2a;
-            border: 2px solid #4a4a4a;
-            border-radius: 4px;
-            height: 400px;
-            overflow-y: auto;
-            padding: 10px;
-        }
+            .save-list {
+                background-color: #2a2a2a;
+                border: 2px solid #4a4a4a;
+                border-radius: 4px;
+                height: 400px;
+                overflow-y: auto;
+                padding: 10px;
+            }
 
-        .save-item {
-            background-color: #3a3a3a;
-            border: 1px solid #4a4a4a;
-            border-radius: 4px;
-            padding: 15px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: background-color 0.2s, border-color 0.2s;
-        }
+            .save-item {
+                background-color: #3a3a3a;
+                border: 1px solid #4a4a4a;
+                border-radius: 4px;
+                padding: 15px;
+                margin-bottom: 10px;
+                cursor: pointer;
+                transition:
+                    background-color 0.2s,
+                    border-color 0.2s;
+            }
 
-        .save-item:hover {
-            background-color: #4a4a4a;
-            border-color: #5a5a5a;
-        }
+            .save-item:hover {
+                background-color: #4a4a4a;
+                border-color: #5a5a5a;
+            }
 
-        .save-item.selected {
-            background-color: #4a5a7a;
-            border-color: #6a7a9a;
-        }
+            .save-item.selected {
+                background-color: #4a5a7a;
+                border-color: #6a7a9a;
+            }
 
-        .save-item h3 {
-            font-size: 16px;
-            margin-bottom: 8px;
-            color: #ffffff;
-        }
+            .save-item h3 {
+                font-size: 16px;
+                margin-bottom: 8px;
+                color: #ffffff;
+            }
 
-        .save-item p {
-            font-size: 12px;
-            color: #b0b0b0;
-            margin-bottom: 4px;
-        }
+            .save-item p {
+                font-size: 12px;
+                color: #b0b0b0;
+                margin-bottom: 4px;
+            }
 
-        .button-container {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-        }
+            .button-container {
+                display: flex;
+                gap: 10px;
+                justify-content: flex-end;
+            }
 
-        button {
-            padding: 12px 30px;
-            font-size: 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            font-weight: bold;
-        }
+            button {
+                padding: 12px 30px;
+                font-size: 16px;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: background-color 0.2s;
+                font-weight: bold;
+            }
 
-        .cancel-btn {
-            background-color: #5a5a5a;
-            color: #ffffff;
-        }
+            .cancel-btn {
+                background-color: #5a5a5a;
+                color: #ffffff;
+            }
 
-        .cancel-btn:hover {
-            background-color: #6a6a6a;
-        }
+            .cancel-btn:hover {
+                background-color: #6a6a6a;
+            }
 
-        .load-btn {
-            background-color: #4a7a5a;
-            color: #ffffff;
-        }
+            .load-btn {
+                background-color: #4a7a5a;
+                color: #ffffff;
+            }
 
-        .load-btn:hover {
-            background-color: #5a8a6a;
-        }
+            .load-btn:hover {
+                background-color: #5a8a6a;
+            }
 
-        .load-btn:disabled {
-            background-color: #3a3a3a;
-            color: #6a6a6a;
-            cursor: not-allowed;
-        }
+            .load-btn:disabled {
+                background-color: #3a3a3a;
+                color: #6a6a6a;
+                cursor: not-allowed;
+            }
 
-        .save-list::-webkit-scrollbar {
-            width: 8px;
-        }
+            .save-list::-webkit-scrollbar {
+                width: 8px;
+            }
 
-        .save-list::-webkit-scrollbar-track {
-            background: #2a2a2a;
-        }
+            .save-list::-webkit-scrollbar-track {
+                background: #2a2a2a;
+            }
 
-        .save-list::-webkit-scrollbar-thumb {
-            background: #4a4a4a;
-            border-radius: 4px;
-        }
+            .save-list::-webkit-scrollbar-thumb {
+                background: #4a4a4a;
+                border-radius: 4px;
+            }
 
-        .save-list::-webkit-scrollbar-thumb:hover {
-            background: #5a5a5a;
-        }
+            .save-list::-webkit-scrollbar-thumb:hover {
+                background: #5a5a5a;
+            }
 
-        .empty-message {
-            text-align: center;
-            color: #7a7a7a;
-            padding: 40px 20px;
-            font-size: 14px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1 id="title">Load Save</h1>
-        
-        <div class="save-list" id="saveList">
-            <div class="empty-message">No save files found</div>
+            .empty-message {
+                text-align: center;
+                color: #7a7a7a;
+                padding: 40px 20px;
+                font-size: 14px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1 id="title">Load Save</h1>
+
+            <div class="save-list" id="saveList">
+                <div class="empty-message">No save files found</div>
+            </div>
+
+            <div class="button-container">
+                <button class="cancel-btn" id="cancelBtn">Cancel</button>
+                <button class="load-btn" id="actionBtn" disabled>Load</button>
+            </div>
         </div>
 
-        <div class="button-container">
-            <button class="cancel-btn" id="cancelBtn">Cancel</button>
-            <button class="load-btn" id="actionBtn" disabled>Load</button>
-        </div>
-    </div>
+        <script type="module">
+            import { setExitListener } from "/src/InputSystem/InputSystem.Keyboard.js";
+            const SAVE_KEY_PREFIX = "alive_save_";
+            const MAX_SAVE_SLOTS = 20;
 
-    <script type="module">
-        import { setExitListener } from '/src/InputSystem/InputSystem.Keyboard.js';
-        const SAVE_KEY_PREFIX = 'alive_save_';
-        const MAX_SAVE_SLOTS = 20;
-        
-        const saveList = document.getElementById('saveList');
-        const cancelBtn = document.getElementById('cancelBtn');
-        const actionBtn = document.getElementById('actionBtn');
-        const titleElement = document.getElementById('title');
-        let selectedSlot = null;
-        
-        // Get mode from URL parameters (save or load)
-        const urlParams = new URLSearchParams(window.location.search);
-        const mode = urlParams.get('mode') || 'load';
-        
-        // Update UI based on mode
-        if (mode === 'save') {
-            titleElement.textContent = 'Save Game';
-            actionBtn.textContent = 'Save';
-        } else {
-            titleElement.textContent = 'Load Game';
-            actionBtn.textContent = 'Load';
-        }
+            const saveList = document.getElementById("saveList");
+            const cancelBtn = document.getElementById("cancelBtn");
+            const actionBtn = document.getElementById("actionBtn");
+            const titleElement = document.getElementById("title");
+            let selectedSlot = null;
 
-        function getAllSaves() {
-            const saves = [];
-            
-            for (let i = 0; i < MAX_SAVE_SLOTS; i++) {
-                const saveKey = SAVE_KEY_PREFIX + i;
-                const saveData = localStorage.getItem(saveKey);
-                
-                if (saveData) {
-                    try {
-                        const gameState = JSON.parse(saveData);
+            // Get mode from URL parameters (save or load)
+            const urlParams = new URLSearchParams(window.location.search);
+            const mode = urlParams.get("mode") || "load";
+
+            // Update UI based on mode
+            if (mode === "save") {
+                titleElement.textContent = "Save Game";
+                actionBtn.textContent = "Save";
+            } else {
+                titleElement.textContent = "Load Game";
+                actionBtn.textContent = "Load";
+            }
+
+            function getAllSaves() {
+                const saves = [];
+
+                for (let i = 0; i < MAX_SAVE_SLOTS; i++) {
+                    const saveKey = SAVE_KEY_PREFIX + i;
+                    const saveData = localStorage.getItem(saveKey);
+
+                    if (saveData) {
+                        try {
+                            const gameState = JSON.parse(saveData);
+                            saves.push({
+                                slotIndex: i,
+                                ...gameState,
+                            });
+                        } catch (error) {
+                            console.error(`Failed to parse save in slot ${i}:`, error);
+                        }
+                    } else if (mode === "save") {
+                        // Show empty slots in save mode
                         saves.push({
                             slotIndex: i,
-                            ...gameState
+                            isEmpty: true,
                         });
-                    } catch (error) {
-                        console.error(`Failed to parse save in slot ${i}:`, error);
                     }
-                } else if (mode === 'save') {
-                    // Show empty slots in save mode
-                    saves.push({
-                        slotIndex: i,
-                        isEmpty: true
-                    });
                 }
-            }
-            
-            return saves;
-        }
 
-        function formatDate(isoString) {
-            if (!isoString) return 'N/A';
-            const date = new Date(isoString);
-            return date.toLocaleString();
-        }
-
-        function renderSaveList(saves) {
-            if (saves.length === 0 && mode === 'load') {
-                saveList.innerHTML = '<div class="empty-message">No save files found</div>';
-                return;
+                return saves;
             }
 
-            saveList.innerHTML = '';
-            saves.forEach(save => {
-                const saveItem = document.createElement('div');
-                saveItem.className = 'save-item focusable';
-                saveItem.dataset.slotIndex = save.slotIndex;
-                
-                if (save.isEmpty) {
-                    saveItem.innerHTML = `
+            function formatDate(isoString) {
+                if (!isoString) return "N/A";
+                const date = new Date(isoString);
+                return date.toLocaleString();
+            }
+
+            function renderSaveList(saves) {
+                if (saves.length === 0 && mode === "load") {
+                    saveList.innerHTML = '<div class="empty-message">No save files found</div>';
+                    return;
+                }
+
+                saveList.innerHTML = "";
+                saves.forEach(save => {
+                    const saveItem = document.createElement("div");
+                    saveItem.className = "save-item focusable";
+                    saveItem.dataset.slotIndex = save.slotIndex;
+
+                    if (save.isEmpty) {
+                        saveItem.innerHTML = `
                         <h3>Slot ${save.slotIndex + 1} - Empty</h3>
                         <p>Click to save here</p>
                     `;
-                } else {
-                    saveItem.innerHTML = `
+                    } else {
+                        saveItem.innerHTML = `
                         <h3>Slot ${save.slotIndex + 1}</h3>
                         <p>Block: ${save.currentBlockIndex}, Instruction: ${save.currentInstructionIndex}</p>
                         <p>Date: ${formatDate(save.timestamp)}</p>
                     `;
-                }
+                    }
 
-                saveItem.addEventListener('click', () => selectSlot(save.slotIndex));
-                saveList.appendChild(saveItem);
-            });
-        }
-
-        function selectSlot(slotIndex) {
-            const items = document.querySelectorAll('.save-item');
-            items.forEach(item => {
-                if (item.dataset.slotIndex == slotIndex) {
-                    item.classList.add('selected');
-                    selectedSlot = slotIndex;
-                } else {
-                    item.classList.remove('selected');
-                }
-            });
-            actionBtn.disabled = false;
-        }
-
-        cancelBtn.addEventListener('click', () => {
-            console.log('Cancel clicked');
-            if (window.opener) {
-                window.opener.postMessage({ type: 'save-load-cancelled' }, '*');
+                    saveItem.addEventListener("click", () => selectSlot(save.slotIndex));
+                    saveList.appendChild(saveItem);
+                });
             }
-            window.close();
-        });
 
-        actionBtn.addEventListener('click', () => {
-            if (selectedSlot !== null) {
-                console.log(`${mode} clicked for slot:`, selectedSlot);
+            function selectSlot(slotIndex) {
+                const items = document.querySelectorAll(".save-item");
+                items.forEach(item => {
+                    if (item.dataset.slotIndex == slotIndex) {
+                        item.classList.add("selected");
+                        selectedSlot = slotIndex;
+                    } else {
+                        item.classList.remove("selected");
+                    }
+                });
+                actionBtn.disabled = false;
+            }
+
+            cancelBtn.addEventListener("click", () => {
+                console.log("Cancel clicked");
                 if (window.opener) {
-                    window.opener.postMessage({ 
-                        type: mode === 'save' ? 'save-game' : 'load-game',
-                        slotIndex: selectedSlot 
-                    }, '*');
+                    window.opener.postMessage({ type: "save-load-cancelled" }, "*");
                 }
                 window.close();
-            }
-        });
+            });
 
-        // Load and render saves
-        const saves = getAllSaves();
-        renderSaveList(saves);
+            actionBtn.addEventListener("click", () => {
+                if (selectedSlot !== null) {
+                    console.log(`${mode} clicked for slot:`, selectedSlot);
+                    if (window.opener) {
+                        window.opener.postMessage(
+                            {
+                                type: mode === "save" ? "save-game" : "load-game",
+                                slotIndex: selectedSlot,
+                            },
+                            "*",
+                        );
+                    }
+                    window.close();
+                }
+            });
 
-        setExitListener(() => {
-            window.close();
-        });
-    </script>
-</body>
+            // Load and render saves
+            const saves = getAllSaves();
+            renderSaveList(saves);
+
+            setExitListener(() => {
+                window.close();
+            });
+        </script>
+    </body>
 </html>

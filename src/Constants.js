@@ -14,7 +14,9 @@ export const AllowedCharacterNames = [
     "万里恵",
     "孝",
     "健治",
-    "繭"
+    "繭",
+    "ウェイトレス",
+    "学生Ａ",
 ];
 
 export const CharacterNameToVoiceKey = {

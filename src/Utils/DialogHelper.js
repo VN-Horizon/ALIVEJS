@@ -33,12 +33,13 @@ export function internalExtractDialogData(lineText)
     let mode = 'Display';
     let name = candidate;
     let closingQuoteIndex = lineText.lastIndexOf('」');
+    console.log(closingQuoteIndex);
     let content = closingQuoteIndex > quoteIndex 
         ? lineText.substring(quoteIndex + 1, closingQuoteIndex).trim()
         : lineText.substring(quoteIndex + 1).trim();
     if (candidate.length > 4 && candidate.startsWith("・・") && candidate.endsWith("・・")) {
         mode = 'Special';
-        name = candidate.substring(2, candidate.length - 3).trim();
+        name = candidate.substring(2, candidate.length - 2).trim();
     } else if (candidate.length > 2 && candidate.startsWith("・") && candidate.endsWith("・")) {
         mode = 'Hidden';
         name = candidate.substring(1, candidate.length - 1).trim();
