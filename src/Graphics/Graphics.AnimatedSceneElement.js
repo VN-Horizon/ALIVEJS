@@ -1,14 +1,14 @@
-import { SceneElement } from './Graphics.SceneElement.js';
+import { SceneElement } from "./Graphics.SceneElement";
 
 export class AnimatedSceneElement extends SceneElement {
     constructor(data, parent = null, scene = null) {
         super(data, parent, scene);
-        
+
         // Animation properties
         this.fps = data.fps || 12;
         this.loop = data.loop !== false;
         this.autoPlay = data.autoPlay !== false;
-        
+
         // Animation state
         this.currentFrame = 0;
         this.isPlaying = false;
@@ -16,7 +16,7 @@ export class AnimatedSceneElement extends SceneElement {
         this.elapsedTime = 0;
         this.onComplete = data.onComplete || null;
     }
-    
+
     initializeFrames() {
         // Hide all frames initially except the first one
         this.children.forEach((child, index) => {
@@ -25,35 +25,35 @@ export class AnimatedSceneElement extends SceneElement {
                 child.updateDOMStyle();
             }
         });
-        
+
         if (this.autoPlay && this.children.length > 0) {
             this.play();
         }
     }
-    
+
     play() {
         if (this.children.length === 0) return;
         this.isPlaying = true;
         this.elapsedTime = 0;
     }
-    
+
     stop() {
         this.isPlaying = false;
         this.setFrame(0);
     }
-    
+
     setFrame(frameIndex) {
         if (this.children.length === 0) return;
-        
+
         // Clamp frame index
         frameIndex = Math.max(0, Math.min(frameIndex, this.children.length - 1));
-        
+
         // Hide current frame
         if (this.children[this.currentFrame]) {
             this.children[this.currentFrame].visible = false;
             this.children[this.currentFrame].updateDOMStyle();
         }
-        
+
         // Show new frame
         this.currentFrame = frameIndex;
         if (this.children[this.currentFrame]) {
@@ -61,13 +61,13 @@ export class AnimatedSceneElement extends SceneElement {
             this.children[this.currentFrame].updateDOMStyle();
         }
     }
-    
+
     nextFrame() {
         if (this.children.length === 0) return;
-        
+
         const direction = this.fps >= 0 ? 1 : -1;
         let nextIndex = this.currentFrame + direction;
-        
+
         // Handle forward playback
         if (direction > 0) {
             if (nextIndex >= this.children.length) {
@@ -96,15 +96,15 @@ export class AnimatedSceneElement extends SceneElement {
                 }
             }
         }
-        
+
         this.setFrame(nextIndex);
     }
-    
+
     previousFrame() {
         if (this.children.length === 0) return;
-        
+
         let prevIndex = this.currentFrame - 1;
-        
+
         if (prevIndex < 0) {
             if (this.loop) {
                 prevIndex = this.children.length - 1;
@@ -112,33 +112,33 @@ export class AnimatedSceneElement extends SceneElement {
                 prevIndex = 0;
             }
         }
-        
+
         this.setFrame(prevIndex);
     }
-    
+
     update(deltaTime) {
         super.update(deltaTime);
-        
+
         if (!this.isPlaying || this.children.length === 0) return;
-        
+
         this.elapsedTime += deltaTime;
-        
+
         // Calculate frame time based on absolute fps value
         const absFrameTime = 1 / Math.abs(this.fps);
-        
+
         // Check if it's time to advance to the next frame
         if (this.elapsedTime >= absFrameTime) {
             // Calculate how many frames to advance (in case of lag)
             const framesToAdvance = Math.floor(this.elapsedTime / absFrameTime);
             this.elapsedTime %= absFrameTime;
-            
+
             for (let i = 0; i < framesToAdvance; i++) {
                 this.nextFrame();
                 if (!this.isPlaying) break; // Stop if animation ended
             }
         }
     }
-    
+
     show(fromParent = false) {
         if (fromParent) {
             this.visible = this.originallyVisible;
@@ -146,7 +146,7 @@ export class AnimatedSceneElement extends SceneElement {
             this.visible = true;
         }
         this.updateDOMStyle();
-        
+
         // Only show the current frame, keep others hidden
         this.children.forEach((child, index) => {
             if (index === this.currentFrame) {
@@ -157,7 +157,7 @@ export class AnimatedSceneElement extends SceneElement {
             }
         });
     }
-    
+
     hide(fromParent = false) {
         if (fromParent) {
             this.originallyVisible = this.visible;

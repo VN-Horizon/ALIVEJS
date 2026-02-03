@@ -1,7 +1,71 @@
-import $ from 'jquery';
+import type { IScene } from "@/Scene/Scene";
+import $ from "jquery";
+
+export interface ISceneElement {
+    scene: IScene | null;
+    sceneData?: SceneElementData;
+    domElement?: HTMLElement | JQuery.PlainObject | null;
+    children?: ISceneElement[];
+    update?(deltaTime: number): void;
+    syncDom?(): void;
+    destroy?(): void;
+    hide?(immediate?: boolean): void;
+    show?(immediate?: boolean): void;
+    updateFocusability?(): void;
+}
+
+export interface Transform {
+    x: number;
+    y: number;
+    z: number;
+    width: number;
+    height: number;
+    rotation: number;
+}
+
+export interface SceneElementData {
+    animated?: boolean;
+    name?: string;
+    transform?: Partial<Transform>;
+    left?: number;
+    top?: number;
+    zIndex?: number;
+    width?: number;
+    height?: number;
+    rotation?: number;
+    anchor?: AnchorType;
+    path?: string;
+    visible?: boolean;
+    opacity?: number;
+    blendMode?: string;
+    children?: SceneElementData[];
+}
+
+export type AnchorType = "top-left" | "top-right" | "bottom-left" | "bottom-right";
 
 export class SceneElement {
-    constructor(data, parent = null, scene = null) {
+    // Core transform grouped
+    transform: Transform = {
+        x: 0,
+        y: 0,
+        z: 0,
+        width: 1,
+        height: 1,
+        rotation: 0,
+    };
+
+    anchor: AnchorType = "top-left"; // 'top-left', 'top-right', 'bottom-left', 'bottom-right'
+    sceneData: SceneElementData = {};
+    scene: IScene | null = null; // reference to owning Scene to access baseZOffset
+    domElement: HTMLElement | JQuery.PlainObject | null = null;
+    visible: boolean = true;
+    originallyVisible: boolean = true; // Store original visibility state
+    opacity: number = 1;
+    blendMode: string = "normal";
+    parent: SceneElement | null = null;
+    children: SceneElement[] = [];
+
+    constructor(data: SceneElementData, parent: SceneElement | null = null, scene: IScene | null = null) {
         // Core transform grouped
         this.transform = {
             x: data.transform?.x || data.left || 0,
@@ -9,19 +73,18 @@ export class SceneElement {
             z: data.transform?.z || data.zIndex || 0,
             width: data.transform?.width || data.width || 1,
             height: data.transform?.height || data.height || 1,
-            rotation: data.transform?.rotation || data.rotation || 0
+            rotation: data.transform?.rotation || data.rotation || 0,
         };
 
-        this.anchor = data.anchor || 'top-left'; // 'top-left', 'top-right', 'bottom-left', 'bottom-right'
+        this.anchor = data.anchor || "top-left"; // 'top-left', 'top-right', 'bottom-left', 'bottom-right'
         this.sceneData = data;
         this.scene = scene; // reference to owning Scene to access baseZOffset
         this.domElement = null;
         this.visible = data.visible !== false;
         this.originallyVisible = this.visible; // Store original visibility state
         this.opacity = data.opacity ?? 1;
-        this.blendMode = data.blendMode || 'normal';
+        this.blendMode = data.blendMode || "normal";
         this.parent = parent;
-        this.children = [];
 
         this.createDOMElement();
         if (data.path) this.loadImage(data.path);
@@ -30,12 +93,42 @@ export class SceneElement {
     }
 
     // Backward-compatible property accessors
-    get x() { return this.transform.x; } set x(v) { this.transform.x = v; }
-    get y() { return this.transform.y; } set y(v) { this.transform.y = v; }
-    get zIndex() { return this.transform.z; } set zIndex(v) { this.transform.z = v; }
-    get width() { return this.transform.width; } set width(v) { this.transform.width = v; }
-    get height() { return this.transform.height; } set height(v) { this.transform.height = v; }
-    get rotation() { return this.transform.rotation; } set rotation(v) { this.transform.rotation = v; }
+    get x() {
+        return this.transform.x;
+    }
+    set x(v) {
+        this.transform.x = v;
+    }
+    get y() {
+        return this.transform.y;
+    }
+    set y(v) {
+        this.transform.y = v;
+    }
+    get zIndex() {
+        return this.transform.z;
+    }
+    set zIndex(v) {
+        this.transform.z = v;
+    }
+    get width() {
+        return this.transform.width;
+    }
+    set width(v) {
+        this.transform.width = v;
+    }
+    get height() {
+        return this.transform.height;
+    }
+    set height(v) {
+        this.transform.height = v;
+    }
+    get rotation() {
+        return this.transform.rotation;
+    }
+    set rotation(v) {
+        this.transform.rotation = v;
+    }
 
     // Build base style object
     buildBaseStyle(extra = {}) {
@@ -46,19 +139,27 @@ export class SceneElement {
         let translateY = y;
         // Support for anchor positioning
         switch (this.anchor) {
-            case 'top-right': translateX = x - this.width; break;
-            case 'bottom-left': translateY = y - this.height; break;
-            case 'bottom-right': translateX = x - this.width; translateY = y - this.height; break;
-            default: break;
+            case "top-right":
+                translateX = x - this.width;
+                break;
+            case "bottom-left":
+                translateY = y - this.height;
+                break;
+            case "bottom-right":
+                translateX = x - this.width;
+                translateY = y - this.height;
+                break;
+            default:
+                break;
         }
         return {
             width: `${this.width}px`,
             height: `${this.height}px`,
-            display: this.visible ? 'block' : 'none',
+            display: this.visible ? "block" : "none",
             opacity: this.opacity,
-            'mix-blend-mode': this.blendMode,
-            transform: `translate(${translateX}px, ${translateY}px) rotate(${this.transform.rotation}rad)` ,
-            'z-index': zBase + this.transform.z,
+            "mix-blend-mode": this.blendMode,
+            transform: `translate(${translateX}px, ${translateY}px) rotate(${this.transform.rotation}rad)`,
+            "z-index": zBase + this.transform.z,
             ...extra,
         };
     }
@@ -68,31 +169,31 @@ export class SceneElement {
      */
     createDOMElement() {
         const hasChildren = this.sceneData.children && this.sceneData.children.length > 0;
-        const elementType = hasChildren ? 'div' : 'img';
+        const elementType = hasChildren ? "div" : "img";
         this.domElement = $(`<${elementType}>`)
-            .attr('layer-name', this.sceneData.name || '')
+            .attr("layer-name", this.sceneData.name || "")
             .css(this.buildBaseStyle())[0];
-        if (hasChildren) $(this.domElement).css('overflow', 'visible');
-        else $(this.domElement).attr('alt', this.sceneData.name || 'Scene Element');
+        if (hasChildren) $(this.domElement).css("overflow", "visible");
+        else $(this.domElement).attr("alt", this.sceneData.name || "Scene Element");
         this.syncDom();
     }
 
-    async loadImage(path) {
-        if (this.domElement.tagName === 'DIV') {
+    async loadImage(path: string) {
+        if (this.domElement?.tagName === "DIV") {
             return;
         }
-        const fullImagePath = `/assets/scenes/${this.scene.name}/${path}.webp`;
-        $(this.domElement).attr('src', fullImagePath);
+        const fullImagePath = `/assets/scenes/${this.scene?.name}/${path}.webp`;
+        $(this.domElement).attr("src", fullImagePath);
         this.syncDom();
     }
 
-    addChild(child) {
+    addChild(child: SceneElement) {
         this.children.push(child);
         child.parent = this;
         this.syncDom();
     }
 
-    removeChild(child) {
+    removeChild(child: SceneElement) {
         const index = this.children.indexOf(child);
         if (index > -1) {
             this.children.splice(index, 1);
@@ -101,7 +202,7 @@ export class SceneElement {
         this.syncDom();
     }
 
-    findChildByName(name) {
+    findChildByName(name: string): SceneElement | null {
         return this.children.find(child => child.sceneData.name === name) || null;
     }
 
@@ -110,7 +211,7 @@ export class SceneElement {
         $(this.domElement).css(this.buildBaseStyle());
     }
 
-    update(deltaTime) {
+    update(deltaTime: number) {
         this.children.forEach(child => {
             child.update(deltaTime);
         });
@@ -118,10 +219,10 @@ export class SceneElement {
 
     syncDom() {
         if (!this.domElement) return;
-        
+
         const engine = window.getEngine();
         const $element = $(this.domElement);
-        
+
         if (this.parent) {
             if (this.domElement.parentNode !== this.parent.domElement) {
                 $(this.parent.domElement).append($element);
@@ -144,7 +245,7 @@ export class SceneElement {
     }
 
     hide(fromParent = false) {
-        if(fromParent){
+        if (fromParent) {
             // Store original visibility state when hiding from parent
             this.originallyVisible = this.visible;
         }
@@ -154,7 +255,7 @@ export class SceneElement {
     }
 
     show(fromParent = false) {
-        if(fromParent){
+        if (fromParent) {
             // Restore original visibility state when showing from parent
             this.visible = this.originallyVisible;
         } else {
@@ -165,26 +266,26 @@ export class SceneElement {
     }
 }
 
-export function preserveLayerIndex(oldElement, newElement) {
+export function preserveLayerIndex(oldElement: SceneElement, newElement: SceneElement) {
     const parent = oldElement.parent;
     let childIndex = -1;
     if (parent) {
         childIndex = parent.children.indexOf(oldElement);
     }
     oldElement.destroy();
-    
+
     if (parent && childIndex >= 0) {
         // Remove new element from end
         const newIndex = parent.children.indexOf(newElement);
-        
+
         // Insert at original position
         if (newIndex > -1) parent.children.splice(newIndex, 1);
         parent.children.splice(childIndex, 0, newElement);
-        
+
         // Reorder DOM elements to match children array order
-        parent.children.forEach((child) => {
+        parent.children.forEach(child => {
             if (child.domElement && child.domElement.parentNode === parent.domElement) {
-                $(parent.domElement).append(child.domElement);
+                $(parent.domElement).append(child.domElement as HTMLElement);
             }
         });
     }

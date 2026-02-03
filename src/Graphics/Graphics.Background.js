@@ -1,5 +1,5 @@
 import $ from "jquery";
-import { SceneElement, preserveLayerIndex } from "./Graphics.SceneElement.js";
+import { SceneElement, preserveLayerIndex } from "./Graphics.SceneElement";
 
 export class Background extends SceneElement {
     constructor(data, parent = null, scene = null) {

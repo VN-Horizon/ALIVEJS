@@ -1,4 +1,12 @@
+import type { ISceneElement } from "@/Graphics/Graphics.SceneElement";
+import type { IScene } from "@/Scene/Scene";
 import $ from "jquery";
+
+export interface GameEngineCallbacks {
+    init: (() => void) | null;
+    update: ((deltaTime: number) => void) | null;
+    updatePost: ((deltaTime: number) => void) | null;
+}
 
 export interface IGameEngine {
     start(): void;
@@ -12,6 +20,16 @@ export interface IGameEngine {
     clearAllScenes(): void;
     isMountedScene(name: string): boolean;
     getContainer(): HTMLElement;
+    containerId: string;
+    container: HTMLElement;
+    running: boolean;
+    deltaTime: number;
+    lastFrameTime: number;
+    fps: number;
+    frameTime: number;
+    callbacks: GameEngineCallbacks;
+    scenes: any[];
+    scenePaths: string[];
 }
 
 export class GameEngine implements IGameEngine {
@@ -22,11 +40,7 @@ export class GameEngine implements IGameEngine {
     lastFrameTime: number = 0;
     fps: number = 24;
     frameTime: number = 1000 / this.fps;
-    callbacks: {
-        init: (() => void) | null;
-        update: ((deltaTime: number) => void) | null;
-        updatePost: ((deltaTime: number) => void) | null;
-    } = {
+    callbacks: GameEngineCallbacks = {
         init: null,
         update: null,
         updatePost: null,
@@ -96,7 +110,7 @@ export class GameEngine implements IGameEngine {
 
     getAllObjects() {
         // Collect all objects from all scenes
-        const allObjects = [];
+        const allObjects: ISceneElement[] = [];
         this.scenes.forEach(scene => {
             allObjects.push(...scene.getAllObjects());
         });
@@ -104,7 +118,7 @@ export class GameEngine implements IGameEngine {
     }
 
     // Scene management methods
-    pushScene(scene) {
+    pushScene(scene: IScene) {
         // Disable focusability on all existing scenes
         this.scenes.forEach(s => s.setFocusable(false));
 
@@ -116,7 +130,7 @@ export class GameEngine implements IGameEngine {
         scene.setFocusable(true);
     }
 
-    popScene() {
+    popScene(): IScene | null {
         if (this.scenes.length === 0) return null;
 
         // Remove and destroy the top scene
@@ -136,7 +150,7 @@ export class GameEngine implements IGameEngine {
         return this.scenes.length > 0 ? this.scenes[this.scenes.length - 1] : null;
     }
 
-    getSceneByName(name) {
+    getSceneByName(name: string): IScene | null {
         return this.scenes.find(s => s.name === name) || null;
     }
 
@@ -144,7 +158,7 @@ export class GameEngine implements IGameEngine {
         while (this.scenes.length > 0) this.popScene();
     }
 
-    isMountedScene(name) {
+    isMountedScene(name: string): boolean {
         return this.scenePaths.includes(name);
     }
 

@@ -1,5 +1,5 @@
 import $ from "jquery";
-import { SceneElement } from "./Graphics.SceneElement.js";
+import { SceneElement } from "./Graphics.SceneElement";
 
 export class TMP_Text extends SceneElement {
     constructor(data, parent = null, scene = null) {

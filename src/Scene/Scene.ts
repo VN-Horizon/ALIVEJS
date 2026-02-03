@@ -1,21 +1,50 @@
+import type { GameEngine } from "@/Core/NotUnityEngine";
+import { FocusableElement } from "@/Graphics/Graphics.FocusableElement.js";
+import type { ISceneElement } from "@/Graphics/Graphics.SceneElement";
 import $ from "jquery";
 
+export interface IScene {
+    name: string;
+    engine: any;
+    baseZOffset: number;
+    sceneObjects: ISceneElement[];
+    isFocusable: boolean;
+    lastFocusedElement: HTMLElement | null;
+    onDestroyCallbacks: Array<() => void>;
+    onBeforeFocusCallbacks: Array<() => void>;
+    onBeforeUnfocusCallbacks: Array<() => void>;
+    onAfterFocusCallbacks: Array<() => void>;
+    addObject(obj: ISceneElement): ISceneElement | undefined;
+    removeObject(obj: ISceneElement): void;
+    getObjectByName(name: string): ISceneElement | null;
+    getAllObjects(): ISceneElement[];
+    setFocusable(focusable: boolean): void;
+    destroy(): void;
+    update(deltaTime: number): void;
+    hide(): void;
+    show(): void;
+}
+
 export class Scene {
-    constructor(name, engine, baseZOffset = 0) {
+    name: string;
+    engine: GameEngine;
+    baseZOffset: number = 0;
+    sceneObjects: ISceneElement[] = [];
+    isFocusable = false;
+    lastFocusedElement: HTMLElement | null = null;
+    onDestroyCallbacks: Array<() => void> = [];
+    onBeforeFocusCallbacks: Array<() => void> = [];
+    onBeforeUnfocusCallbacks: Array<() => void> = [];
+    onAfterFocusCallbacks: Array<() => void> = [];
+    onAfterUnfocusCallbacks: Array<() => void> = [];
+
+    constructor(name: string, engine: GameEngine, baseZOffset: number = 0) {
         this.name = name;
         this.engine = engine;
         this.baseZOffset = baseZOffset;
-        this.sceneObjects = [];
-        this.isFocusable = false;
-        this.lastFocusedElement = null;
-        this.onDestroyCallbacks = [];
-        this.onBeforeFocusCallbacks = [];
-        this.onBeforeUnfocusCallbacks = [];
-        this.onAfterFocusCallbacks = [];
-        this.onAfterUnfocusCallbacks = [];
     }
 
-    addObject(obj) {
+    addObject(obj: ISceneElement) {
         if (!this.sceneObjects.includes(obj)) {
             this.sceneObjects.push(obj);
             obj.scene = this;
@@ -25,7 +54,7 @@ export class Scene {
         }
     }
 
-    removeObject(obj) {
+    removeObject(obj: ISceneElement) {
         const index = this.sceneObjects.indexOf(obj);
         if (index > -1) {
             this.sceneObjects.splice(index, 1);
@@ -34,7 +63,7 @@ export class Scene {
         }
     }
 
-    getObjectByName(name) {
+    getObjectByName(name: string) {
         // Search recursively through objects and their children
         for (const obj of this.sceneObjects) {
             if (obj.sceneData && obj.sceneData.name === name) {
@@ -47,7 +76,7 @@ export class Scene {
         return null;
     }
 
-    findInChildren(obj, name) {
+    findInChildren(obj: ISceneElement, name: string): ISceneElement | null {
         if (!obj.children || obj.children.length === 0) return null;
 
         for (const child of obj.children) {
@@ -60,11 +89,11 @@ export class Scene {
         return null;
     }
 
-    getAllObjects() {
+    getAllObjects(): ISceneElement[] {
         return this.sceneObjects;
     }
 
-    setFocusable(focusable) {
+    setFocusable(focusable: boolean) {
         this.isFocusable = focusable;
         if (focusable) this.onBeforeFocusCallbacks.forEach(cb => cb());
         else this.onBeforeUnfocusCallbacks.forEach(cb => cb());
@@ -96,7 +125,7 @@ export class Scene {
         this.sceneObjects = [];
     }
 
-    update(deltaTime) {
+    update(deltaTime: number) {
         this.sceneObjects.forEach(obj => obj.update?.(deltaTime));
     }
 
