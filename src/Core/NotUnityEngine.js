@@ -1,3 +1,5 @@
+import $ from 'jquery';
+
 export class GameEngine {
     constructor(containerId = 'gameContainer') {
         this.container = $(`#${containerId}`)[0] || this.createContainer();

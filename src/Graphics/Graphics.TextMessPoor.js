@@ -1,22 +1,23 @@
-import { SceneElement } from './Graphics.SceneElement.js';
+import $ from "jquery";
+import { SceneElement } from "./Graphics.SceneElement.js";
 
 export class TMP_Text extends SceneElement {
     constructor(data, parent = null, scene = null) {
         super(data, parent, scene);
 
-        this.text = data.text || '';
+        this.text = data.text || "";
         this.fontSize = data.fontSize || 16;
-        this.fontFamily = data.fontFamily || '';
-        this.fontWeight = data.fontWeight || 'normal';
-        this.color = data.color || '#000000';
-        
+        this.fontFamily = data.fontFamily || "";
+        this.fontWeight = data.fontWeight || "normal";
+        this.color = data.color || "#000000";
+
         this.setText(this.text);
         this.updateTextStyle();
     }
 
     createDOMElement() {
-        this.domElement = $('<span>')
-            .attr('layer-name', this.sceneData.name || '')
+        this.domElement = $("<span>")
+            .attr("layer-name", this.sceneData.name || "")
             .text(this.text)
             .css(this.buildBaseStyle())[0];
         super.syncDom();
@@ -24,14 +25,14 @@ export class TMP_Text extends SceneElement {
 
     buildBaseStyle(extra = {}) {
         const baseStyle = super.buildBaseStyle({
-            'font-size': `${this.fontSize}px`,
-            'color': this.color,
-            'display': this.visible ? 'inline-block' : 'none',
-            'font-family': this.fontFamily,
-            'font-weight': this.fontWeight,
-            ...extra
+            "font-size": `${this.fontSize}px`,
+            color: this.color,
+            display: this.visible ? "inline-block" : "none",
+            "font-family": this.fontFamily,
+            "font-weight": this.fontWeight,
+            ...extra,
         });
-        
+
         return baseStyle;
     }
 
@@ -62,20 +63,20 @@ export class TMP_Text extends SceneElement {
 export class TMP_TypeWriter extends TMP_Text {
     constructor(data, parent = null, scene = null) {
         super(data, parent, scene);
-        
+
         this.fullText = this.text;
         this.currentCharIndex = 0;
         this.isAnimating = false;
         this.charsPerSecond = data.charsPerSecond || 30;
         this.timeAccumulator = 0;
-        
+
         this.cancelAnimation();
         this.setText(this.text);
     }
 
     update(deltaTime) {
         super.update(deltaTime);
-        
+
         if (!this.isAnimating || this.currentCharIndex >= this.fullText.length) {
             if (this.isAnimating) {
                 this.isAnimating = false;
@@ -108,7 +109,7 @@ export class TMP_TypeWriter extends TMP_Text {
     }
 
     animateText(newText) {
-        if(this.fullText == newText && this.isAnimating) {
+        if (this.fullText == newText && this.isAnimating) {
             this.cancelAnimation();
             return;
         }
@@ -116,6 +117,6 @@ export class TMP_TypeWriter extends TMP_Text {
         this.isAnimating = true;
         this.currentCharIndex = 0;
         this.timeAccumulator = 0;
-        this.setText('');
+        this.setText("");
     }
 }

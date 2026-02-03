@@ -1,8 +1,10 @@
+import $ from 'jquery';
+
 import { GameEngine } from './Core/NotUnityEngine.js';
 import { loadEvents } from './Core/Events.js';
 import { loadStartScene } from './Scripts/START.js';
-import './InputSystem/InputSystem.Keyboard.js';
-import './InputSystem/InputSystem.Gamepad.js';
+import './InputSystem/InputSystem.Keyboard.ts';
+import './InputSystem/InputSystem.Gamepad.ts';
 
 import './Audio/Audio.🔓.js';
 import { initBGM } from './Audio/Audio.Bgm.js';
@@ -12,9 +14,19 @@ import { initSE } from './Audio/Audio.Se.js';
 import { initEnginePane } from './Debug/EnginePane.js';
 import { initSceneGraphPane } from './Debug/SceneGraphPane.js';
 
+// Define types for existing classes if needed, or use any for now
+declare global {
+    interface Window {
+        getEngine: () => GameEngine;
+        exit: () => void;
+        skipping: boolean;
+        isSelecting: boolean;
+    }
+}
+
 let notUnityEngine = new GameEngine('gameContainer');
 initEnginePane(notUnityEngine);
-initSceneGraphPane(notUnityEngine);
+initSceneGraphPane();
 notUnityEngine.start();
 
 window.getEngine = () => notUnityEngine;
@@ -27,7 +39,7 @@ async function main() {
         initSE();
         await loadStartScene();
         $('#black-overlay').fadeOut(600);
-    } catch (error) {
+    } catch (error: any) {
         alert(`Failed to initialize:\n${error.message}`);
         console.error(error);
     }
@@ -36,7 +48,7 @@ async function main() {
 window.exit = () => {
     $('#black-overlay').fadeIn(600, () => {
         window.close();
-        $(gameContainer).remove();
+        $('#gameContainer').remove();
     });
 };
 

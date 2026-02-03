@@ -1,4 +1,5 @@
 import { SceneElement } from './Graphics.SceneElement.js';
+import $ from 'jquery'
 
 export class FocusableElement extends SceneElement {
     constructor(data, parent = null, scene) {

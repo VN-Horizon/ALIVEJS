@@ -1,3 +1,5 @@
+import $ from "jquery";
+
 export class Scene {
     constructor(name, engine, baseZOffset = 0) {
         this.name = name;
@@ -47,7 +49,7 @@ export class Scene {
 
     findInChildren(obj, name) {
         if (!obj.children || obj.children.length === 0) return null;
-        
+
         for (const child of obj.children) {
             if (child.sceneData && child.sceneData.name === name) {
                 return child;
@@ -68,16 +70,19 @@ export class Scene {
         else this.onBeforeUnfocusCallbacks.forEach(cb => cb());
 
         this.sceneObjects.forEach(obj => {
-            if (typeof FocusableElement !== 'undefined' && typeof FocusableElement.updateFocusabilityRecursive === 'function') {
+            if (
+                typeof FocusableElement !== "undefined" &&
+                typeof FocusableElement.updateFocusabilityRecursive === "function"
+            ) {
                 FocusableElement.updateFocusabilityRecursive(obj);
-            } else if (typeof obj.updateFocusability === 'function') {
+            } else if (typeof obj.updateFocusability === "function") {
                 obj.updateFocusability();
             }
         });
 
         if (!this.lastFocusedElement) return;
         const $last = $(this.lastFocusedElement);
-        if ($last.length && $last.is(':visible')) {
+        if ($last.length && $last.is(":visible")) {
             $last.focus();
         }
 

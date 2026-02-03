@@ -1,14 +1,18 @@
+import $ from 'jquery'
 
 // Handle keyboard navigation
-const CONFIRM_KEYS = [13, 74, 90]; // Enter(Keyboard), J(Keyboard Joysdick), Z(Touhou)
-const CANCEL_KEYS = [27, 75, 88]; // Esc(Keyboard), K(Keyboard Joystick), X(Touhou)
-const NAVIGATION_KEYS = {
-    40: 'next', 39: 'next', 38: 'prev', 37: 'prev', // arrow keys
-    83: 'next', 87: 'prev', 65: 'prev', 68: 'next'  // WASD keys
+const CONFIRM_KEYS = ['Enter', 'KeyJ', 'KeyZ']; // Enter(Keyboard), J(Keyboard Joysdick), Z(Touhou)
+const CANCEL_KEYS = ['Escape', 'KeyK', 'KeyX']; // Esc(Keyboard), K(Keyboard Joystick), X(Touhou)
+const NAVIGATION_KEYS: Record<string, 'next' | 'prev'> = {
+    'ArrowDown': 'next', 'ArrowRight': 'next', 'ArrowUp': 'prev', 'ArrowLeft': 'prev', // arrow keys
+    'KeyS': 'next', 'KeyD': 'next', 'KeyW': 'prev', 'KeyA': 'prev' // WASD keys
 };
 
-let confirmListener = null;
-let exitListener = null;
+export type ConfirmListener = (e: JQuery.KeyUpEvent | null, focused: JQuery<HTMLElement>) => void;
+export type ExitListener = (e: JQuery.KeyDownEvent | JQuery.ContextMenuEvent | null) => void | Promise<void>;
+
+export let confirmListener: ConfirmListener | null = null;
+export let exitListener: ExitListener | null = null;
 // Single-flight guard state for exit listener to prevent duplicate scene pushes
 let exitListenerInFlight = false;
 let exitListenerOptions = { singleFlight: false };
@@ -17,8 +21,8 @@ let overrideRightKeys = false;
 // Skipping state
 window.skipping = false;
 
-export function setConfirmListener(fn) { confirmListener = fn; }
-export function setExitListener(fn, options = {}) {
+export function setConfirmListener(fn: ConfirmListener) { confirmListener = fn; }
+export function setExitListener(fn: ExitListener, options = {}) {
     exitListenerOptions = { singleFlight: true, ...options };
     // Wrap the original listener if singleFlight enabled
     if (!fn) { exitListener = null; return; }
@@ -42,7 +46,7 @@ export function setExitListener(fn, options = {}) {
 }
 export function clearKeyboardListeners() { confirmListener = null; exitListener = null; exitListenerInFlight = false; }
 
-export function setOverrideRightKeys(override) {
+export function setOverrideRightKeys(override: boolean) {
     overrideRightKeys = override;
     // remove all right-click listeners if overriding
     $(document).off('contextmenu');
@@ -55,7 +59,7 @@ export function setOverrideRightKeys(override) {
 
 $(document).on('keydown', function(e) {
     // Handle Ctrl key for skipping
-    if (e.keyCode === 17 && !window.skipping && !window.isSelecting) { // Ctrl key
+    if (e.key === 'Control' && !window.skipping && !window.isSelecting) { // Ctrl key
         window.skipping = true;
         // Trigger the first line advance immediately
         setTimeout(() => {
@@ -66,24 +70,28 @@ $(document).on('keydown', function(e) {
     }
     
     const $focused = $('.focusable:focus');
-    const op = NAVIGATION_KEYS[e.keyCode];
-    if(!$focused.length && (Object.keys(NAVIGATION_KEYS).includes(e.keyCode.toString()))) {
-        $('.focusable')[{'prev': 'last', 'next': 'first'}[op]]().focus(); return;
+    const op = NAVIGATION_KEYS[e.code];
+    // Use explicit check for key existing in NAVIGATION_KEYS
+    if(!$focused.length && (e.code in NAVIGATION_KEYS)) {
+        const $focusable = $('.focusable');
+        const $target = op === 'prev' ? $focusable.last() : $focusable.first();
+        $target.trigger("focus");
+        return;
     }
-    if(CONFIRM_KEYS.includes(e.keyCode)) {
+    if(CONFIRM_KEYS.includes(e.code)) {
         $focused.addClass('active'); e.preventDefault(); return;
     }
-    if(CANCEL_KEYS.includes(e.keyCode) && exitListener) {
+    if(CANCEL_KEYS.includes(e.code) && exitListener) {
         exitListener(e); e.preventDefault(); return;
     }
     if(!op) return;
     let $current = $focused;
     $current.removeClass('active');
     while (true) {
-        const $target = $current[op]('.focusable');
+        const $target = op === 'next' ? $current.next('.focusable') : $current.prev('.focusable');
         if(!$target.length) break;
         if($target.is(':visible')) {
-            $target.focus();
+            $target.trigger("focus");
             break;
         }
         $current = $target;
@@ -91,7 +99,7 @@ $(document).on('keydown', function(e) {
 });
 $(document).on('keyup', function(e) {
     // Handle Ctrl key release to stop skipping
-    if (e.keyCode === 17 && window.skipping) { // Ctrl key
+    if (e.key === 'Control' && window.skipping) { // Ctrl key
         window.skipping = false;
         // Notify systems that skip mode has ended so they can resume behaviors
         try {
@@ -99,14 +107,14 @@ $(document).on('keyup', function(e) {
         } catch {}
     }
     
-    if(CONFIRM_KEYS.includes(e.keyCode)) {
+    if(CONFIRM_KEYS.includes(e.code)) {
         const $focused = $('.focusable:focus');
         if($focused.length) {
             $focused.removeClass('active');
             if(confirmListener) {
                 confirmListener(e, $focused);
             } else {
-                $focused.click();
+                $focused.trigger("click");
             }
         }
     }

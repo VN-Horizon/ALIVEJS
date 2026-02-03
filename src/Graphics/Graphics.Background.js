@@ -1,25 +1,26 @@
-import { SceneElement, preserveLayerIndex } from './Graphics.SceneElement.js';
+import $ from "jquery";
+import { SceneElement, preserveLayerIndex } from "./Graphics.SceneElement.js";
 
 export class Background extends SceneElement {
     constructor(data, parent = null, scene = null) {
         data.isBackground = true;
 
         super(data, parent, scene);
-        
+
         this.backgroundId = `bg-${Math.random().toString(36).substr(2, 9)}`;
         this.backgroundImageUrl = null;
-        this.backgroundSize = data.backgroundSize || 'auto';
-        this.backgroundPosition = data.backgroundPosition || 'center';
-        this.backgroundRepeat = data.backgroundRepeat || 'no-repeat';
+        this.backgroundSize = data.backgroundSize || "auto";
+        this.backgroundPosition = data.backgroundPosition || "center";
+        this.backgroundRepeat = data.backgroundRepeat || "no-repeat";
         this.transition = data.transition || null;
-        
+
         // Infinite scroll properties
         this.scrollSpeed = {
             x: data.scrollSpeedX || 0,
-            y: data.scrollSpeedY || 0
+            y: data.scrollSpeedY || 0,
         };
         this.scrollOffset = { x: 0, y: 0 };
-        
+
         this.recreateDOMAsBackground();
     }
 
@@ -27,19 +28,20 @@ export class Background extends SceneElement {
         if (this.domElement) {
             $(this.domElement).remove();
         }
-        
-        this.domElement = $('<div>')
-            .attr('id', this.backgroundId)
-            .attr('layer-name', this.sceneData.name || 'Background')
-            .css(this.buildBaseStyle({
-                'background-size': this.backgroundSize,
-                'background-repeat': this.backgroundRepeat,
-                'background-position': this.backgroundPosition,
-                'transition': this.transition || 'none',
-            }))
-            [0];
-        
-            super.syncDom();
+
+        this.domElement = $("<div>")
+            .attr("id", this.backgroundId)
+            .attr("layer-name", this.sceneData.name || "Background")
+            .css(
+                this.buildBaseStyle({
+                    "background-size": this.backgroundSize,
+                    "background-repeat": this.backgroundRepeat,
+                    "background-position": this.backgroundPosition,
+                    transition: this.transition || "none",
+                }),
+            )[0];
+
+        super.syncDom();
     }
 
     async loadImage(path) {
@@ -50,14 +52,14 @@ export class Background extends SceneElement {
     updateBackgroundImage(backgroundImageUrl = null) {
         if (!this.domElement) return;
         this.backgroundImageUrl = backgroundImageUrl;
-        if(!backgroundImageUrl) this.backgroundImageUrl = '';
-        $(this.domElement).css('background-image', `url('${this.backgroundImageUrl}')`);
+        if (!backgroundImageUrl) this.backgroundImageUrl = "";
+        $(this.domElement).css("background-image", `url('${this.backgroundImageUrl}')`);
         this.updateScrollPosition();
     }
 
     updateScrollPosition() {
-        if (!this.domElement || (this.scrollSpeed?.x || 0) == 0 && (this.scrollSpeed?.y || 0) == 0) return;
-        $(this.domElement).css('background-position', `${this.scrollOffset?.x || 0}px ${this.scrollOffset?.y || 0}px`);
+        if (!this.domElement || ((this.scrollSpeed?.x || 0) == 0 && (this.scrollSpeed?.y || 0) == 0)) return;
+        $(this.domElement).css("background-position", `${this.scrollOffset?.x || 0}px ${this.scrollOffset?.y || 0}px`);
     }
 
     resetScrollOffset() {
@@ -69,7 +71,7 @@ export class Background extends SceneElement {
     update(deltaTime) {
         // Handle scroll offset
         if ((this.scrollSpeed?.x || 0) !== 0 || (this.scrollSpeed?.y || 0) !== 0) {
-            if(isNaN(this.scrollOffset.x) || isNaN(this.scrollOffset.y)) {
+            if (isNaN(this.scrollOffset.x) || isNaN(this.scrollOffset.y)) {
                 this.scrollOffset.x = 0;
                 this.scrollOffset.y = 0;
             }
@@ -83,16 +85,16 @@ export class Background extends SceneElement {
 
 export function toBackground(element, options = {}) {
     const {
-        backgroundSize = 'cover',
-        backgroundPosition = 'center',
-        backgroundRepeat = 'repeat',
+        backgroundSize = "cover",
+        backgroundPosition = "center",
+        backgroundRepeat = "repeat",
         scrollSpeedX = 0,
         scrollSpeedY = 0,
         transition = null,
     } = options;
 
     if (!element || !element.sceneData) {
-        console.error('Element must be a valid SceneElement to elevate to Background');
+        console.error("Element must be a valid SceneElement to elevate to Background");
         return null;
     }
 

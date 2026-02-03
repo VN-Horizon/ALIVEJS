@@ -1,7 +1,10 @@
+import $ from 'jquery';
+import { confirmListener, exitListener } from './InputSystem.Keyboard';
+
 // Gamepad support
-let gamepadState = {
-    buttons: [],
-    axes: [],
+const gamepadState = {
+    buttons: [] as boolean[],
+    axes: [] as number[],
     lastUpdate: 0
 };
 const GAMEPAD_DEADZONE = 0.3;
@@ -35,7 +38,7 @@ function pollGamepad() {
             if (confirmListener) {
                 confirmListener(null, $current);
             } else {
-                $current.click();
+                $current.trigger("click");
             }
         }
     }
@@ -49,7 +52,7 @@ function pollGamepad() {
     }
     
     // D-pad and analog stick navigation
-    let navigationDirection = null;
+    let navigationDirection: 'prev' | 'next' | null = null;
     if (gamepad.buttons[12]?.pressed) navigationDirection = 'prev';
     else if (gamepad.buttons[13]?.pressed) navigationDirection = 'next';
     else if (gamepad.buttons[14]?.pressed) navigationDirection = 'prev';
@@ -64,7 +67,7 @@ function pollGamepad() {
     // Navigation with repeat delay
     if (navigationDirection && (now - lastNavigationTime > GAMEPAD_REPEAT_DELAY)) {
         if (!$focused.length) {
-            $('.focusable').first().focus();
+            $('.focusable').first().trigger('focus');
         } else {
             let $current = $focused;
             $current.removeClass('active');
@@ -72,7 +75,7 @@ function pollGamepad() {
                 const $target = $current[navigationDirection]('.focusable');
                 if (!$target.length) break;
                 if ($target.is(':visible')) {
-                    $target.focus();
+                    $target.trigger('focus');
                     break;
                 }
                 $current = $target;

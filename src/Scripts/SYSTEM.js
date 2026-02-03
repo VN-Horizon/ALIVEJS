@@ -1,7 +1,7 @@
 import { loadScene, destroyScene } from '../Scene/SceneManagement.js';
 import { toButton } from '../Graphics/Graphics.Button.js';
 import { toBackground } from '../Graphics/Graphics.Background.js';
-import { setExitListener, setOverrideRightKeys } from '../InputSystem/InputSystem.Keyboard.js';
+import { setExitListener, setOverrideRightKeys } from '../InputSystem/InputSystem.Keyboard.ts';
 import { saveGame, loadGame, applyGameState } from '../Core/GameSave.js';
 import { execUntilNextLine } from '../Core/Events.js';
 

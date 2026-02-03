@@ -1,4 +1,4 @@
-import { setExitListener } from '../../InputSystem/InputSystem.Keyboard.js';
+import { setExitListener } from '../../InputSystem/InputSystem.Keyboard.ts';
 import { pushPauseScreen } from '../SYSTEM.js';
 
 export function hideDialogWindow() {
