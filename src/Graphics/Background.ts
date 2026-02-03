@@ -105,7 +105,11 @@ export class Background extends SceneElement {
     }
 }
 
-export function toBackground(element: SceneElement, options: Partial<BackgroundData> = {}) {
+export function toBackground(element: SceneElement | null, options: Partial<BackgroundData> = {}) {
+    if (!element) {
+        console.error("toBackground called with null element");
+        return null;
+    }
     const {
         backgroundSize = "cover",
         backgroundPosition = "center",

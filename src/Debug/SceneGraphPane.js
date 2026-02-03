@@ -1,7 +1,7 @@
 import * as d3 from "d3";
 import $ from "jquery";
 import { execUntilNextLine } from "../Core/Events";
-import { createPaneContainer } from "./DebugPane.js";
+import { createPaneContainer } from "./DebugPane";
 
 const container = createPaneContainer();
 

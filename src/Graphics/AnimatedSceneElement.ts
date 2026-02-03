@@ -1,3 +1,4 @@
+import type { IScene } from "@/Scene/Scene";
 import type { SceneElementData } from "@/Scene/SceneData";
 import { SceneElement } from "./SceneElement";
 
@@ -17,7 +18,8 @@ export class AnimatedSceneElement extends SceneElement {
     frameTime: number;
     elapsedTime: number = 0;
     onComplete: (() => void) | null;
-    constructor(data: AnimatedSceneElementData, parent = null, scene = null) {
+
+    constructor(data: AnimatedSceneElementData, parent: SceneElement | null = null, scene: IScene | null = null) {
         super(data, parent, scene);
 
         // Animation properties

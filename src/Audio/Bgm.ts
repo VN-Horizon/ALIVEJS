@@ -1,8 +1,8 @@
-import { isAudioUnlocked } from "./🔓.js";
+import { isAudioUnlocked } from "./🔓";
 
-const bgmList = {};
-let currentBGM = null;
-let currentBGMName = null;
+const bgmList: { [key: string]: HTMLAudioElement } = {};
+let currentBGM: HTMLAudioElement | null = null;
+let currentBGMName: string | null = null;
 
 export function initBGM() {
     for (let i = 0; i < 22; i++) {
@@ -15,7 +15,7 @@ export function initBGM() {
     console.log("BGM initialized");
 }
 
-export function playBGM(name) {
+export function playBGM(name: string) {
     if (!isAudioUnlocked()) {
         console.error("Audio locked");
         return;
@@ -33,7 +33,7 @@ export function playBGM(name) {
     }
 }
 
-export function getCurrentBGM() {
+export function getCurrentBGM(): string | null {
     console.log("Current BGM:", currentBGMName);
     return currentBGMName;
 }
@@ -46,8 +46,8 @@ export function stopBGM() {
     }
 }
 
-document.addEventListener("PlayBgm", e => {
-    const { stringParams } = e.detail;
+document.addEventListener("PlayBgm", (e: Event) => {
+    const { stringParams } = (e as CustomEvent).detail;
     if (stringParams.length >= 1) {
         playBGM(stringParams[0]);
     } else {

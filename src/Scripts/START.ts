@@ -1,15 +1,19 @@
-import { playBGM } from "../Audio/Bgm.js";
+import { playBGM } from "../Audio/Bgm";
 import { execUntilNextLine } from "../Core/Events";
 import { applyGameState, loadGame } from "../Core/GameSave";
-import { toButton } from "../Graphics/Button.js";
-import { setExitListener, setOverrideRightKeys } from "../InputSystem/InputSystem.Keyboard.ts";
-import { loadScene } from "../Scene/SceneManagement.js";
-import { loadBackgroundScene } from "./BACKGROUND.js";
-import { initGallery } from "./GALLERY.js";
-import { pushDialogWindow } from "./WINDOW/WINDOW.js";
+import { toButton } from "../Graphics/Button";
+import { setExitListener, setOverrideRightKeys } from "../InputSystem/InputSystem.Keyboard";
+import { loadScene } from "../Scene/SceneManagement";
+import { loadBackgroundScene } from "./BACKGROUND";
+import { initGallery } from "./GALLERY";
+import { pushDialogWindow } from "./WINDOW/WINDOW";
 
 export async function loadStartScene(hasGallery = true) {
     const startScene = await loadScene("UI/START");
+    if (!startScene) {
+        console.error("Failed to load START scene");
+        return;
+    }
 
     let exitBtn = hasGallery ? startScene.getObjectByName("EXIT2") : startScene.getObjectByName("EXIT1");
 
@@ -26,7 +30,7 @@ export async function loadStartScene(hasGallery = true) {
             const loadWindow = window.open("/save_load.html?mode=load", "LoadGame", "width=600,height=600");
 
             // Listen for messages from the save/load window
-            const messageHandler = event => {
+            const messageHandler = (event: MessageEvent) => {
                 if (event.data.type === "load-game") {
                     const slotIndex = event.data.slotIndex;
                     console.log("Loading game from slot:", slotIndex);
@@ -69,19 +73,19 @@ export async function loadStartScene(hasGallery = true) {
     exitBtn = toButton(exitBtn, { callback: window.exit });
 
     setExitListener(() => {
-        if ($(exitBtn.domElement).is(":focus")) {
+        if ($(exitBtn?.domElement).is(":focus")) {
             window.exit();
         } else {
-            $(exitBtn.domElement).focus();
+            $(exitBtn?.domElement).focus();
         }
     });
 
     startScene.onAfterFocusCallbacks.push(() => {
         setExitListener(() => {
-            if ($(exitBtn.domElement).is(":focus")) {
+            if ($(exitBtn?.domElement).is(":focus")) {
                 window.exit();
             } else {
-                $(exitBtn.domElement).focus();
+                $(exitBtn?.domElement).focus();
             }
         });
     });

@@ -1,7 +1,7 @@
-import { isAudioUnlocked } from "./🔓.js";
+import { isAudioUnlocked } from "./🔓";
 
-const seList = {};
-let currentSE = null;
+const seList: { [key: string]: HTMLAudioElement } = {};
+let currentSE: HTMLAudioElement | null = null;
 
 export function initSE() {
     for (let i = 1; i < 37; i++) {
@@ -14,7 +14,7 @@ export function initSE() {
     console.log("SE initialized");
 }
 
-export function playSE(name) {
+export function playSE(name: string) {
     if (!isAudioUnlocked()) {
         console.error("Audio locked");
         return;
@@ -31,7 +31,7 @@ export function playSE(name) {
     }
 }
 
-document.addEventListener("PlaySe", e => {
+document.addEventListener("PlaySe", (e: Event) => {
     if (window.skipping === true) return;
-    playSE(e.detail.stringParams[0]);
+    playSE((e as CustomEvent).detail.stringParams[0]);
 });

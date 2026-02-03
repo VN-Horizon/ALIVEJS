@@ -1,6 +1,6 @@
 import type { IScene } from "@/Scene/Scene";
-import { Button, toButton, type ButtonData, type ToButtonOptions } from "./Button";
-import { preserveLayerIndex, type SceneElement } from "./SceneElement";
+import { Button, type ButtonData, type ToButtonOptions } from "./Button";
+import { type SceneElement } from "./SceneElement";
 
 export interface ToggleData extends ButtonData {}
 
@@ -63,16 +63,17 @@ export class Toggle extends Button {
 }
 
 export function toToggle(group: SceneElement, options: Partial<ToButtonOptions> = {}) {
-    const button = toButton(group, options);
+    // const button = toButton(group, options);
 
-    const toggle = new Toggle(buttonData, group.parent, group.scene);
-    window.getEngine().getTopScene().addObject(toggle);
+    // const toggle = new Toggle(buttonData, group.parent, group.scene);
+    // window.getEngine().getTopScene().addObject(toggle);
 
-    // Destroy all children first
-    group.children.forEach(child => child.destroy());
+    // // Destroy all children first
+    // group.children.forEach(child => child.destroy());
 
-    // Preserve the layer index in the parent's children array
-    preserveLayerIndex(group, toggle);
+    // // Preserve the layer index in the parent's children array
+    // preserveLayerIndex(group, toggle);
 
-    return toggle;
+    // return toggle;
+    return null;
 }
