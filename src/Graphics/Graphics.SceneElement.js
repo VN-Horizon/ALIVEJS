@@ -1,3 +1,5 @@
+import $ from 'jquery';
+
 export class SceneElement {
     constructor(data, parent = null, scene = null) {
         // Core transform grouped

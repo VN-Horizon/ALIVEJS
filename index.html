@@ -1,18 +1,26 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Alive Remake</title>
-    <script src="./lib/jquery-3.7.1.min.js"></script>
-    <script src="./lib/protobuf.min.js"></script>
-    <script src="./lib/d3.v7.min.js"></script>
-    <!-- ES6 Module Entry Point -->
-    <script type="module" src="./src/main.js"></script>
-    <link rel="stylesheet" href="./src/styles/NotUnityPlayer.css">
-</head>
-<body>
+    <script type="module" src="./src/main.ts"></script>
+    <link rel="stylesheet" href="./src/styles/NotUnityPlayer.css" />
+  </head>
+  <body>
     <div id="audiounlock hidden"><h1>👉 🔓🔊 👈</h1></div>
-    <div id="black-overlay" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0); display: block; z-index: 114514;"></div>
-</body>
+    <div
+      id="black-overlay"
+      style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0);
+        display: block;
+        z-index: 114514;
+      "
+    ></div>
+  </body>
 </html>

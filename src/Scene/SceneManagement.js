@@ -1,6 +1,7 @@
 import { Scene } from './Scene.js';
 import { SceneElement } from '../Graphics/Graphics.SceneElement.js';
 import { AnimatedSceneElement } from '../Graphics/Graphics.AnimatedSceneElement.js';
+import $ from 'jquery'
 
 const currentExclusionList = [];
 const loadingScenes = new Set();

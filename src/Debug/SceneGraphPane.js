@@ -1,6 +1,8 @@
 import { Pane } from '../../lib/tweakpane-4.0.5.min.js';
 import { execUntilNextLine } from '../Core/Events.js';
 import { createPaneContainer } from './DebugPane.js';
+import $ from 'jquery';
+import * as d3 from 'd3';
 
 const container = createPaneContainer();
 

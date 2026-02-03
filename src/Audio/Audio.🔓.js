@@ -1,3 +1,5 @@
+import $ from 'jquery';
+
 let audioUnlocked = false;
 
 export function setAudioUnlocked(unlocked) {

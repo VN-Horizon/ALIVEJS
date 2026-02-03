@@ -1,5 +1,6 @@
 import { FocusableElement } from './Graphics.FocusableElement.js';
 import { preserveLayerIndex } from './Graphics.SceneElement.js';
+import $ from 'jquery';
 
 export class Button extends FocusableElement {
     constructor(data, parent = null, scene) {

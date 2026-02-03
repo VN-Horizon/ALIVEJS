@@ -1,6 +1,6 @@
 import { loadScene } from '../Scene/SceneManagement.js';
 import { toButton } from '../Graphics/Graphics.Button.js';
-import { setExitListener, setOverrideRightKeys } from '../InputSystem/InputSystem.Keyboard.js';
+import { setExitListener, setOverrideRightKeys } from '../InputSystem/InputSystem.Keyboard.ts';
 import { playBGM } from '../Audio/Audio.Bgm.js';
 import { pushDialogWindow } from './WINDOW/WINDOW.js';
 import { initGallery } from './GALLERY.js';

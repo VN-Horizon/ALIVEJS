@@ -1,3 +1,4 @@
+import $ from 'jquery';
 
 const $debugContainer = $('<div class="debug-container"></div>');
 $('body').append($debugContainer);

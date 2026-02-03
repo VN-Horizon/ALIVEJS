@@ -1,4 +1,6 @@
 import { extractDialogData } from "../Utils/DialogHelper.js";
+import protobuf from 'protobufjs';
+import $ from 'jquery';
 
 let ScreenplayContext = {
     blocks: [],
