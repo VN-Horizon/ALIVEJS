@@ -1,14 +1,33 @@
+import type { IScene } from "@/Scene/Scene";
+import type { SceneElementData } from "@/Scene/SceneData";
 import $ from "jquery";
-import { SceneElement, preserveLayerIndex } from "./Graphics.SceneElement";
+import { SceneElement, preserveLayerIndex } from "./SceneElement";
+
+export interface BackgroundData extends SceneElementData {
+    isBackground?: boolean;
+    backgroundSize?: string;
+    backgroundPosition?: string;
+    backgroundRepeat?: string;
+    transition?: string | null;
+    scrollSpeedX?: number;
+    scrollSpeedY?: number;
+}
 
 export class Background extends SceneElement {
-    constructor(data, parent = null, scene = null) {
-        data.isBackground = true;
+    backgroundId: string;
+    backgroundImageUrl: string | null = null;
+    backgroundSize: string;
+    backgroundPosition: string;
+    backgroundRepeat: string;
+    transition: string | null;
+    scrollSpeed: { x: number; y: number };
+    scrollOffset: { x: number; y: number } = { x: 0, y: 0 };
 
+    constructor(data: BackgroundData, parent: SceneElement | null = null, scene: IScene | null = null) {
+        data.isBackground = true;
         super(data, parent, scene);
 
         this.backgroundId = `bg-${Math.random().toString(36).substr(2, 9)}`;
-        this.backgroundImageUrl = null;
         this.backgroundSize = data.backgroundSize || "auto";
         this.backgroundPosition = data.backgroundPosition || "center";
         this.backgroundRepeat = data.backgroundRepeat || "no-repeat";
@@ -19,7 +38,6 @@ export class Background extends SceneElement {
             x: data.scrollSpeedX || 0,
             y: data.scrollSpeedY || 0,
         };
-        this.scrollOffset = { x: 0, y: 0 };
 
         this.recreateDOMAsBackground();
     }
@@ -44,12 +62,16 @@ export class Background extends SceneElement {
         super.syncDom();
     }
 
-    async loadImage(path) {
+    async loadImage(path: string) {
+        if (!this.scene) {
+            console.error("Cannot load background image: Scene is null");
+            return;
+        }
         const fullImagePath = `/assets/scenes/${this.scene.name}/${path}.webp`;
         this.updateBackgroundImage(fullImagePath);
     }
 
-    updateBackgroundImage(backgroundImageUrl = null) {
+    updateBackgroundImage(backgroundImageUrl: string | null = null) {
         if (!this.domElement) return;
         this.backgroundImageUrl = backgroundImageUrl;
         if (!backgroundImageUrl) this.backgroundImageUrl = "";
@@ -68,7 +90,7 @@ export class Background extends SceneElement {
         this.updateScrollPosition();
     }
 
-    update(deltaTime) {
+    update(deltaTime: number) {
         // Handle scroll offset
         if ((this.scrollSpeed?.x || 0) !== 0 || (this.scrollSpeed?.y || 0) !== 0) {
             if (isNaN(this.scrollOffset.x) || isNaN(this.scrollOffset.y)) {
@@ -83,7 +105,7 @@ export class Background extends SceneElement {
     }
 }
 
-export function toBackground(element, options = {}) {
+export function toBackground(element: SceneElement, options: Partial<BackgroundData> = {}) {
     const {
         backgroundSize = "cover",
         backgroundPosition = "center",
@@ -109,7 +131,7 @@ export function toBackground(element, options = {}) {
     };
 
     const background = new Background(backgroundData, element.parent, element.scene);
-    background.loadImage(element.sceneData.path);
+    if (element.sceneData?.path) background.loadImage(element.sceneData.path);
 
     // Preserve the layer index in the parent's children array
     preserveLayerIndex(element, background);

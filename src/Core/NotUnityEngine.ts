@@ -1,4 +1,4 @@
-import type { ISceneElement } from "@/Graphics/Graphics.SceneElement";
+import type { ISceneElement } from "@/Graphics/SceneElement";
 import type { IScene } from "@/Scene/Scene";
 import $ from "jquery";
 

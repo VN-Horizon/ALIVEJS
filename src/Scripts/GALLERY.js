@@ -1,5 +1,5 @@
 import { CharacterNameToVoiceKey } from "../Constants.js";
-import { toButton } from "../Graphics/Graphics.Button.js";
+import { toButton } from "../Graphics/Button.js";
 import { setExitListener } from "../InputSystem/InputSystem.Keyboard.ts";
 import { loadScene } from "../Scene/SceneManagement.js";
 

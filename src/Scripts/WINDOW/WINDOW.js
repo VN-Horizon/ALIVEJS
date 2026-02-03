@@ -1,7 +1,7 @@
 import $ from "jquery";
 import { execUntilNextLine } from "../../Core/Events";
-import { Button, toButton } from "../../Graphics/Graphics.Button.js";
-import { TMP_Text, TMP_TypeWriter } from "../../Graphics/Graphics.TextMessPoor.js";
+import { Button, toButton } from "../../Graphics/Button.js";
+import { TMP_Text, TMP_TypeWriter } from "../../Graphics/TextMessPoor.js";
 import { setExitListener, setOverrideRightKeys } from "../../InputSystem/InputSystem.Keyboard.ts";
 import { loadScene } from "../../Scene/SceneManagement.js";
 import { pushPauseScreen } from "../SYSTEM.js";

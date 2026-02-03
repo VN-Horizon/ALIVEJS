@@ -1,6 +1,6 @@
 import { getCurrentBlockIndex, resolveLastInstruction } from "../Core/Events";
 import { extractDialogData, GetCharacterVoiceName, GetVoiceEventName } from "../Utils/DialogHelper.js";
-import { isAudioUnlocked } from "./Audio.🔓.js";
+import { isAudioUnlocked } from "./🔓.js";
 
 export function OnPlayDialog(instruction) {
     if (instruction.params.length < 3) return;

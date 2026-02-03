@@ -1,8 +1,8 @@
 import $ from "jquery";
-import { AnimatedSceneElement } from "../../Graphics/Graphics.AnimatedSceneElement";
-import { toButton } from "../../Graphics/Graphics.Button.js";
-import { SceneElement } from "../../Graphics/Graphics.SceneElement";
-import { TMP_Text } from "../../Graphics/Graphics.TextMessPoor.js";
+import { AnimatedSceneElement } from "../../Graphics/AnimatedSceneElement";
+import { toButton } from "../../Graphics/Button.js";
+import { SceneElement } from "../../Graphics/SceneElement";
+import { TMP_Text } from "../../Graphics/TextMessPoor.js";
 
 export function initSelectionsBox(dialogWindow) {
     window.isSelecting = false;

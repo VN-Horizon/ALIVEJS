@@ -1,6 +1,6 @@
 import type { GameEngine } from "@/Core/NotUnityEngine";
-import { FocusableElement } from "@/Graphics/Graphics.FocusableElement.js";
-import type { ISceneElement } from "@/Graphics/Graphics.SceneElement";
+import { FocusableElement } from "@/Graphics/FocusableElement.js";
+import type { ISceneElement } from "@/Graphics/SceneElement";
 import $ from "jquery";
 
 export interface IScene {
@@ -9,7 +9,7 @@ export interface IScene {
     baseZOffset: number;
     sceneObjects: ISceneElement[];
     isFocusable: boolean;
-    lastFocusedElement: HTMLElement | null;
+    lastFocusedElement: HTMLElement | JQuery.PlainObject | null;
     onDestroyCallbacks: Array<() => void>;
     onBeforeFocusCallbacks: Array<() => void>;
     onBeforeUnfocusCallbacks: Array<() => void>;
@@ -31,7 +31,7 @@ export class Scene {
     baseZOffset: number = 0;
     sceneObjects: ISceneElement[] = [];
     isFocusable = false;
-    lastFocusedElement: HTMLElement | null = null;
+    lastFocusedElement: HTMLElement | JQuery.PlainObject | null = null;
     onDestroyCallbacks: Array<() => void> = [];
     onBeforeFocusCallbacks: Array<() => void> = [];
     onBeforeUnfocusCallbacks: Array<() => void> = [];
@@ -103,7 +103,7 @@ export class Scene {
                 typeof FocusableElement !== "undefined" &&
                 typeof FocusableElement.updateFocusabilityRecursive === "function"
             ) {
-                FocusableElement.updateFocusabilityRecursive(obj);
+                FocusableElement.updateFocusabilityRecursive(obj as FocusableElement);
             } else if (typeof obj.updateFocusability === "function") {
                 obj.updateFocusability();
             }

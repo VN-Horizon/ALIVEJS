@@ -1,14 +1,38 @@
-import { toButton } from "./Graphics.Button.js";
-import { preserveLayerIndex } from "./Graphics.SceneElement";
+import type { IScene } from "@/Scene/Scene";
+import type { SceneElementData } from "@/Scene/SceneData";
+import $ from "jquery";
+import { FocusableElement } from "./FocusableElement.js";
+import { preserveLayerIndex, type SceneElement } from "./SceneElement.js";
 
-export class Toggle extends Button {
-    constructor(data, parent = null, scene) {
+export interface ButtonData extends SceneElementData {
+    isButton?: boolean;
+    transforms: Array<[number, number, number, number]>;
+    images: string[];
+    z?: number;
+    cursor?: string;
+    callback?: () => void;
+}
+
+export class Button extends FocusableElement {
+    transforms: Array<[number, number, number, number]>;
+    images: string[];
+    onClickHandler: (() => void) | null;
+    buttonId: string;
+    cursor: string;
+    isButton: boolean = true;
+
+    constructor(data: ButtonData, parent: SceneElement | null = null, scene: IScene | null = null) {
         data.isButton = true;
 
         super(data, parent, scene);
 
-        this.buttonId = `toggle-${Math.random().toString(36).substr(2, 9)}`;
-        this.isButton = true;
+        this.transforms = data.transforms || [];
+        this.width = this.transforms[0]?.[2] || 10;
+        this.height = this.transforms[0]?.[3] || 10;
+
+        this.images = data.images;
+        this.onClickHandler = null;
+        this.buttonId = `btn-${Math.random().toString(36).substr(2, 9)}`;
         this.transform.z = data.z || 0;
         this.cursor = data.cursor || "pointer";
 
@@ -18,16 +42,16 @@ export class Toggle extends Button {
     }
 
     recreateDOMAsButton() {
-        let classNames = "";
+        let classNames: string[] = [];
         if (this.domElement) {
-            classNames = $(this.domElement).attr("class").split(" ");
+            classNames = $(this.domElement)?.attr("class")?.split(" ") || [];
             $(this.domElement).remove();
         }
 
         this.domElement = $("<button>")
             .attr("id", this.buttonId)
             .attr("layer-name", this.sceneData.name || "Button")
-            .attr("class", classNames)
+            .attr("class", classNames.join(" "))
             .css({
                 opacity: this.opacity,
                 "mix-blend-mode": this.blendMode,
@@ -45,7 +69,9 @@ export class Toggle extends Button {
             $("head").append($styleSheet);
         }
 
-        const sheet = $styleSheet[0].sheet;
+        const sheet = ($styleSheet[0] as HTMLStyleElement).sheet;
+        if (!sheet) return;
+
         sheet.insertRule(
             `#${this.buttonId} { background-image: url('${this.images[0]}'); width: ${this.transforms[0]?.[2] || 10}px; height: ${this.transforms[0]?.[3] || 10}px; transform: translate(${this.transforms[0]?.[0] || 0}px, ${this.transforms[0]?.[1] || 0}px); }`,
             sheet.cssRules.length,
@@ -76,7 +102,7 @@ export class Toggle extends Button {
         });
     }
 
-    onClick(callback) {
+    onClick(callback: () => void) {
         this.onClickHandler = callback;
         this.setupClickListener();
     }
@@ -94,17 +120,64 @@ export class Toggle extends Button {
     }
 }
 
-export function toToggle(group, options = {}) {
-    const button = toButton(group, options);
+export interface ToButtonOptions {
+    stateIndexes?: number[];
+    defaultTransform?: [number | null, number | null, number | null, number | null];
+    z?: number;
+    cursor?: string;
+    callback?: () => void;
+    focusable?: boolean;
+}
 
-    const toggle = new Toggle(buttonData, group.parent, group.scene);
-    window.getEngine().getTopScene().addObject(toggle);
+export function toButton(group: SceneElement, options: Partial<ToButtonOptions> = {}) {
+    const {
+        stateIndexes = [0, 1, 2, 0],
+        defaultTransform = [null, null, null, null],
+        z = 0,
+        cursor = "pointer",
+        callback = null,
+        focusable = true,
+    } = options;
+
+    if (!Array.isArray(group.children) || group.children.length === 0) {
+        console.error("Group must have children to elevate to Button");
+        return null;
+    }
+
+    const transforms: Array<[number, number, number, number]> = [];
+    const images: string[] = [];
+
+    stateIndexes.forEach(stateIndex => {
+        const layer = stateIndex >= 0 ? group.children[stateIndex] : null;
+
+        transforms.push([
+            layer?.x || defaultTransform[0] || 0,
+            layer?.y || defaultTransform[1] || 0,
+            layer?.width || defaultTransform[2] || 10,
+            layer?.height || defaultTransform[3] || 10,
+        ]);
+        images.push(layer ? (layer.domElement as HTMLImageElement)?.src || layer.sceneData.path || "" : "");
+    });
+
+    const buttonData = {
+        ...group.sceneData,
+        transforms,
+        z,
+        cursor,
+        images,
+        zIndex: group.zIndex,
+        callback,
+        focusable,
+    } as ButtonData;
+
+    const button = new Button(buttonData, group.parent, group.scene);
+    window.getEngine().getTopScene().addObject(button);
 
     // Destroy all children first
     group.children.forEach(child => child.destroy());
 
     // Preserve the layer index in the parent's children array
-    preserveLayerIndex(group, toggle);
+    preserveLayerIndex(group, button);
 
-    return toggle;
+    return button;
 }

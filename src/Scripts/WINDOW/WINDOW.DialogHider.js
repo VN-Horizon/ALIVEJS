@@ -1,5 +1,6 @@
-import { setExitListener } from '../../InputSystem/InputSystem.Keyboard.ts';
-import { pushPauseScreen } from '../SYSTEM.js';
+import $ from "jquery";
+import { setExitListener } from "../../InputSystem/InputSystem.Keyboard.ts";
+import { pushPauseScreen } from "../SYSTEM.js";
 
 export function hideDialogWindow() {
     const dialogWindow = window.getEngine().getSceneByName("UI/WINDOW");
@@ -17,15 +18,15 @@ export function showDialogWindow() {
 
 export function _hideDialogWindow(e) {
     hideDialogWindow();
-    $(document).off('contextmenu', _hideDialogWindow);
-    $(document).on('contextmenu', _showDialogWindow);
-    $(document).on('click', _showDialogWindow);
+    $(document).off("contextmenu", _hideDialogWindow);
+    $(document).on("contextmenu", _showDialogWindow);
+    $(document).on("click", _showDialogWindow);
     e.preventDefault();
 }
 export function _showDialogWindow(e) {
     showDialogWindow();
-    $(document).off('contextmenu', _showDialogWindow);
-    $(document).on('contextmenu', _hideDialogWindow);
-    $(document).off('click', _showDialogWindow);
+    $(document).off("contextmenu", _showDialogWindow);
+    $(document).on("contextmenu", _hideDialogWindow);
+    $(document).off("click", _showDialogWindow);
     e.preventDefault();
 }
