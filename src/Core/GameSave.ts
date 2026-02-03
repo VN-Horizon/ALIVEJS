@@ -1,4 +1,5 @@
-import { getCurrentBGM } from "../Audio/Audio.Bgm.js";
+import { Background } from "@/Graphics/Background";
+import { getCurrentBGM } from "../Audio/Bgm.js";
 import { getCurrentEvent } from "./Events";
 
 const SAVE_KEY_PREFIX = "alive_save_";
@@ -25,10 +26,10 @@ export function getCurrentGameState(): GameState {
         const bgObject = backgroundScene.getObjectByName("BackgroundCG");
         const portraitObject = backgroundScene.getObjectByName("PortraitCG");
 
-        if (bgObject && bgObject.backgroundImageUrl) {
+        if (bgObject && bgObject instanceof Background) {
             currentBg = bgObject.backgroundImageUrl;
         }
-        if (portraitObject && portraitObject.backgroundImageUrl) {
+        if (portraitObject && portraitObject instanceof Background) {
             currentPortrait = portraitObject.backgroundImageUrl;
         }
     }

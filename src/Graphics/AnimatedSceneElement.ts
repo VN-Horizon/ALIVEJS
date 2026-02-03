@@ -1,7 +1,23 @@
-import { SceneElement } from "./Graphics.SceneElement";
+import type { SceneElementData } from "@/Scene/SceneData";
+import { SceneElement } from "./SceneElement";
+
+export interface AnimatedSceneElementData extends SceneElementData {
+    fps?: number;
+    loop?: boolean;
+    autoPlay?: boolean;
+    onComplete?: () => void;
+}
 
 export class AnimatedSceneElement extends SceneElement {
-    constructor(data, parent = null, scene = null) {
+    fps: number;
+    loop: boolean;
+    autoPlay: boolean;
+    currentFrame: number = 0;
+    isPlaying: boolean = false;
+    frameTime: number;
+    elapsedTime: number = 0;
+    onComplete: (() => void) | null;
+    constructor(data: AnimatedSceneElementData, parent = null, scene = null) {
         super(data, parent, scene);
 
         // Animation properties
@@ -10,10 +26,7 @@ export class AnimatedSceneElement extends SceneElement {
         this.autoPlay = data.autoPlay !== false;
 
         // Animation state
-        this.currentFrame = 0;
-        this.isPlaying = false;
         this.frameTime = 1 / this.fps;
-        this.elapsedTime = 0;
         this.onComplete = data.onComplete || null;
     }
 
@@ -42,7 +55,7 @@ export class AnimatedSceneElement extends SceneElement {
         this.setFrame(0);
     }
 
-    setFrame(frameIndex) {
+    setFrame(frameIndex: number) {
         if (this.children.length === 0) return;
 
         // Clamp frame index
@@ -116,7 +129,7 @@ export class AnimatedSceneElement extends SceneElement {
         this.setFrame(prevIndex);
     }
 
-    update(deltaTime) {
+    update(deltaTime: number) {
         super.update(deltaTime);
 
         if (!this.isPlaying || this.children.length === 0) return;

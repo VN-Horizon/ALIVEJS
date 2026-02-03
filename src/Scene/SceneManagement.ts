@@ -1,7 +1,8 @@
 import $ from "jquery";
-import { AnimatedSceneElement } from "../Graphics/Graphics.AnimatedSceneElement";
-import { SceneElement, type SceneElementData } from "../Graphics/Graphics.SceneElement";
+import { AnimatedSceneElement } from "../Graphics/AnimatedSceneElement";
+import { SceneElement } from "../Graphics/SceneElement";
 import { Scene } from "./Scene";
+import type { SceneElementData } from "./SceneData";
 
 const currentExclusionList: string[] = [];
 const loadingScenes = new Set();

@@ -1,7 +1,7 @@
-import { playBGM } from "../Audio/Audio.Bgm.js";
+import { playBGM } from "../Audio/Bgm.js";
 import { execUntilNextLine } from "../Core/Events";
 import { applyGameState, loadGame } from "../Core/GameSave";
-import { toButton } from "../Graphics/Graphics.Button.js";
+import { toButton } from "../Graphics/Button.js";
 import { setExitListener, setOverrideRightKeys } from "../InputSystem/InputSystem.Keyboard.ts";
 import { loadScene } from "../Scene/SceneManagement.js";
 import { loadBackgroundScene } from "./BACKGROUND.js";

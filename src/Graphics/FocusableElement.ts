@@ -1,11 +1,18 @@
+import type { IScene } from "@/Scene/Scene";
+import type { SceneElementData } from "@/Scene/SceneData";
 import $ from "jquery";
-import { SceneElement } from "./Graphics.SceneElement";
+import { SceneElement } from "./SceneElement";
 
 export class FocusableElement extends SceneElement {
-    constructor(data, parent = null, scene) {
-        super(data, parent, scene);
+    permanentlyNonFocusable: boolean;
+    manualEnabled: boolean | null = null; // null = follow scene, true = enabled, false = disabled
 
-        this.manualEnabled = null;
+    constructor(
+        data: SceneElementData & { focusable?: boolean },
+        parent: SceneElement | null = null,
+        scene: IScene | null = null,
+    ) {
+        super(data, parent, scene);
         this.permanentlyNonFocusable = data && data.focusable === false;
 
         if (this.permanentlyNonFocusable) {
@@ -18,12 +25,12 @@ export class FocusableElement extends SceneElement {
         this.updateFocusability();
     }
 
-    setEnabled(enabled) {
+    setEnabled(enabled: boolean | null) {
         this.manualEnabled = enabled;
         this.updateFocusability();
     }
 
-    applyInteractableState(enabled) {
+    applyInteractableState(enabled: boolean) {
         if (!this.domElement) return;
         const $el = $(this.domElement);
         if (enabled) {
@@ -97,11 +104,11 @@ export class FocusableElement extends SceneElement {
         return document && document.activeElement === this.domElement;
     }
 
-    static updateFocusabilityRecursive(obj) {
+    static updateFocusabilityRecursive(obj: FocusableElement | null) {
         if (!obj) return;
         if (typeof obj.updateFocusability === "function") obj.updateFocusability();
         if (obj.children && obj.children.length) {
-            obj.children.forEach(child => FocusableElement.updateFocusabilityRecursive(child));
+            obj.children.forEach(child => FocusableElement.updateFocusabilityRecursive(child as FocusableElement));
         }
     }
 }

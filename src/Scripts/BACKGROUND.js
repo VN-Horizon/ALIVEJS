@@ -1,5 +1,5 @@
 import $ from "jquery";
-import { Background } from "../Graphics/Graphics.Background.js";
+import { Background } from "../Graphics/Background.js";
 import { createBlankScene } from "../Scene/SceneManagement.js";
 
 export async function loadBackgroundScene() {

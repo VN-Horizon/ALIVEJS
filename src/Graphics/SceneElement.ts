@@ -1,4 +1,5 @@
 import type { IScene } from "@/Scene/Scene";
+import type { AnchorType, SceneElementData, Transform } from "@/Scene/SceneData";
 import $ from "jquery";
 
 export interface ISceneElement {
@@ -14,35 +15,6 @@ export interface ISceneElement {
     updateFocusability?(): void;
 }
 
-export interface Transform {
-    x: number;
-    y: number;
-    z: number;
-    width: number;
-    height: number;
-    rotation: number;
-}
-
-export interface SceneElementData {
-    animated?: boolean;
-    name?: string;
-    transform?: Partial<Transform>;
-    left?: number;
-    top?: number;
-    zIndex?: number;
-    width?: number;
-    height?: number;
-    rotation?: number;
-    anchor?: AnchorType;
-    path?: string;
-    visible?: boolean;
-    opacity?: number;
-    blendMode?: string;
-    children?: SceneElementData[];
-}
-
-export type AnchorType = "top-left" | "top-right" | "bottom-left" | "bottom-right";
-
 export class SceneElement {
     // Core transform grouped
     transform: Transform = {
@@ -54,7 +26,7 @@ export class SceneElement {
         rotation: 0,
     };
 
-    anchor: AnchorType = "top-left"; // 'top-left', 'top-right', 'bottom-left', 'bottom-right'
+    anchor: AnchorType = "top-left";
     sceneData: SceneElementData = {};
     scene: IScene | null = null; // reference to owning Scene to access baseZOffset
     domElement: HTMLElement | JQuery.PlainObject | null = null;
@@ -76,7 +48,7 @@ export class SceneElement {
             rotation: data.transform?.rotation || data.rotation || 0,
         };
 
-        this.anchor = data.anchor || "top-left"; // 'top-left', 'top-right', 'bottom-left', 'bottom-right'
+        this.anchor = data.anchor || "top-left";
         this.sceneData = data;
         this.scene = scene; // reference to owning Scene to access baseZOffset
         this.domElement = null;

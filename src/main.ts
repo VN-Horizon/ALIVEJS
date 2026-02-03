@@ -6,13 +6,13 @@ import "./InputSystem/InputSystem.Gamepad.ts";
 import "./InputSystem/InputSystem.Keyboard.ts";
 import { loadStartScene } from "./Scripts/START.js";
 
-import { initBGM } from "./Audio/Audio.Bgm.js";
-import { initSE } from "./Audio/Audio.Se.js";
-import "./Audio/Audio.Voice.js";
-import "./Audio/Audio.🔓.js";
+import { initBGM } from "./Audio/Bgm.js";
+import { initSE } from "./Audio/Se.js";
+import "./Audio/Voice.js";
+import "./Audio/🔓.js";
 
-import { initEnginePane } from "./Debug/EnginePane.js";
-import { initSceneGraphPane } from "./Debug/SceneGraphPane.js";
+// import { initEnginePane } from "./Debug/EnginePane.js";
+// import { initSceneGraphPane } from "./Debug/SceneGraphPane.js";
 
 // Define types for existing classes if needed, or use any for now
 declare global {
@@ -24,9 +24,9 @@ declare global {
     }
 }
 
-let notUnityEngine = new GameEngine("gameContainer");
-initEnginePane(notUnityEngine);
-initSceneGraphPane();
+let notUnityEngine = new GameEngine();
+// initEnginePane(notUnityEngine);
+// initSceneGraphPane();
 notUnityEngine.start();
 
 window.getEngine = () => notUnityEngine;

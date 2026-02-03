@@ -1,8 +1,28 @@
+import type { SceneElementData } from "@/Scene/SceneData";
 import $ from "jquery";
-import { SceneElement } from "./Graphics.SceneElement";
+import { SceneElement } from "./SceneElement";
+
+export interface TMP_FontOptions {
+    size?: number;
+    family?: string;
+    weight?: string;
+}
+
+export interface TMP_TextData extends SceneElementData {
+    text?: string;
+    fontSize?: number;
+    fontFamily?: string;
+    fontWeight?: string;
+    color?: string;
+}
 
 export class TMP_Text extends SceneElement {
-    constructor(data, parent = null, scene = null) {
+    text: string = "";
+    fontSize: number = 16;
+    fontFamily: string = "";
+    fontWeight: string = "normal";
+    color: string = "#000000";
+    constructor(data: TMP_TextData, parent = null, scene = null) {
         super(data, parent, scene);
 
         this.text = data.text || "";
@@ -36,11 +56,11 @@ export class TMP_Text extends SceneElement {
         return baseStyle;
     }
 
-    async loadImage(path) {
+    async loadImage(path: string) {
         return;
     }
 
-    setText(newText) {
+    setText(newText: string) {
         this.text = newText;
         if (this.domElement) {
             $(this.domElement).text(this.text);
@@ -52,16 +72,22 @@ export class TMP_Text extends SceneElement {
         this.updateDOMStyle();
     }
 
-    setFontOptions({ size, family, weight }) {
-        if (size) this.fontSize = size;
-        if (family) this.fontFamily = family;
-        if (weight) this.fontWeight = weight;
+    setFontOptions(options: TMP_FontOptions) {
+        if (options.size) this.fontSize = options.size;
+        if (options.family) this.fontFamily = options.family;
+        if (options.weight) this.fontWeight = options.weight;
         this.updateTextStyle();
     }
 }
 
 export class TMP_TypeWriter extends TMP_Text {
-    constructor(data, parent = null, scene = null) {
+    fullText: string = "";
+    currentCharIndex: number = 0;
+    isAnimating: boolean = false;
+    charsPerSecond: number = 30;
+    timeAccumulator: number = 0;
+
+    constructor(data: TMP_TextData & { charsPerSecond?: number }, parent = null, scene = null) {
         super(data, parent, scene);
 
         this.fullText = this.text;
@@ -74,7 +100,7 @@ export class TMP_TypeWriter extends TMP_Text {
         this.setText(this.text);
     }
 
-    update(deltaTime) {
+    update(deltaTime: number) {
         super.update(deltaTime);
 
         if (!this.isAnimating || this.currentCharIndex >= this.fullText.length) {
@@ -108,7 +134,7 @@ export class TMP_TypeWriter extends TMP_Text {
         this.timeAccumulator = 0;
     }
 
-    animateText(newText) {
+    animateText(newText: string) {
         if (this.fullText == newText && this.isAnimating) {
             this.cancelAnimation();
             return;
