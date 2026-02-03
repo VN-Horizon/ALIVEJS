@@ -23,7 +23,7 @@ export async function loadScene(
         singleInstance: true,
         exclusionList: [],
     },
-) {
+): Promise<Scene | null> {
     console.log(`Loading scene: ${path}`);
     const { override = false, singleInstance = true, exclusionList = [] } = options;
     const engine = window.getEngine();

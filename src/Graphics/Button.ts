@@ -1,12 +1,13 @@
 import type { IScene } from "@/Scene/Scene";
 import type { SceneElementData } from "@/Scene/SceneData";
 import $ from "jquery";
-import { FocusableElement } from "./FocusableElement.js";
-import { preserveLayerIndex, type SceneElement } from "./SceneElement.js";
+import { FocusableElement } from "./FocusableElement";
+import { preserveLayerIndex, type SceneElement } from "./SceneElement";
 
 export interface ButtonData extends SceneElementData {
     isButton?: boolean;
     transforms: Array<[number, number, number, number]>;
+    stateIndexes?: number[];
     images: string[];
     z?: number;
     cursor?: string;
@@ -129,7 +130,11 @@ export interface ToButtonOptions {
     focusable?: boolean;
 }
 
-export function toButton(group: SceneElement, options: Partial<ToButtonOptions> = {}) {
+export function toButton(group: SceneElement | null, options: Partial<ToButtonOptions> = {}) {
+    if (!group) {
+        console.error("toButton called with null group");
+        return null;
+    }
     const {
         stateIndexes = [0, 1, 2, 0],
         defaultTransform = [null, null, null, null],

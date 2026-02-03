@@ -1,4 +1,4 @@
-import { createPaneContainer } from "./DebugPane.js";
+import { createPaneContainer } from "./DebugPane";
 
 let engineInstance = null;
 

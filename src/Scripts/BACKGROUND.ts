@@ -1,9 +1,13 @@
 import $ from "jquery";
-import { Background } from "../Graphics/Background.js";
-import { createBlankScene } from "../Scene/SceneManagement.js";
+import { Background } from "../Graphics/Background";
+import { createBlankScene } from "../Scene/SceneManagement";
 
 export async function loadBackgroundScene() {
     const backgroundScene = createBlankScene("BACKGROUND");
+    if (!backgroundScene) {
+        console.error("Failed to create BACKGROUND scene");
+        return null;
+    }
 
     const backgroundCG = backgroundScene.addObject(
         new Background({
@@ -17,8 +21,8 @@ export async function loadBackgroundScene() {
     // Update transition based on skipping state
     const updateTransition = () => {
         const transition = window.skipping ? "none" : "background-image 0.5s ease-in-out";
-        $(backgroundCG.domElement).css("transition", transition);
-        $(portrait.domElement).css(
+        $(backgroundCG?.domElement).css("transition", transition);
+        $(portrait?.domElement).css(
             "transition",
             window.skipping ? "none" : "background-image 0.5s ease-in-out, background-size 0s linear",
         );
@@ -34,50 +38,50 @@ export async function loadBackgroundScene() {
             transition: "background-image 0.5s ease-in-out, background-size 0s linear",
         }),
     );
-    $(portrait.domElement).css({ "background-size": "none" });
+    $(portrait?.domElement).css({ "background-size": "none" });
 
-    const setBgImgHandler = e => {
-        const { stringParams } = e.detail;
+    const setBgImgHandler = (e: any) => {
+        const { stringParams } = (e as CustomEvent).detail;
         if (stringParams.length < 2) return;
         if (stringParams[0] === "0" || stringParams[1] === "0") {
-            backgroundCG.updateBackgroundImage(null);
+            backgroundCG?.updateBackgroundImage(null);
             return;
         }
-        backgroundCG.updateBackgroundImage(`/assets/scenes/BG/${stringParams[0]}/${stringParams[1]}.webp`);
+        backgroundCG?.updateBackgroundImage(`/assets/scenes/BG/${stringParams[0]}/${stringParams[1]}.webp`);
     };
-    const transitionToGraphicsHandler = e => {
-        const { stringParams } = e.detail;
+    const transitionToGraphicsHandler = (e: any) => {
+        const { stringParams } = (e as CustomEvent).detail;
         if (stringParams.length < 4) return;
         if (stringParams[2] === "0" || stringParams[3] === "0") {
-            backgroundCG.updateBackgroundImage(`/assets/scenes/CG/BLACK/BLACK.webp`);
+            backgroundCG?.updateBackgroundImage(`/assets/scenes/CG/BLACK/BLACK.webp`);
             return;
         }
-        backgroundCG.updateBackgroundImage(`/assets/scenes/BG/${stringParams[2]}/${stringParams[3]}.webp`);
+        backgroundCG?.updateBackgroundImage(`/assets/scenes/BG/${stringParams[2]}/${stringParams[3]}.webp`);
     };
-    const setCgHandler = e => {
-        const { stringParams } = e.detail;
+    const setCgHandler = (e: any) => {
+        const { stringParams } = (e as CustomEvent).detail;
         if (stringParams.length < 1) return;
-        portrait.updateBackgroundImage(null);
-        backgroundCG.updateBackgroundImage(
+        portrait?.updateBackgroundImage(null);
+        backgroundCG?.updateBackgroundImage(
             `/assets/scenes/CG/${stringParams[0].toUpperCase()}/${stringParams[0].toUpperCase()}.webp`,
         );
     };
 
-    const setCharaImgHandler = e => {
-        const { stringParams } = e.detail;
+    const setCharaImgHandler = (e: any) => {
+        const { stringParams } = (e as CustomEvent).detail;
         if (stringParams.length < 2) return;
         if (stringParams[0] === "0" || stringParams[1] === "0") {
-            portrait.updateBackgroundImage(null);
+            portrait?.updateBackgroundImage(null);
             return;
         }
-        portrait.updateBackgroundImage(`/assets/scenes/Portraits/${stringParams[0]}/${stringParams[1]}.webp`);
+        portrait?.updateBackgroundImage(`/assets/scenes/Portraits/${stringParams[0]}/${stringParams[1]}.webp`);
     };
 
     // Handler to restore background image from saved state
-    const restoreGraphicsHandler = e => {
-        const { bg, character } = e.detail;
-        backgroundCG.updateBackgroundImage(bg);
-        portrait.updateBackgroundImage(character);
+    const restoreGraphicsHandler = (e: any) => {
+        const { bg, character } = (e as CustomEvent).detail;
+        backgroundCG?.updateBackgroundImage(bg);
+        portrait?.updateBackgroundImage(character);
     };
 
     $(document).on("SetBgImg", setBgImgHandler);

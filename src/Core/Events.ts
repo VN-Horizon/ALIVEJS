@@ -1,6 +1,6 @@
 import $ from "jquery";
 import protobuf from "protobufjs";
-import { extractDialogData } from "../Utils/DialogHelper.js";
+import { extractDialogData } from "../Utils/DialogHelper";
 
 // -- Interfaces --
 
@@ -24,11 +24,7 @@ export interface ScreenplayContextState {
     evIdToBlockIndex: Record<number, number>;
 }
 
-export interface ResolvedInstruction {
-    type: string;
-    params: number[];
-    stringParams: string[];
-}
+export interface ResolvedInstruction extends Instruction {}
 
 // Global declaration for window
 declare global {

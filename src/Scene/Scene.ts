@@ -1,6 +1,6 @@
 import type { GameEngine } from "@/Core/NotUnityEngine";
-import { FocusableElement } from "@/Graphics/FocusableElement.js";
-import type { ISceneElement } from "@/Graphics/SceneElement";
+import { FocusableElement } from "@/Graphics/FocusableElement";
+import { SceneElement, type ISceneElement } from "@/Graphics/SceneElement";
 import $ from "jquery";
 
 export interface IScene {
@@ -14,9 +14,9 @@ export interface IScene {
     onBeforeFocusCallbacks: Array<() => void>;
     onBeforeUnfocusCallbacks: Array<() => void>;
     onAfterFocusCallbacks: Array<() => void>;
-    addObject(obj: ISceneElement): ISceneElement | undefined;
+    addObject<T extends ISceneElement>(obj: T): T | undefined;
     removeObject(obj: ISceneElement): void;
-    getObjectByName(name: string): ISceneElement | null;
+    getObjectByName<T extends ISceneElement = SceneElement>(name: string, type?: { new (...args: any[]): T }): T | null;
     getAllObjects(): ISceneElement[];
     setFocusable(focusable: boolean): void;
     destroy(): void;
@@ -44,7 +44,7 @@ export class Scene {
         this.baseZOffset = baseZOffset;
     }
 
-    addObject(obj: ISceneElement) {
+    addObject<T extends ISceneElement>(obj: T): T | undefined {
         if (!this.sceneObjects.includes(obj)) {
             this.sceneObjects.push(obj);
             obj.scene = this;
@@ -63,15 +63,32 @@ export class Scene {
         }
     }
 
-    getObjectByName(name: string) {
+    getObjectByName<T extends ISceneElement = SceneElement>(
+        name: string,
+        type?: { new (...args: any[]): T },
+    ): T | null {
+        let found: ISceneElement | null = null;
         // Search recursively through objects and their children
         for (const obj of this.sceneObjects) {
             if (obj.sceneData && obj.sceneData.name === name) {
-                return obj;
+                found = obj;
+                break;
             }
             // Search in children recursively
-            const found = this.findInChildren(obj, name);
-            if (found) return found;
+            const childFound = this.findInChildren(obj, name);
+            if (childFound) {
+                found = childFound;
+                break;
+            }
+        }
+        if (found) {
+            if (type && !(found instanceof type)) {
+                console.error(
+                    `Object '${name}' found but is type '${found.constructor.name}', expected '${type.name}'`,
+                );
+                return null;
+            }
+            return found as unknown as T;
         }
         return null;
     }

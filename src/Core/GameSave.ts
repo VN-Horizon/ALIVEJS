@@ -1,5 +1,5 @@
 import { Background } from "@/Graphics/Background";
-import { getCurrentBGM } from "../Audio/Bgm.js";
+import { getCurrentBGM } from "../Audio/Bgm";
 import { getCurrentEvent } from "./Events";
 
 const SAVE_KEY_PREFIX = "alive_save_";

@@ -1,8 +1,14 @@
-import { getCurrentBlockIndex, resolveLastInstruction } from "../Core/Events";
-import { extractDialogData, GetCharacterVoiceName, GetVoiceEventName } from "../Utils/DialogHelper.js";
-import { isAudioUnlocked } from "./🔓.js";
+import { getCurrentBlockIndex, resolveLastInstruction, type Instruction } from "../Core/Events";
+import { extractDialogData, GetCharacterVoiceName, GetVoiceEventName } from "../Utils/DialogHelper";
+import { isAudioUnlocked } from "./🔓";
 
-export function OnPlayDialog(instruction) {
+declare global {
+    interface Window {
+        PlayCurrentVoice: () => void;
+    }
+}
+
+export function OnPlayDialog(instruction: Instruction) {
     if (instruction.params.length < 3) return;
     var voiceName = instruction.stringParams[0];
     var blockIndex = instruction.params[1];
@@ -19,7 +25,7 @@ export function OnPlayDialog(instruction) {
 
 export function PlayCurrentVoice() {
     const instruction = resolveLastInstruction();
-    if (instruction.type !== "PlayDialog") return;
+    if (!instruction || instruction.type !== "PlayDialog") return;
     const lineText = instruction.stringParams[0];
     const lineData = extractDialogData(lineText);
     var voiceName = lineData[0];
@@ -40,7 +46,7 @@ let isCharacterAudioPlaying = false;
 characterAudioElement.loop = false;
 characterAudioElement.volume = 0.7;
 
-function PlayCharacterVoice(characterKey, eventName, lineNumber) {
+function PlayCharacterVoice(characterKey: string, eventName: string, lineNumber: string) {
     if (!isAudioUnlocked()) {
         console.error("Audio locked");
         return;
@@ -53,8 +59,8 @@ function PlayCharacterVoice(characterKey, eventName, lineNumber) {
     });
 }
 
-document.addEventListener("PlayDialogInternal", e => {
-    OnPlayDialog(e.detail);
+document.addEventListener("PlayDialogInternal", (e: Event) => {
+    OnPlayDialog((e as CustomEvent).detail);
 });
 
 window.PlayCurrentVoice = PlayCurrentVoice;
