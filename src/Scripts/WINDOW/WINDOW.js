@@ -1,5 +1,5 @@
 import $ from "jquery";
-import { execUntilNextLine } from "../../Core/Events.js";
+import { execUntilNextLine } from "../../Core/Events";
 import { Button, toButton } from "../../Graphics/Graphics.Button.js";
 import { TMP_Text, TMP_TypeWriter } from "../../Graphics/Graphics.TextMessPoor.js";
 import { setExitListener, setOverrideRightKeys } from "../../InputSystem/InputSystem.Keyboard.ts";

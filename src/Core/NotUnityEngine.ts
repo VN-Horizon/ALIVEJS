@@ -1,39 +1,48 @@
-import $ from 'jquery';
+import $ from "jquery";
 
-export class GameEngine {
-    constructor(containerId = 'gameContainer') {
-        this.container = $(`#${containerId}`)[0] || this.createContainer();
-        this.running = false;
-        this.deltaTime = 0;
-        this.lastFrameTime = 0;
-        this.fps = 24;
-        this.frameTime = 1000 / this.fps;
+export interface IGameEngine {
+    start(): void;
+    stop(): void;
+    getObjectByName(name: string): any;
+    getAllObjects(): any[];
+    pushScene(scene: any): void;
+    popScene(): any;
+    getTopScene(): any;
+    getSceneByName(name: string): any;
+    clearAllScenes(): void;
+    isMountedScene(name: string): boolean;
+    getContainer(): HTMLElement;
+}
 
-        this.callbacks = {
-            init: null,
-            update: null,
-            updatePost: null,
-        };
-
-        this.scenes = []; // Array to hold all scenes
-        this.scenePaths = []; // Array to hold scene paths
-    }
+export class GameEngine implements IGameEngine {
+    containerId: string = "gameContainer";
+    container = $(`#${this.containerId}`)[0] || this.createContainer();
+    running: boolean = false;
+    deltaTime: number = 0;
+    lastFrameTime: number = 0;
+    fps: number = 24;
+    frameTime: number = 1000 / this.fps;
+    callbacks: {
+        init: (() => void) | null;
+        update: ((deltaTime: number) => void) | null;
+        updatePost: ((deltaTime: number) => void) | null;
+    } = {
+        init: null,
+        update: null,
+        updatePost: null,
+    };
+    scenes: any[] = []; // Array to hold all scenes
+    scenePaths: string[] = []; // Array to hold scene paths
 
     createContainer() {
         const $container = $('<div id="gameContainer"></div>');
-        $('body').append($container);
+        $("body").append($container);
         return $container[0];
-    }
-
-    registerCallbacks(init, update, updatePost) {
-        this.callbacks.init = init;
-        this.callbacks.update = update;
-        this.callbacks.updatePost = updatePost;
     }
 
     start() {
         if (this.running) return;
-        
+
         this.running = true;
         this.lastFrameTime = performance.now();
 
@@ -73,11 +82,11 @@ export class GameEngine {
         requestAnimationFrame(this.gameLoop);
     };
 
-    updateScenes(deltaTime) {
+    updateScenes(deltaTime: number) {
         this.scenes.forEach(scene => scene.update(deltaTime));
     }
 
-    getObjectByName(name) {
+    getObjectByName(name: string) {
         for (const scene of this.scenes) {
             const obj = scene.getObjectByName(name);
             if (obj) return obj;
@@ -98,28 +107,28 @@ export class GameEngine {
     pushScene(scene) {
         // Disable focusability on all existing scenes
         this.scenes.forEach(s => s.setFocusable(false));
-        
+
         // Add new scene
         this.scenes.push(scene);
         this.scenePaths.push(scene.name);
-        
+
         // Enable focusability only on the new scene
         scene.setFocusable(true);
     }
 
     popScene() {
         if (this.scenes.length === 0) return null;
-        
+
         // Remove and destroy the top scene
         const scene = this.scenes.pop();
         scene.destroy();
         this.scenePaths.pop();
-        
+
         // Enable focus on the new top scene
         if (this.scenes.length > 0) {
             this.scenes[this.scenes.length - 1].setFocusable(true);
         }
-        
+
         return scene;
     }
 
