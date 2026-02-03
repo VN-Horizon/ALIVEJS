@@ -1,5 +1,5 @@
-import { SceneElement } from './Graphics.SceneElement.js';
-import $ from 'jquery'
+import $ from "jquery";
+import { SceneElement } from "./Graphics.SceneElement";
 
 export class FocusableElement extends SceneElement {
     constructor(data, parent = null, scene) {
@@ -9,10 +9,10 @@ export class FocusableElement extends SceneElement {
         this.permanentlyNonFocusable = data && data.focusable === false;
 
         if (this.permanentlyNonFocusable) {
-            console.log('Element ' + (data.name || '') + ' set as non-focusable by data.');
-            $(this.domElement).attr('tabindex', '-1').addClass('non-focusable');
+            console.log("Element " + (data.name || "") + " set as non-focusable by data.");
+            $(this.domElement).attr("tabindex", "-1").addClass("non-focusable");
         } else {
-            $(this.domElement).addClass('focusable');
+            $(this.domElement).addClass("focusable");
         }
 
         this.updateFocusability();
@@ -27,21 +27,21 @@ export class FocusableElement extends SceneElement {
         if (!this.domElement) return;
         const $el = $(this.domElement);
         if (enabled) {
-            $el.css('pointer-events', 'auto');
-            $el.removeAttr('tabindex');
-            $el.prop('disabled', false);
-            $el.removeClass('non-focusable').addClass('focusable');
+            $el.css("pointer-events", "auto");
+            $el.removeAttr("tabindex");
+            $el.prop("disabled", false);
+            $el.removeClass("non-focusable").addClass("focusable");
         } else {
-            if (this.scene && $el.is(':focus')) this.scene.lastFocusedElement = this.domElement;
-            $el.css('pointer-events', 'none');
-            $el.prop('disabled', true);
-            $el.attr('tabindex', '-1');
-            if ($el.is(':focus')) $el.blur();
-            $el.removeClass('focusable').addClass('non-focusable');
+            if (this.scene && $el.is(":focus")) this.scene.lastFocusedElement = this.domElement;
+            $el.css("pointer-events", "none");
+            $el.prop("disabled", true);
+            $el.attr("tabindex", "-1");
+            if ($el.is(":focus")) $el.blur();
+            $el.removeClass("focusable").addClass("non-focusable");
         }
-        if(this.permanentlyNonFocusable) {
-            $el.attr('tabindex', '-1').addClass('non-focusable');
-            if ($el.is(':focus')) $el.blur();
+        if (this.permanentlyNonFocusable) {
+            $el.attr("tabindex", "-1").addClass("non-focusable");
+            if ($el.is(":focus")) $el.blur();
         }
     }
 
@@ -64,12 +64,16 @@ export class FocusableElement extends SceneElement {
         if (!this.domElement) return false;
         const $el = $(this.domElement);
 
-        const isFocusableNow = !$el.prop('disabled')
-            && $el.attr('tabindex') !== '-1'
-            && ($el.css('pointer-events') || '').toLowerCase() !== 'none'
-            && $el.is(':visible')
-            && $el.hasClass('focusable') && !$el.hasClass('non-focusable')
-            && this.scene ? this.scene.isFocusable !== false : true;
+        const isFocusableNow =
+            !$el.prop("disabled") &&
+            $el.attr("tabindex") !== "-1" &&
+            ($el.css("pointer-events") || "").toLowerCase() !== "none" &&
+            $el.is(":visible") &&
+            $el.hasClass("focusable") &&
+            !$el.hasClass("non-focusable") &&
+            this.scene
+                ? this.scene.isFocusable !== false
+                : true;
 
         if (!isFocusableNow) return false;
 
@@ -78,14 +82,16 @@ export class FocusableElement extends SceneElement {
 
         try {
             // Prefer native focus with preventScroll to avoid jumping
-            if (typeof this.domElement.focus === 'function') {
+            if (typeof this.domElement.focus === "function") {
                 this.domElement.focus({ preventScroll: true });
             } else {
-                $el.trigger('focus');
+                $el.trigger("focus");
             }
         } catch (e) {
             // Fallback if options aren't supported
-            try { this.domElement.focus(); } catch (_) {}
+            try {
+                this.domElement.focus();
+            } catch (_) {}
         }
 
         return document && document.activeElement === this.domElement;
@@ -93,7 +99,7 @@ export class FocusableElement extends SceneElement {
 
     static updateFocusabilityRecursive(obj) {
         if (!obj) return;
-        if (typeof obj.updateFocusability === 'function') obj.updateFocusability();
+        if (typeof obj.updateFocusability === "function") obj.updateFocusability();
         if (obj.children && obj.children.length) {
             obj.children.forEach(child => FocusableElement.updateFocusabilityRecursive(child));
         }
