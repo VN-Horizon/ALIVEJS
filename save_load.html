@@ -4,7 +4,6 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Save/Load</title>
-        <script src="./lib/jquery-3.7.1.min.js"></script>
         <script src="/src/InputSystem/InputSystem.Gamepad.ts" type="module"></script>
         <script src="/src/InputSystem/InputSystem.Keyboard.ts" type="module"></script>
         <style>
@@ -50,28 +49,6 @@
                 height: 400px;
                 overflow-y: auto;
                 padding: 10px;
-            }
-
-            .save-item {
-                background-color: #3a3a3a;
-                border: 1px solid #4a4a4a;
-                border-radius: 4px;
-                padding: 15px;
-                margin-bottom: 10px;
-                cursor: pointer;
-                transition:
-                    background-color 0.2s,
-                    border-color 0.2s;
-            }
-
-            .save-item:hover {
-                background-color: #4a4a4a;
-                border-color: #5a5a5a;
-            }
-
-            .save-item.selected {
-                background-color: #4a5a7a;
-                border-color: #6a7a9a;
             }
 
             .save-item h3 {
@@ -257,7 +234,7 @@
             function selectSlot(slotIndex) {
                 const items = document.querySelectorAll(".save-item");
                 items.forEach(item => {
-                    if (item.dataset.slotIndex == slotIndex) {
+                    if (item.dataset.slotIndex === slotIndex) {
                         item.classList.add("selected");
                         selectedSlot = slotIndex;
                     } else {

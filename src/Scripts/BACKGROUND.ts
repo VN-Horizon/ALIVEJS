@@ -1,6 +1,6 @@
 import $ from "jquery";
-import { Background } from "../Graphics/Background";
-import { createBlankScene } from "../Scene/SceneManagement";
+import { Background } from "@/Graphics/Background";
+import { createBlankScene } from "@/Scene/SceneManagement";
 
 export async function loadBackgroundScene() {
     const backgroundScene = createBlankScene("BACKGROUND");

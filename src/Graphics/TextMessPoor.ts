@@ -1,6 +1,6 @@
-import type { SceneElementData } from "@/Scene/SceneData";
+import type {SceneElementData} from "@/Scene/SceneData";
 import $ from "jquery";
-import { SceneElement } from "./SceneElement";
+import {SceneElement} from "./SceneElement";
 
 export interface TMP_FontOptions {
     size?: number;
@@ -44,7 +44,7 @@ export class TMP_Text extends SceneElement {
     }
 
     buildBaseStyle(extra = {}) {
-        const baseStyle = super.buildBaseStyle({
+        return super.buildBaseStyle({
             "font-size": `${this.fontSize}px`,
             color: this.color,
             display: this.visible ? "inline-block" : "none",
@@ -52,12 +52,6 @@ export class TMP_Text extends SceneElement {
             "font-weight": this.fontWeight,
             ...extra,
         });
-
-        return baseStyle;
-    }
-
-    async loadImage(path: string) {
-        return;
     }
 
     setText(newText: string) {

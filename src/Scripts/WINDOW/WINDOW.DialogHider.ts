@@ -1,5 +1,5 @@
 import $ from "jquery";
-import { setExitListener } from "../../InputSystem/InputSystem.Keyboard";
+import { setExitListener } from "@/InputSystem/InputSystem.Keyboard";
 import { pushPauseScreen } from "../SYSTEM";
 
 export function hideDialogWindow() {

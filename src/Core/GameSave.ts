@@ -1,5 +1,5 @@
 import { Background } from "@/Graphics/Background";
-import { getCurrentBGM } from "../Audio/Bgm";
+import { getCurrentBGM } from "@/Audio/Bgm";
 import { getCurrentEvent } from "./Events";
 
 const SAVE_KEY_PREFIX = "alive_save_";
@@ -86,39 +86,6 @@ export function loadGame(slotIndex: number) {
         console.error("Failed to load game:", error);
         return null;
     }
-}
-
-export function getAllSaves(): GameState[] {
-    const saves = [];
-
-    for (let i = 0; i < MAX_SAVE_SLOTS; i++) {
-        const saveKey = SAVE_KEY_PREFIX + i;
-        const saveData = localStorage.getItem(saveKey);
-
-        if (saveData) {
-            try {
-                const gameState = JSON.parse(saveData);
-                saves.push({
-                    slotIndex: i,
-                    ...gameState,
-                });
-            } catch (error) {
-                console.error(`Failed to parse save in slot ${i}:`, error);
-            }
-        }
-    }
-
-    return saves;
-}
-
-export function deleteSave(slotIndex: number) {
-    if (slotIndex < 0 || slotIndex >= MAX_SAVE_SLOTS) {
-        throw new Error(`Invalid slot index: ${slotIndex}`);
-    }
-
-    const saveKey = SAVE_KEY_PREFIX + slotIndex;
-    localStorage.removeItem(saveKey);
-    console.log(`Save deleted from slot ${slotIndex}`);
 }
 
 export function applyGameState(gameState: GameState): boolean {

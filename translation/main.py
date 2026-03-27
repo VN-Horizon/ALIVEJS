@@ -38,7 +38,26 @@ if __name__ == "__main__":
         del second_col[i]
         del third_col[i]
 
-    with open("translation.bin", 'wb') as f:
+    with open("choices.txt", 'r') as f:
+        lines = f.readlines()
+        occured = set()
+        fix = {"勘違いだと去る・・・": "当作是误会，离开……", 
+                "いや、ビシッと言ってやる": "好好教训她一顿",
+                "もうちょっと問い詰める": "再追问一下",
+                "お仕置きポイントの事を聞く": "询问有关惩罚点数的事",
+                "寝てる": "趴在桌子上睡觉"}
+        for i in range(108):
+            if lines[i].strip() in occured:
+                continue
+            occured.add(lines[i].strip())
+            second_col.append(lines[i].strip())
+            if lines[i].strip() in fix.keys():
+                third_col.append(fix[lines[i].strip()])
+                continue
+            third_col.append(lines[i+108].strip())
+            # print(f"{lines[i].strip():<30} {lines[i+108].strip()}")
+
+    with open("../assets/events/translation.bin", 'wb') as f:
         for i in range(len(second_col)):
             # Encode strings as UTF-8 and write their lengths followed by the encoded data
             second_encoded = second_col[i].encode('utf-8')

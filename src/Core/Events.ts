@@ -1,6 +1,6 @@
 import $ from "jquery";
 import protobuf from "protobufjs";
-import { extractDialogData } from "../Utils/DialogHelper";
+import { extractDialogData } from "@/Utils/DialogHelper";
 
 // -- Interfaces --
 

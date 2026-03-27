@@ -10,7 +10,7 @@ export class Toggle extends Button {
 
         super(data, parent, scene);
 
-        this.buttonId = `toggle-${Math.random().toString(36).substr(2, 9)}`;
+        this.buttonId = `toggle-${Math.random().toString(36).substring(2, 11)}`;
         this.isButton = true;
         this.transform.z = data.z || 0;
         this.cursor = data.cursor || "pointer";
