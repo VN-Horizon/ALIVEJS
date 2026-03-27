@@ -1,8 +1,8 @@
-import { CharacterNameToVoiceKey } from "../Constants";
-import { toButton } from "../Graphics/Button";
-import { SceneElement } from "../Graphics/SceneElement";
-import { setExitListener } from "../InputSystem/InputSystem.Keyboard";
-import { loadScene } from "../Scene/SceneManagement";
+import { CharacterNameToVoiceKey } from "@/Constants";
+import { toButton } from "@/Graphics/Button";
+import { SceneElement } from "@/Graphics/SceneElement";
+import { setExitListener } from "@/InputSystem/InputSystem.Keyboard";
+import { loadScene } from "@/Scene/SceneManagement";
 
 export async function initGallery() {
     // Load gallery data from JSON

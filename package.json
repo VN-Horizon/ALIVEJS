@@ -20,6 +20,7 @@
     },
     "dependencies": {
         "jquery": "^4.0.0",
+        "litegraph.js": "^0.7.18",
         "protobufjs": "^8.0.0"
     }
 }

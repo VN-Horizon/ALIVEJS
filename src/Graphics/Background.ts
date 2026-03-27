@@ -27,7 +27,7 @@ export class Background extends SceneElement {
         data.isBackground = true;
         super(data, parent, scene);
 
-        this.backgroundId = `bg-${Math.random().toString(36).substr(2, 9)}`;
+        this.backgroundId = `bg-${Math.random().toString(36).substring(2, 11)}`;
         this.backgroundSize = data.backgroundSize || "auto";
         this.backgroundPosition = data.backgroundPosition || "center";
         this.backgroundRepeat = data.backgroundRepeat || "no-repeat";
@@ -82,12 +82,6 @@ export class Background extends SceneElement {
     updateScrollPosition() {
         if (!this.domElement || ((this.scrollSpeed?.x || 0) == 0 && (this.scrollSpeed?.y || 0) == 0)) return;
         $(this.domElement).css("background-position", `${this.scrollOffset?.x || 0}px ${this.scrollOffset?.y || 0}px`);
-    }
-
-    resetScrollOffset() {
-        this.scrollOffset.x = 0;
-        this.scrollOffset.y = 0;
-        this.updateScrollPosition();
     }
 
     update(deltaTime: number) {

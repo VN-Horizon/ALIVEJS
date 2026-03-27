@@ -1,3 +1,4 @@
+import $ from "jquery";
 import { playBGM } from "../Audio/Bgm";
 import { execUntilNextLine } from "../Core/Events";
 import { applyGameState, loadGame } from "../Core/GameSave";

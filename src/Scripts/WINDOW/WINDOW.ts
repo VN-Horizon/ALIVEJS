@@ -1,11 +1,11 @@
 import type { AnimatedSceneElement } from "@/Graphics/AnimatedSceneElement";
 import type { IScene } from "@/Scene/Scene";
 import $ from "jquery";
-import { execUntilNextLine } from "../../Core/Events";
-import { Button, toButton } from "../../Graphics/Button";
-import { TMP_Text, TMP_TypeWriter } from "../../Graphics/TextMessPoor";
-import { setExitListener, setOverrideRightKeys } from "../../InputSystem/InputSystem.Keyboard";
-import { loadScene } from "../../Scene/SceneManagement";
+import { execUntilNextLine } from "@/Core/Events";
+import { Button, toButton } from "@/Graphics/Button";
+import { TMP_Text, TMP_TypeWriter } from "@/Graphics/TextMessPoor";
+import { setExitListener, setOverrideRightKeys } from "@/InputSystem/InputSystem.Keyboard";
+import { loadScene } from "@/Scene/SceneManagement";
 import { pushPauseScreen } from "../SYSTEM";
 import { _hideDialogWindow } from "./WINDOW.DialogHider";
 import { initSelectionsBox } from "./WINDOW.SelectionsBox";

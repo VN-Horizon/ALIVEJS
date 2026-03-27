@@ -32,6 +32,6 @@ export function playSE(name: string) {
 }
 
 document.addEventListener("PlaySe", (e: Event) => {
-    if (window.skipping === true) return;
+    if (window.skipping) return;
     playSE((e as CustomEvent).detail.stringParams[0]);
 });

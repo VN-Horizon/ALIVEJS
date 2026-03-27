@@ -6,47 +6,48 @@ import "./InputSystem/InputSystem.Gamepad.ts";
 import "./InputSystem/InputSystem.Keyboard.ts";
 import { loadStartScene } from "./Scripts/START";
 
+import { initTranslation } from "@/Utils/Translator";
 import { initBGM } from "./Audio/Bgm";
 import { initSE } from "./Audio/Se";
 import "./Audio/Voice";
 import "./Audio/🔓";
-
-// import { initEnginePane } from "./Debug/EnginePane";
-// import { initSceneGraphPane } from "./Debug/SceneGraphPane";
+import { initEventGraphOverlay } from "./Debug/Graph/EventGraphEditor";
 
 declare global {
-    interface Window {
-        getEngine: () => GameEngine;
-        exit: () => void;
-    }
+  interface Window {
+    getEngine: () => GameEngine;
+    exit: () => void;
+    isSelecting: boolean;
+    translationPlainMap?: Record<string, string>;
+  }
 }
 
 let notUnityEngine = new GameEngine();
-// initEnginePane(notUnityEngine);
-// initSceneGraphPane();
+initEventGraphOverlay();
 notUnityEngine.start();
 
 window.getEngine = () => notUnityEngine;
 
 async function main() {
-    try {
-        console.log("Initializing application...");
-        const events = await loadEvents();
-        initBGM();
-        initSE();
-        await loadStartScene();
-        $("#black-overlay").fadeOut(600);
-    } catch (error: any) {
-        alert(`Failed to initialize:\n${error.message}`);
-        console.error(error);
-    }
+  try {
+    console.log("Initializing application...");
+    await loadEvents();
+    initBGM();
+    initSE();
+    await loadStartScene();
+    await initTranslation();
+    $("#black-overlay").fadeOut(600);
+  } catch (error: any) {
+    alert(`Failed to initialize:\n${error.message}`);
+    console.error(error);
+  }
 }
 
 window.exit = () => {
-    $("#black-overlay").fadeIn(600, () => {
-        window.close();
-        $("#gameContainer").remove();
-    });
+  $("#black-overlay").fadeIn(600, () => {
+    window.close();
+    $("#gameContainer").remove();
+  });
 };
 
-main();
+main().then(() => console.log("Init Finished."));

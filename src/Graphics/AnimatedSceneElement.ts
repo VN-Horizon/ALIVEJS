@@ -115,22 +115,6 @@ export class AnimatedSceneElement extends SceneElement {
         this.setFrame(nextIndex);
     }
 
-    previousFrame() {
-        if (this.children.length === 0) return;
-
-        let prevIndex = this.currentFrame - 1;
-
-        if (prevIndex < 0) {
-            if (this.loop) {
-                prevIndex = this.children.length - 1;
-            } else {
-                prevIndex = 0;
-            }
-        }
-
-        this.setFrame(prevIndex);
-    }
-
     update(deltaTime: number) {
         super.update(deltaTime);
 

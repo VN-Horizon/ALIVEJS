@@ -29,7 +29,7 @@ function pollGamepad() {
         if ($focused.length) {
             $focused.addClass('active');
         } else {
-            $('.focusable').first().focus().addClass('active');
+            $('.focusable').first().trigger("focus").addClass('active');
         }
     } else if (!gamepad.buttons[0]?.pressed && gamepadState.buttons[0]) {
         const $current = $('.focusable:focus');

@@ -25,7 +25,7 @@ export interface IScene {
     show(): void;
 }
 
-export class Scene {
+export class Scene implements IScene {
     name: string;
     engine: GameEngine;
     baseZOffset: number = 0;
@@ -129,7 +129,7 @@ export class Scene {
         if (!this.lastFocusedElement) return;
         const $last = $(this.lastFocusedElement);
         if ($last.length && $last.is(":visible")) {
-            $last.focus();
+            $last.trigger("focus");
         }
 
         if (focusable) this.onAfterFocusCallbacks.forEach(cb => cb());
