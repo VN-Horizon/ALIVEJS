@@ -1,6 +1,6 @@
-import $ from "jquery";
 import { Background } from "@/Graphics/Background";
 import { createBlankScene } from "@/Scene/SceneManagement";
+import $ from "jquery";
 
 export async function loadBackgroundScene() {
     const backgroundScene = createBlankScene("BACKGROUND");
@@ -47,23 +47,24 @@ export async function loadBackgroundScene() {
             backgroundCG?.updateBackgroundImage(null);
             return;
         }
-        backgroundCG?.updateBackgroundImage(`/assets/scenes/BG/${stringParams[0]}/${stringParams[1]}.webp`);
+        backgroundCG?.updateBackgroundImage(`/assets/scenes/BG/${stringParams[0]}/${stringParams[1]}.avif`);
     };
-    const transitionToGraphicsHandler = (e: any) => {
+    const transitionToGraphicsHandler = (e: any, paramOffset: number = 0) => {
         const { stringParams } = (e as CustomEvent).detail;
         if (stringParams.length < 4) return;
-        if (stringParams[2] === "0" || stringParams[3] === "0") {
-            backgroundCG?.updateBackgroundImage(`/assets/scenes/CG/BLACK/BLACK.webp`);
+        if (stringParams[paramOffset] === "0" || stringParams[paramOffset + 1] === "0") {
+            backgroundCG?.updateBackgroundImage(`/assets/scenes/CG/BLACK/BLACK.avif`);
             return;
         }
-        backgroundCG?.updateBackgroundImage(`/assets/scenes/BG/${stringParams[2]}/${stringParams[3]}.webp`);
+        backgroundCG?.updateBackgroundImage(`/assets/scenes/BG/${stringParams[paramOffset]}/${stringParams[paramOffset+1]}.avif`);
     };
     const setCgHandler = (e: any) => {
         const { stringParams } = (e as CustomEvent).detail;
         if (stringParams.length < 1) return;
+        const bgName = stringParams[0] === "0"? "BLACK" : stringParams[0].toUpperCase();
         portrait?.updateBackgroundImage(null);
         backgroundCG?.updateBackgroundImage(
-            `/assets/scenes/CG/${stringParams[0].toUpperCase()}/${stringParams[0].toUpperCase()}.webp`,
+            `/assets/scenes/CG/${bgName}/${bgName}.avif`,
         );
     };
 
@@ -74,7 +75,7 @@ export async function loadBackgroundScene() {
             portrait?.updateBackgroundImage(null);
             return;
         }
-        portrait?.updateBackgroundImage(`/assets/scenes/Portraits/${stringParams[0]}/${stringParams[1]}.webp`);
+        portrait?.updateBackgroundImage(`/assets/scenes/Portraits/${stringParams[0]}/${stringParams[1]}.avif`);
     };
 
     // Handler to restore background image from saved state
@@ -85,7 +86,8 @@ export async function loadBackgroundScene() {
     };
 
     $(document).on("SetBgImg", setBgImgHandler);
-    $(document).on("TransitionToGraphics TransitionToGraphicsFade", transitionToGraphicsHandler);
+    $(document).on("TransitionToGraphicsFade", e => transitionToGraphicsHandler(e, 0));
+    $(document).on("TransitionToGraphics", e => transitionToGraphicsHandler(e, 2));
     $(document).on("ShowCg", setCgHandler);
     $(document).on("SetCharaImg", setCharaImgHandler);
     $(document).on("RestoreGraphics", restoreGraphicsHandler);

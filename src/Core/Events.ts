@@ -1,6 +1,6 @@
+import { extractDialogData } from "@/Utils/DialogHelper";
 import $ from "jquery";
 import protobuf from "protobufjs";
-import { extractDialogData } from "@/Utils/DialogHelper";
 
 // -- Interfaces --
 
@@ -201,9 +201,8 @@ export async function loadEvents(): Promise<any> {
             defaults: true, // includes default values
         }) as { events: EventBlock[]; textPool: string[] };
 
-        console.log("Events loaded successfully!", eventMappings.events);
         if (eventMappings.events && eventMappings.events.length > 0) {
-            console.log("Events loaded successfully!", eventMappings.events[0].instructions);
+            console.log("Events loaded successfully!");
         }
 
         // Initialize screenplay context with loaded data

@@ -67,7 +67,7 @@ export class Background extends SceneElement {
             console.error("Cannot load background image: Scene is null");
             return;
         }
-        const fullImagePath = `/assets/scenes/${this.scene.name}/${path}.webp`;
+        const fullImagePath = `/assets/scenes/${this.scene.name}/${path}.avif`;
         this.updateBackgroundImage(fullImagePath);
     }
 

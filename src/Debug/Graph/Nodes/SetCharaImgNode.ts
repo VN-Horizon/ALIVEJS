@@ -33,6 +33,6 @@ export class SetCharaImgNode extends ImagePreviewNode {
         const p = this.properties.stringParams;
         if (!p || p.length < 2) return null;
         if (p[0] === "0" || p[1] === "0") return null;
-        return `/assets/scenes/Portraits/${p[0]}/${p[1]}.webp`;
+        return `/assets/scenes/Portraits/${p[0]}/${p[1]}.avif`;
     }
 }

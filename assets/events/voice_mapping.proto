@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package voice_mapping;
+
+
+message VoiceInfo {
+  // the grouped audio file name
+  string bank = 1;
+  // the time offset in seconds for this voice line within the grouped audio file
+  float time = 2;
+  // the duration in seconds of this voice line
+  float duration = 3;
+}
+
+message PreloadInfo {
+  // the grouped audio file name that contains voice lines of this chapter
+  repeated string bank = 2;
+}
+
+
+message VoiceMappings {
+  string version = 1;
+  // mapping from the original voice file name (without extension) to the new grouped audio file and timing info
+  map<string, VoiceInfo> voices = 2;
+  // mapping from chapter name to the grouped audio file that needs to be preloaded for that chapter
+  map<string, PreloadInfo> preload_blocks = 3;
+}
+

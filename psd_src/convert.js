@@ -1,8 +1,58 @@
 const fs = require('fs').promises;
 const path = require('path');
-const { Canvas } = require('canvas');
-require('ag-psd/initialize-canvas');
-const { readPsd } = require('ag-psd');
+const { PNG } = require('pngjs');
+const { initializeCanvas, readPsd } = require('ag-psd');
+
+function createImageData(width, height) {
+  return {
+    width,
+    height,
+    data: new Uint8ClampedArray(width * height * 4),
+  };
+}
+
+// ag-psd requires canvas initialization in Node.js. For this script we only
+// need ImageData, so we provide a minimal shim and skip thumbnail decoding.
+initializeCanvas(
+  (width, height) => ({
+    width,
+    height,
+    getContext() {
+      return {
+        createImageData,
+      };
+    },
+  }),
+  undefined,
+  createImageData
+);
+
+function imageDataToPngBuffer(imageData) {
+  if (!imageData || !imageData.data) {
+    throw new Error('Invalid image data');
+  }
+
+  const png = new PNG({ width: imageData.width, height: imageData.height });
+  const src = imageData.data;
+  const dst = png.data;
+
+  if (src instanceof Uint8ClampedArray || src instanceof Uint8Array) {
+    dst.set(src);
+  } else if (src instanceof Uint16Array) {
+    for (let i = 0; i < src.length; i++) {
+      dst[i] = src[i] >>> 8;
+    }
+  } else if (src instanceof Float32Array) {
+    for (let i = 0; i < src.length; i++) {
+      const value = Math.round(src[i] * 255);
+      dst[i] = Math.max(0, Math.min(255, value));
+    }
+  } else {
+    throw new Error(`Unsupported image data array type: ${src.constructor?.name || typeof src}`);
+  }
+
+  return PNG.sync.write(png);
+}
 
 const PSD_SRC_DIR = __dirname;
 const OUTPUT_BASE_DIR = path.join(PSD_SRC_DIR, '..', 'assets', 'scenes');
@@ -31,7 +81,7 @@ async function getPsdFiles() {
   const entries = await fs.readdir(PSD_SRC_DIR, { withFileTypes: true });
 
   for (const entry of entries) {
-    if (entry.isDirectory() && entry.name !== 'node_modules' && (entry.name == 'UI' || entry.name == 'Calendar')) {
+    if (entry.isDirectory() && entry.name !== 'node_modules' && (entry.name !== "Cutscenes")) {
       const folderPath = path.join(PSD_SRC_DIR, entry.name);
       const files = await fs.readdir(folderPath);
 
@@ -78,6 +128,10 @@ function buildLayerHierarchy(psd) {
       layerData.left = layer.left;
       layerData.top = layer.top;
     }
+    if (layer.imageData !== undefined) {
+      layerData.width = layer.imageData.width;
+      layerData.height = layer.imageData.height;
+    }
 
     // Process children (groups/folders)
     if (layer.children && layer.children.length > 0) {
@@ -100,7 +154,7 @@ function buildLayerHierarchy(psd) {
 }
 
 /**
- * Export layers as WebP files
+ * Export layers as PNG files
  */
 async function exportLayers(psd, psdFileName, outputDir) {
   let layerCount = 0;
@@ -111,15 +165,17 @@ async function exportLayers(psd, psdFileName, outputDir) {
     const sanitizedName = sanitizeLayerName(layer.name);
     const layerPath = parentPath ? `${parentPath}/${sanitizedName}` : sanitizedName;
 
-    // Export layer as WebP if it's a visible layer with content
+    // Export layer as PNG if it's a visible layer with content
     if (layer.type !== 'group' && layer.visible !== false) {
       try {
-        // Get layer canvas
-        if (layer.canvas) {
+        // Get layer image content
+        if (layer.imageData || layer.canvas) {
           // Use group path in filename to avoid duplicates
           const fileName = parentPath ? `${parentPath.replace(/\//g, '-')}-${sanitizedName}.png` : `${sanitizedName}.png`;
           const filePath = path.join(outputDir, fileName);
-          const buffer = layer.canvas.toBuffer('image/png');
+          const buffer = layer.imageData
+            ? imageDataToPngBuffer(layer.imageData)
+            : layer.canvas.toBuffer('image/png');
           await fs.writeFile(filePath, buffer);
 
           layerCount++;
@@ -151,19 +207,21 @@ async function exportLayers(psd, psdFileName, outputDir) {
 }
 
 /**
- * Export entire PSD as a single WebP image
+ * Export entire PSD as a single PNG image
  */
 async function exportPsdAsImage(psd, psdFileName, outputDir) {
   try {
-    if (!psd.canvas) {
-      console.log(`  ⚠ Skipped: No canvas data available`);
+    if (!psd.imageData && !psd.canvas) {
+      console.log(`  ⚠ Skipped: No image data available`);
       return false;
     }
 
     const psdNameWithoutExt = path.parse(psdFileName).name;
     const fileName = `${psdNameWithoutExt}.png`;
     const filePath = path.join(outputDir, fileName);
-    const buffer = psd.canvas.toBuffer('image/png');
+    const buffer = psd.imageData
+      ? imageDataToPngBuffer(psd.imageData)
+      : psd.canvas.toBuffer('image/png');
     await fs.writeFile(filePath, buffer);
 
     console.log(`✓ Rendered: ${fileName}`);
@@ -184,7 +242,10 @@ async function processPsd(psdFile) {
   try {
     // Read PSD file
     const psdBuffer = await fs.readFile(psdFile.path);
-    const psd = readPsd(psdBuffer);
+    const psd = readPsd(psdBuffer, {
+      useImageData: true,
+      skipThumbnail: true,
+    });
 
     // Create output directory structure
     const psdNameWithoutExt = path.parse(psdFile.name).name;

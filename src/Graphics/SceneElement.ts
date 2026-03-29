@@ -154,7 +154,7 @@ export class SceneElement {
         if (this.domElement?.tagName === "DIV") {
             return;
         }
-        const fullImagePath = `/assets/scenes/${this.scene?.name}/${path}.webp`;
+        const fullImagePath = `/assets/scenes/${this.scene?.name}/${path}.avif`;
         $(this.domElement).attr("src", fullImagePath);
         this.syncDom();
     }

@@ -1,13 +1,45 @@
+import * as ogvModule from "ogv";
 import { isAudioUnlocked } from "./🔓";
 
-const seList: { [key: string]: HTMLAudioElement } = {};
-let currentSE: HTMLAudioElement | null = null;
+const ogvRuntime = (
+    (ogvModule as unknown as { default?: unknown }).default ?? ogvModule
+) as {
+    OGVLoader: { base: string };
+    OGVPlayer: new () => HTMLMediaElement;
+};
+
+if (!ogvRuntime?.OGVLoader || !ogvRuntime?.OGVPlayer) {
+    throw new Error("ogv runtime did not expose OGVLoader/OGVPlayer");
+}
+
+ogvRuntime.OGVLoader.base = "/ogv";
+
+const seList: { [key: string]: HTMLMediaElement } = {};
+let currentSE: HTMLMediaElement | null = null;
+
+function attachHiddenPlayer(player: HTMLMediaElement) {
+    player.style.display = "none";
+    if (document.body) {
+        document.body.appendChild(player as unknown as Node);
+        return;
+    }
+
+    window.addEventListener(
+        "DOMContentLoaded",
+        () => {
+            document.body.appendChild(player as unknown as Node);
+        },
+        { once: true },
+    );
+}
 
 export function initSE() {
     for (let i = 1; i < 37; i++) {
-        const audioElement = new Audio(`/assets/audio/se/SE_${i.toString().padStart(2, "0")}.mp3`);
+        const audioElement = new ogvRuntime.OGVPlayer();
+        audioElement.src = `/assets/audio/se/SE_${i.toString().padStart(2, "0")}.ogg`;
         audioElement.loop = false;
         audioElement.volume = 0.5;
+        attachHiddenPlayer(audioElement);
         const trackName = `se_${i.toString().padStart(2, "0")}`;
         seList[trackName] = audioElement;
     }
@@ -25,9 +57,14 @@ export function playSE(name: string) {
     }
     currentSE = seList[name];
     if (currentSE) {
-        currentSE.play().catch(err => {
-            console.warn("Play SE failed:", err);
-        });
+        const playPromise = currentSE.play() as unknown as Promise<void> | undefined;
+        if (playPromise !== undefined) {
+            playPromise.catch(err => {
+                if (err.name !== "AbortError") {
+                    console.warn("Play SE failed:", err);
+                }
+            });
+        }
     }
 }
 

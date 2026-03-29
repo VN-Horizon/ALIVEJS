@@ -42,8 +42,8 @@ export class TransitionToGraphicsNode extends ImagePreviewNode {
         // [?, ?, category, name]
         const p = this.properties.stringParams;
         if (!p || p.length < 4) return null;
-        if (p[2] === "0" || p[3] === "0") return "/assets/scenes/CG/BLACK/BLACK.webp";
-        return `/assets/scenes/BG/${p[2]}/${p[3]}.webp`;
+        if (p[2] === "0" || p[3] === "0") return "/assets/scenes/CG/BLACK/BLACK.avif";
+        return `/assets/scenes/BG/${p[2]}/${p[3]}.avif`;
     }
 }
 
@@ -88,7 +88,7 @@ export class TransitionToGraphicsFadeNode extends ImagePreviewNode {
         // Same as TransitionToGraphics
         const p = this.properties.stringParams;
         if (!p || p.length < 4) return null;
-        if (p[2] === "0" || p[3] === "0") return "/assets/scenes/CG/BLACK/BLACK.webp";
-        return `/assets/scenes/BG/${p[2]}/${p[3]}.webp`;
+        if (p[2] === "0" || p[3] === "0") return "/assets/scenes/CG/BLACK/BLACK.avif";
+        return `/assets/scenes/BG/${p[2]}/${p[3]}.avif`;
     }
 }
