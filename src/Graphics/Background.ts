@@ -22,6 +22,11 @@ export class Background extends SceneElement {
     transition: string | null;
     scrollSpeed: { x: number; y: number };
     scrollOffset: { x: number; y: number } = { x: 0, y: 0 };
+    
+    private layerActive: HTMLElement;
+    private layerInactive: HTMLElement;
+    private _transitionTimeout: number | null = null;
+    private _loadingImageSrc: string | null = null;
 
     constructor(data: BackgroundData, parent: SceneElement | null = null, scene: IScene | null = null) {
         data.isBackground = true;
@@ -39,7 +44,24 @@ export class Background extends SceneElement {
             y: data.scrollSpeedY || 0,
         };
 
+        this.layerActive = document.createElement("div");
+        this.layerInactive = document.createElement("div");
+
         this.recreateDOMAsBackground();
+    }
+
+    private setupLayer(layer: HTMLElement) {
+        $(layer).css({
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            "background-size": this.backgroundSize,
+            "background-repeat": this.backgroundRepeat,
+            "background-position": this.backgroundPosition,
+            opacity: 0,
+        });
     }
 
     recreateDOMAsBackground() {
@@ -52,12 +74,19 @@ export class Background extends SceneElement {
             .attr("layer-name", this.sceneData.name || "Background")
             .css(
                 this.buildBaseStyle({
-                    "background-size": this.backgroundSize,
-                    "background-repeat": this.backgroundRepeat,
-                    "background-position": this.backgroundPosition,
-                    transition: this.transition || "none",
+                    position: "absolute",
+                    overflow: "hidden"
                 }),
             )[0];
+
+        this.setupLayer(this.layerActive);
+        this.setupLayer(this.layerInactive);
+
+        $(this.layerActive).css("opacity", 1);
+        $(this.layerInactive).css("opacity", 0);
+
+        this.domElement.appendChild(this.layerInactive);
+        this.domElement.appendChild(this.layerActive);
 
         super.syncDom();
     }
@@ -73,15 +102,100 @@ export class Background extends SceneElement {
 
     updateBackgroundImage(backgroundImageUrl: string | null = null) {
         if (!this.domElement) return;
+
+        backgroundImageUrl = backgroundImageUrl || "";
         this.backgroundImageUrl = backgroundImageUrl;
-        if (!backgroundImageUrl) this.backgroundImageUrl = "";
-        $(this.domElement).css("background-image", `url('${this.backgroundImageUrl}')`);
+
+        if (this._loadingImageSrc === backgroundImageUrl) {
+            // Already loading this image
+            return;
+        }
+        this._loadingImageSrc = backgroundImageUrl;
+
+        if (!backgroundImageUrl) {
+            // Immediately clear
+            this._applyTransition(null);
+            return;
+        }
+
+        // Preload image
+        const img = new Image();
+        img.onload = () => {
+            // If the requested image changed while we were loading, abort
+            if (this._loadingImageSrc !== backgroundImageUrl) return;
+            this._applyTransition(backgroundImageUrl);
+        };
+        img.onerror = () => {
+            if (this._loadingImageSrc !== backgroundImageUrl) return;
+            console.error(`Failed to load background image: ${backgroundImageUrl}`);
+            this._applyTransition(null);
+        };
+        img.src = backgroundImageUrl;
+    }
+
+    private _applyTransition(backgroundImageUrl: string | null) {
+        this._loadingImageSrc = null;
+
+        if (this._transitionTimeout !== null) {
+            clearTimeout(this._transitionTimeout);
+            this._transitionTimeout = null;
+            // A transition is currently in progress, forcefully end it
+            $(this.layerInactive).css({ transition: "none", opacity: 1 });
+            $(this.layerActive).css({ transition: "none", opacity: 0 });
+
+            // Swap them immediately
+            const temp = this.layerActive;
+            this.layerActive = this.layerInactive;
+            this.layerInactive = temp;
+        }
+
+        // Prepare new image on inactive layer
+        $(this.layerInactive).css({
+            "background-image": backgroundImageUrl ? `url('${backgroundImageUrl}')` : "none",
+            transition: "none",
+            opacity: 0,
+        });
+        
+        // Force reflow
+        void this.layerInactive.offsetWidth;
+
+        const transitionCss = this.transition || "opacity 0.5s ease-in-out";
+
+        $(this.layerActive).css({
+            transition: transitionCss,
+            opacity: 0,
+        });
+
+        $(this.layerInactive).css({
+            transition: transitionCss,
+            opacity: 1,
+        });
+
+        // Swap references
+        const temp = this.layerActive;
+        this.layerActive = this.layerInactive;
+        this.layerInactive = temp;
+
+        // Parse duration heuristically for timeout
+        let duration = 500;
+        if (this.transition) {
+            const match = this.transition.match(/(\d+\.?\d*)s/);
+            if (match) duration = parseFloat(match[1]) * 1000;
+        }
+
+        this._transitionTimeout = setTimeout(() => {
+            this._transitionTimeout = null;
+            $(this.layerInactive).css("transition", "none"); // Clean up transition on old layer
+            // Don't remove background image since transparent layers should just overlay
+        }, duration) as unknown as number;
+
         this.updateScrollPosition();
     }
 
     updateScrollPosition() {
         if (!this.domElement || ((this.scrollSpeed?.x || 0) == 0 && (this.scrollSpeed?.y || 0) == 0)) return;
-        $(this.domElement).css("background-position", `${this.scrollOffset?.x || 0}px ${this.scrollOffset?.y || 0}px`);
+        $(this.layerActive).css("background-position", `${this.scrollOffset?.x || 0}px ${this.scrollOffset?.y || 0}px`);
+        $(this.layerInactive).css("background-position", `${this.scrollOffset?.x || 0}px ${this.scrollOffset?.y || 0}px`);
     }
 
     update(deltaTime: number) {

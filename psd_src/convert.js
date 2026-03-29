@@ -104,7 +104,7 @@ async function getPsdFiles() {
 /**
  * Build layer hierarchy from PSD
  */
-function buildLayerHierarchy(psd) {
+function buildLayerHierarchy(psd, category) {
   function processLayer(layer, parentPath = '') {
     const sanitizedName = sanitizeLayerName(layer.name);
     const layerData = {
@@ -123,14 +123,26 @@ function buildLayerHierarchy(psd) {
       layerData.path = sanitizedName;
     }
 
+    const isPortrait = category === 'Portraits';
+
     // Add position if available
     if (layer.left !== undefined && layer.top !== undefined) {
-      layerData.left = layer.left;
-      layerData.top = layer.top;
+      if (isPortrait) {
+        layerData.left = 0;
+        layerData.top = 0;
+      } else {
+        layerData.left = layer.left;
+        layerData.top = layer.top;
+      }
     }
     if (layer.imageData !== undefined) {
-      layerData.width = layer.imageData.width;
-      layerData.height = layer.imageData.height;
+      if (isPortrait) {
+        layerData.width = 640;
+        layerData.height = 480;
+      } else {
+        layerData.width = layer.imageData.width;
+        layerData.height = layer.imageData.height;
+      }
     }
 
     // Process children (groups/folders)
@@ -156,7 +168,7 @@ function buildLayerHierarchy(psd) {
 /**
  * Export layers as PNG files
  */
-async function exportLayers(psd, psdFileName, outputDir) {
+async function exportLayers(psd, psdFileName, outputDir, category) {
   let layerCount = 0;
 
   async function exportLayer(layer, parentPath = '') {
@@ -173,9 +185,41 @@ async function exportLayers(psd, psdFileName, outputDir) {
           // Use group path in filename to avoid duplicates
           const fileName = parentPath ? `${parentPath.replace(/\//g, '-')}-${sanitizedName}.png` : `${sanitizedName}.png`;
           const filePath = path.join(outputDir, fileName);
-          const buffer = layer.imageData
-            ? imageDataToPngBuffer(layer.imageData)
-            : layer.canvas.toBuffer('image/png');
+          
+          let buffer;
+          const isPortrait = category === 'Portraits';
+          if (isPortrait && layer.imageData) {
+            const paddedImageData = createImageData(640, 480);
+            const src = layer.imageData.data;
+            const dst = paddedImageData.data;
+            
+            const srcWidth = layer.imageData.width;
+            const srcHeight = layer.imageData.height;
+            const left = layer.left || 0;
+            const top = layer.top || 0;
+            
+            for (let y = 0; y < srcHeight; y++) {
+              for (let x = 0; x < srcWidth; x++) {
+                const dstX = left + x;
+                const dstY = top + y;
+                
+                if (dstX >= 0 && dstX < 640 && dstY >= 0 && dstY < 480) {
+                  const srcIdx = (y * srcWidth + x) * 4;
+                  const dstIdx = (dstY * 640 + dstX) * 4;
+                  
+                  dst[dstIdx] = src[srcIdx];
+                  dst[dstIdx + 1] = src[srcIdx + 1];
+                  dst[dstIdx + 2] = src[srcIdx + 2];
+                  dst[dstIdx + 3] = src[srcIdx + 3];
+                }
+              }
+            }
+            buffer = imageDataToPngBuffer(paddedImageData);
+          } else {
+            buffer = layer.imageData
+              ? imageDataToPngBuffer(layer.imageData)
+              : layer.canvas.toBuffer('image/png');
+          }
           await fs.writeFile(filePath, buffer);
 
           layerCount++;
@@ -260,7 +304,7 @@ async function processPsd(psdFile) {
     }
 
     // For other files: Generate layer hierarchy and export layers
-    const hierarchy = buildLayerHierarchy(psd);
+    const hierarchy = buildLayerHierarchy(psd, psdFile.category);
 
     // Save JSON file
     const jsonPath = path.join(outputDir, `${psdNameWithoutExt}.json`);
@@ -268,7 +312,7 @@ async function processPsd(psdFile) {
     console.log(`✓ JSON saved: ${path.relative(PSD_SRC_DIR, jsonPath)}`);
 
     // Export layers as PNG
-    const layerCount = await exportLayers(psd, psdFile.name, outputDir);
+    const layerCount = await exportLayers(psd, psdFile.name, outputDir, psdFile.category);
     console.log(`✓ Exported ${layerCount} layers`);
     // const layerCount = 0; // Temporarily disabled
 

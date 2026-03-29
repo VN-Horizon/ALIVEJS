@@ -14,18 +14,15 @@ export async function loadBackgroundScene() {
             name: "BackgroundCG",
             transform: { x: 0, y: 0, width: 640, height: 480 },
             zIndex: -1,
-            transition: "background-image 0.5s ease-in-out",
+            transition: "opacity 0.5s ease-in-out",
         }),
     );
 
     // Update transition based on skipping state
     const updateTransition = () => {
-        const transition = window.skipping ? "none" : "background-image 0.5s ease-in-out";
-        $(backgroundCG?.domElement).css("transition", transition);
-        $(portrait?.domElement).css(
-            "transition",
-            window.skipping ? "none" : "background-image 0.5s ease-in-out, background-size 0s linear",
-        );
+        const transition = window.skipping ? "none" : "opacity 0.5s ease-in-out";
+        if (backgroundCG) backgroundCG.transition = transition;
+        if (portrait) portrait.transition = transition;
     };
     setInterval(updateTransition, 50);
 
@@ -35,10 +32,9 @@ export async function loadBackgroundScene() {
             transform: { x: 0, y: 0, width: 640, height: 480 },
             zIndex: -1,
             backgroundPosition: "left bottom",
-            transition: "background-image 0.5s ease-in-out, background-size 0s linear",
+            transition: "opacity 0.5s ease-in-out",
         }),
     );
-    $(portrait?.domElement).css({ "background-size": "none" });
 
     const setBgImgHandler = (e: any) => {
         const { stringParams } = (e as CustomEvent).detail;
