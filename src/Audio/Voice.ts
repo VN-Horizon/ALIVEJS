@@ -23,6 +23,9 @@ interface VoiceMappings {
 const player = createAudioPlayer();
 player.loop = false;
 player.volume = 0.7;
+player.addEventListener("ended", () => {
+    isPlayingCurrentVoice = false;
+});
 
 let activeSegmentTimer: number | null = null;
 let lastPreloadedChapter: string | null = null;
@@ -38,12 +41,22 @@ function clearActiveSegmentTimer() {
     }
 }
 
-function stopCurrentVoice() {
-    clearActiveSegmentTimer();
-    player.pause();
+let currentPlayingVoiceId: string | null = null;
+let isPlayingCurrentVoice = false;
+
+export function getCurrentPlayingVoiceId() {
+    if (!isPlayingCurrentVoice) return null;
+    return currentPlayingVoiceId;
 }
 
-function getVoiceKey(characterName: string, eventName: string, lineNumber: string) {
+export function stopCurrentVoice() {
+    clearActiveSegmentTimer();
+    player.pause();
+    isPlayingCurrentVoice = false;
+    currentPlayingVoiceId = null;
+}
+
+export function getVoiceKey(characterName: string, eventName: string, lineNumber: string) {
     const voiceKey = GetCharacterVoiceName(characterName);
     if (!voiceKey) return null;
     return `${voiceKey}.${eventName}.${lineNumber}`;
@@ -163,16 +176,18 @@ async function playMappedVoice(voiceId: string) {
         activeSegmentTimer = window.setTimeout(() => {
             if (player.currentTime >= endTime - 0.03) {
                 player.pause();
+                isPlayingCurrentVoice = false;
                 return;
             }
             player.pause();
+            isPlayingCurrentVoice = false;
         }, duration * 1000);
     }
 
     return true;
 }
 
-async function playCharacterVoice(characterName: string, eventName: string, lineNumber: string) {
+export async function playCharacterVoice(characterName: string, eventName: string, lineNumber: string) {
     if (queueIfLocked(() => { void playCharacterVoice(characterName, eventName, lineNumber); })) {
         console.error("Audio locked, queueing voice.");
         return;
@@ -184,7 +199,10 @@ async function playCharacterVoice(characterName: string, eventName: string, line
     if (!voiceId) return;
 
     const playedMapped = await playMappedVoice(voiceId);
-    if (!playedMapped) {
+    isPlayingCurrentVoice = playedMapped;
+    if (playedMapped) {
+        currentPlayingVoiceId = voiceId;
+    } else {
         console.warn(`No mapping found for voice ${voiceId}, or playback failed.`);
     }
 }

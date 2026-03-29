@@ -56,6 +56,8 @@ if __name__ == "__main__":
                 continue
             third_col.append(lines[i+108].strip())
             # print(f"{lines[i].strip():<30} {lines[i+108].strip()}")
+    second_col.append("ウェイトレス")
+    third_col.append("女服务员")
 
     with open("../assets/events/translation.bin", 'wb') as f:
         for i in range(len(second_col)):

@@ -19,6 +19,19 @@ export const AllowedCharacterNames = [
     "学生Ａ",
 ];
 
+export const AllowedVoiceNames = [
+    "柚木",
+    "祐里子",
+    "春菜",
+    "菜摘",
+    "久遠",
+    "刹那",
+    "夜美",
+    "リリス",
+    "万里恵",
+    "健治",
+];
+
 export const CharacterNameToVoiceKey = {
     "祐二": "",
     "柚木": "YUZUKI",

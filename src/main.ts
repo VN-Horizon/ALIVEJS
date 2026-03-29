@@ -19,6 +19,8 @@ declare global {
     exit: () => void;
     isSelecting: boolean;
     translationPlainMap?: Record<string, string>;
+    isBacklogOpen: boolean;
+    skipping: boolean;
   }
 }
 
