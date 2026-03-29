@@ -1,8 +1,8 @@
 import { getCurrentBlockIndex, resolveLastInstruction, type Instruction } from "@/Core/Events";
 import { extractDialogData, GetCharacterVoiceName, GetVoiceEventName } from "@/Utils/DialogHelper";
-import * as ogvModule from "ogv";
 import protobuf from "protobufjs";
-import { isAudioUnlocked } from "./🔓";
+import { createAudioPlayer } from "./AudioPlayer";
+import { queueIfLocked } from "./🔓";
 
 interface VoiceInfo {
     bank: string;
@@ -20,32 +20,9 @@ interface VoiceMappings {
     preloadBlocks: Record<string, PreloadInfo>;
 }
 
-const ogvRuntime = (
-    (ogvModule as unknown as { default?: unknown }).default ?? ogvModule
-) as {
-    OGVLoader: { base: string };
-    OGVPlayer: new () => HTMLMediaElement;
-};
-
-if (!ogvRuntime?.OGVLoader || !ogvRuntime?.OGVPlayer) {
-    throw new Error("ogv runtime did not expose OGVLoader/OGVPlayer");
-}
-
-ogvRuntime.OGVLoader.base = "/ogv";
-
-const player = new ogvRuntime.OGVPlayer();
+const player = createAudioPlayer();
 player.loop = false;
 player.volume = 0.7;
-
-if (document.body) {
-    player.style.display = "none";
-    document.body.appendChild(player as unknown as Node);
-} else {
-    window.addEventListener("DOMContentLoaded", () => {
-        player.style.display = "none";
-        document.body.appendChild(player as unknown as Node);
-    });
-}
 
 let activeSegmentTimer: number | null = null;
 let lastPreloadedChapter: string | null = null;
@@ -196,8 +173,8 @@ async function playMappedVoice(voiceId: string) {
 }
 
 async function playCharacterVoice(characterName: string, eventName: string, lineNumber: string) {
-    if (!isAudioUnlocked()) {
-        console.error("Audio locked");
+    if (queueIfLocked(() => { void playCharacterVoice(characterName, eventName, lineNumber); })) {
+        console.error("Audio locked, queueing voice.");
         return;
     }
 

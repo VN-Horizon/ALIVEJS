@@ -1,17 +1,17 @@
-import $ from "jquery";
 import { setExitListener } from "@/InputSystem/InputSystem.Keyboard";
+import $ from "jquery";
 import { pushPauseScreen } from "../SYSTEM";
 
 export function hideDialogWindow() {
     const dialogWindow = window.getEngine().getSceneByName("UI/WINDOW");
-    console.log("Hiding dialog window", dialogWindow);
+    console.log("Hiding dialog window");
     dialogWindow?.hide();
     setExitListener(() => showDialogWindow());
 }
 
 export function showDialogWindow() {
     const dialogWindow = window.getEngine().getSceneByName("UI/WINDOW");
-    console.log("Showing dialog window", dialogWindow);
+    console.log("Showing dialog window");
     dialogWindow?.show();
     setExitListener(() => pushPauseScreen());
 }

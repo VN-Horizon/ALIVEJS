@@ -1,45 +1,15 @@
-import * as ogvModule from "ogv";
-import { isAudioUnlocked } from "./🔓";
-
-const ogvRuntime = (
-    (ogvModule as unknown as { default?: unknown }).default ?? ogvModule
-) as {
-    OGVLoader: { base: string };
-    OGVPlayer: new () => HTMLMediaElement;
-};
-
-if (!ogvRuntime?.OGVLoader || !ogvRuntime?.OGVPlayer) {
-    throw new Error("ogv runtime did not expose OGVLoader/OGVPlayer");
-}
-
-ogvRuntime.OGVLoader.base = "/ogv";
+import { createAudioPlayer } from "./AudioPlayer";
+import { queueIfLocked } from "./🔓";
 
 const seList: { [key: string]: HTMLMediaElement } = {};
 let currentSE: HTMLMediaElement | null = null;
 
-function attachHiddenPlayer(player: HTMLMediaElement) {
-    player.style.display = "none";
-    if (document.body) {
-        document.body.appendChild(player as unknown as Node);
-        return;
-    }
-
-    window.addEventListener(
-        "DOMContentLoaded",
-        () => {
-            document.body.appendChild(player as unknown as Node);
-        },
-        { once: true },
-    );
-}
-
 export function initSE() {
     for (let i = 1; i < 37; i++) {
-        const audioElement = new ogvRuntime.OGVPlayer();
+        const audioElement = createAudioPlayer();
         audioElement.src = `/assets/audio/se/SE_${i.toString().padStart(2, "0")}.ogg`;
         audioElement.loop = false;
         audioElement.volume = 0.5;
-        attachHiddenPlayer(audioElement);
         const trackName = `se_${i.toString().padStart(2, "0")}`;
         seList[trackName] = audioElement;
     }
@@ -47,8 +17,8 @@ export function initSE() {
 }
 
 export function playSE(name: string) {
-    if (!isAudioUnlocked()) {
-        console.error("Audio locked");
+    if (queueIfLocked(() => playSE(name))) {
+        console.error("Audio locked, queueing SE:", name);
         return;
     }
     if (currentSE) {

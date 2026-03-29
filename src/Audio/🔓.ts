@@ -2,13 +2,26 @@ import $ from "jquery";
 
 let audioUnlocked = false;
 let audioUnlockInProgress = false;
+let pendingAudioQueue: (() => void)[] = [];
 
 export function setAudioUnlocked(unlocked: boolean) {
     audioUnlocked = unlocked;
+    if (unlocked) {
+        pendingAudioQueue.forEach(action => action());
+        pendingAudioQueue = [];
+    }
 }
 
 export function isAudioUnlocked() {
     return audioUnlocked;
+}
+
+export function queueIfLocked(action: () => void): boolean {
+    if (isAudioUnlocked()) {
+        return false;
+    }
+    pendingAudioQueue.push(action);
+    return true;
 }
 
 $(function () {
