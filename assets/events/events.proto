@@ -27,7 +27,7 @@ enum InstructionType {
 message Instruction {
   InstructionType type = 1;
   repeated int32 params = 2;
-  repeated string string_params=3; // ['s{strin_index}', ...] or ['{int_flag}', ...]
+  repeated string string_params=3; // ['${strin_index}', ...] or ['{int_flag}', ...]
 }
 
 

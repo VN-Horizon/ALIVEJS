@@ -35,9 +35,6 @@ export async function initTranslation() {
 
       map[_secondString] = thirdString;
       const keyPlain = plainizeText(_secondString);
-      if (offset < 1000) {
-        console.log(`Key: "${keyPlain}" => "${thirdString}"`);
-      }
       if (keyPlain.length > 0) {
         plainMap[keyPlain] = thirdString;
       }

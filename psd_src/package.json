@@ -1,6 +1,7 @@
 {
+  "main": "convert.js",
   "dependencies": {
-    "ag-psd": "^28.4.1",
-    "canvas": "^3.2.0"
+    "ag-psd": "^28.5.1",
+    "pngjs": "^7.0.0"
   }
 }

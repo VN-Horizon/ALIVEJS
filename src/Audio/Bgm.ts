@@ -1,14 +1,46 @@
+import * as ogvModule from "ogv";
 import { isAudioUnlocked } from "./🔓";
 
-const bgmList: { [key: string]: HTMLAudioElement } = {};
-let currentBGM: HTMLAudioElement | null = null;
+const ogvRuntime = (
+    (ogvModule as unknown as { default?: unknown }).default ?? ogvModule
+) as {
+    OGVLoader: { base: string };
+    OGVPlayer: new () => HTMLMediaElement;
+};
+
+if (!ogvRuntime?.OGVLoader || !ogvRuntime?.OGVPlayer) {
+    throw new Error("ogv runtime did not expose OGVLoader/OGVPlayer");
+}
+
+ogvRuntime.OGVLoader.base = "/ogv";
+
+const bgmList: { [key: string]: HTMLMediaElement } = {};
+let currentBGM: HTMLMediaElement | null = null;
 let currentBGMName: string | null = null;
+
+function attachHiddenPlayer(player: HTMLMediaElement) {
+    player.style.display = "none";
+    if (document.body) {
+        document.body.appendChild(player as unknown as Node);
+        return;
+    }
+
+    window.addEventListener(
+        "DOMContentLoaded",
+        () => {
+            document.body.appendChild(player as unknown as Node);
+        },
+        { once: true },
+    );
+}
 
 export function initBGM() {
     for (let i = 0; i < 22; i++) {
-        const audioElement = new Audio(`/assets/audio/bgm/M${i.toString().padStart(2, "0")}.mp3`);
+        const audioElement = new ogvRuntime.OGVPlayer();
+        audioElement.src = `/assets/audio/bgm/M${i.toString().padStart(2, "0")}.ogg`;
         audioElement.loop = true;
         audioElement.volume = 0.5;
+        attachHiddenPlayer(audioElement);
         const trackName = `M${i.toString().padStart(2, "0")}`;
         bgmList[trackName] = audioElement;
     }
@@ -27,9 +59,14 @@ export function playBGM(name: string) {
     currentBGMName = name;
     currentBGM = bgmList[name];
     if (currentBGM) {
-        currentBGM.play().catch(err => {
-            console.warn("Play BGM failed:", err);
-        });
+        const playPromise = currentBGM.play() as unknown as Promise<void> | undefined;
+        if (playPromise !== undefined) {
+            playPromise.catch(err => {
+                if (err.name !== "AbortError") {
+                    console.warn("Play BGM failed:", err);
+                }
+            });
+        }
     }
 }
 

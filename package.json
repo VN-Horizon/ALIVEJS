@@ -4,9 +4,10 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "dev": "vite",
-        "build": "tsc && vite build",
-        "preview": "vite preview"
+        "sync:ogv": "node scripts/sync-ogv-dist.mjs",
+        "dev": "pnpm run sync:ogv && vite",
+        "build": "pnpm run sync:ogv && tsc && vite build",
+        "preview": "pnpm run sync:ogv && vite preview"
     },
     "keywords": [],
     "author": "",
@@ -21,6 +22,7 @@
     "dependencies": {
         "jquery": "^4.0.0",
         "litegraph.js": "^0.7.18",
+        "ogv": "^1.9.0",
         "protobufjs": "^8.0.0"
     }
 }

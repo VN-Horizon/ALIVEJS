@@ -33,7 +33,7 @@ export class SetBgImgNode extends ImagePreviewNode {
         const p = this.properties.stringParams;
         if (!p || p.length < 2) return null;
         if (p[0] === "0" || p[1] === "0") return null;
-        return `/assets/scenes/BG/${p[0]}/${p[1]}.webp`;
+        return `/assets/scenes/BG/${p[0]}/${p[1]}.avif`;
     }
 }
 
@@ -63,6 +63,6 @@ export class ShowCgNode extends ImagePreviewNode {
         const p = this.properties.stringParams;
         if (!p || p.length < 1) return null;
         const name = p[0];
-        return `/assets/scenes/CG/${name.toUpperCase()}/${name.toUpperCase()}.webp`;
+        return `/assets/scenes/CG/${name.toUpperCase()}/${name.toUpperCase()}.avif`;
     }
 }

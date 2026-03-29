@@ -1,0 +1,23 @@
+version = 1
+revision = 3
+requires-python = ">=3.13"
+
+[[package]]
+name = "psd-src"
+version = "0.1.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "wand" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "wand", specifier = ">=0.7.0" }]
+
+[[package]]
+name = "wand"
+version = "0.7.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/c5/f6/feb40fadb7f3a6c5d45c02840c329725f6ec907eb3581c5de27445700e8a/wand-0.7.0.tar.gz", hash = "sha256:e48f983cc248c23f752e5ba8a6aa1b09370c87d81425d2cc7474f4536c0740f9", size = 11888946, upload-time = "2026-02-23T14:50:34.79Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/29/6c/51fe13d260d9e910d8f010494cc513420ab79852662fefdebdecfeaeebd5/wand-0.7.0-py3-none-any.whl", hash = "sha256:197a5011891a68fc14558cac58db5f5aafb66ef1dd28bfb4a2c62c156c41712e", size = 144773, upload-time = "2026-02-23T14:50:46.162Z" },
+]

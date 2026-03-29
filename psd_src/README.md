@@ -1,6 +1,6 @@
 # PSD_SRC Folder
 
-Pretty much AI-Generated scripts to convert original .PSD ALIVE scene files to webp+json descriptor. to use:
+Pretty much AI-Generated scripts to convert original .PSD ALIVE scene files to avif+json descriptor. to use:
 
 copy the PSD assets to folder using this hierarchy:
 
@@ -19,5 +19,5 @@ node convert.js
 pip install -r requirements.txt
 python update_dimensions.py
 python add_portrait_padding.py
-python convert_to_webp.py
+python convert_to_avif.py
 ```
