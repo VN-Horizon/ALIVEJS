@@ -13,9 +13,10 @@
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "alivejs",
-        "width": 800,
-        "height": 600
+        "title": "ALIVE Renewal",
+        "width": 640,
+        "height": 480,
+        "additionalBrowserArgs": "--autoplay-policy=no-user-gesture-required"
       }
     ],
     "security": {

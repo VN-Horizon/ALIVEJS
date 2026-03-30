@@ -1,6 +1,6 @@
 import $ from "jquery";
 
-let audioUnlocked = false;
+let audioUnlocked = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 let audioUnlockInProgress = false;
 let pendingAudioQueue: (() => void)[] = [];
 
