@@ -137,3 +137,7 @@ dist
 
 psd_src/**/*.psd
 
+target/
+src-tauri/target/
+src-tauri/gen/
+
