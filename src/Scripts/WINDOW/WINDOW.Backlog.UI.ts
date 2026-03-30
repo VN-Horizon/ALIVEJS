@@ -19,7 +19,7 @@ export function createBacklogUI() {
 
   backlogContent = $("<div>").attr("id", "backlog-content")
   backlogContainer.append(backlogContent);
-  $(document.body).append(backlogContainer);
+  $("#gameContainer").append(backlogContainer);
 }
 
 export function renderEntry(entry: BacklogEntry, prevIsCharacter: boolean): JQuery<HTMLElement> {

@@ -65,12 +65,27 @@ export class GameEngine implements IGameEngine {
             this.callbacks.init();
         }
 
+        window.addEventListener("resize", this.handleResize);
+        this.handleResize();
+
         this.gameLoop();
     }
 
     stop() {
         this.running = false;
+        window.removeEventListener("resize", this.handleResize);
     }
+
+    handleResize = () => {
+        const baseWidth = 640;
+        const baseHeight = 480;
+        
+        const scaleX = window.innerWidth / baseWidth;
+        const scaleY = window.innerHeight / baseHeight;
+        const scale = Math.min(scaleX, scaleY);
+        
+        this.container.style.transform = `translate(-50%, -50%) scale(${scale})`;
+    };
 
     gameLoop = () => {
         if (!this.running) return;

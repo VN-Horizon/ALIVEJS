@@ -12,6 +12,7 @@ import { initSE } from "./Audio/Se";
 import "./Audio/Voice";
 import "./Audio/🔓";
 import { initEventGraphOverlay } from "./Debug/Graph/EventGraphEditor";
+import "./styles/NotUnityPlayer.css";
 
 declare global {
   interface Window {
@@ -24,16 +25,14 @@ declare global {
   }
 }
 
-let notUnityEngine = new GameEngine();
-initEventGraphOverlay();
-notUnityEngine.start();
-
-window.getEngine = () => notUnityEngine;
-
-async function main() {
+async function init() {
   try {
+    let notUnityEngine = new GameEngine();
+    notUnityEngine.start();
+    window.getEngine = () => notUnityEngine;
     console.log("Initializing application...");
     await loadEvents();
+    initEventGraphOverlay();
     initBGM();
     initSE();
     await loadStartScene();
@@ -46,10 +45,19 @@ async function main() {
 }
 
 window.exit = () => {
-  $("#black-overlay").fadeIn(600, () => {
-    window.close();
+  $("#black-overlay").fadeIn(600, async () => {
+    try {
+      if ('__TAURI_INTERNALS__' in window) {
+        const { getCurrentWindow } = await import("@tauri-apps/api/window");
+        getCurrentWindow().close();
+      } else {
+        window.close();
+      }
+    } catch (e) {
+      window.close();
+    }
     $("#gameContainer").remove();
   });
 };
 
-main().then(() => console.log("Init Finished."));
+init().then(() => console.log("Init Finished."));
