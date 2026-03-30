@@ -168,7 +168,7 @@ function buildLayerHierarchy(psd, category) {
 /**
  * Export layers as PNG files
  */
-async function exportLayers(psd, psdFileName, outputDir, category) {
+async function exportLayers(psd, outputDir, category) {
   let layerCount = 0;
 
   async function exportLayer(layer, parentPath = '') {
@@ -312,7 +312,7 @@ async function processPsd(psdFile) {
     console.log(`✓ JSON saved: ${path.relative(PSD_SRC_DIR, jsonPath)}`);
 
     // Export layers as PNG
-    const layerCount = await exportLayers(psd, psdFile.name, outputDir, psdFile.category);
+    const layerCount = await exportLayers(psd, outputDir, psdFile.category);
     console.log(`✓ Exported ${layerCount} layers`);
     // const layerCount = 0; // Temporarily disabled
 

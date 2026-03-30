@@ -3,23 +3,28 @@
     "version": "1.0.0",
     "description": "",
     "main": "index.js",
+    "type": "module",
     "scripts": {
         "sync:ogv": "node scripts/sync-ogv-dist.mjs",
         "dev": "pnpm run sync:ogv && vite",
         "build": "pnpm run sync:ogv && tsc && vite build",
-        "preview": "pnpm run sync:ogv && vite preview"
+        "preview": "pnpm run sync:ogv && vite preview",
+        "tauri": "tauri"
     },
     "keywords": [],
     "author": "",
     "license": "ISC",
     "packageManager": "pnpm@10.25.0",
     "devDependencies": {
+        "@tauri-apps/cli": "^2",
         "@types/jquery": "^3.5.33",
         "@types/node": "^25.2.0",
         "typescript": "^5.9.3",
         "vite": "^7.3.1"
     },
     "dependencies": {
+        "@tauri-apps/api": "^2",
+        "@tauri-apps/plugin-opener": "^2",
         "jquery": "^4.0.0",
         "litegraph.js": "^0.7.18",
         "ogv": "^1.9.0",

@@ -17,6 +17,17 @@ body {
     -ms-user-select: none; /* For IE 10 and 11 */
 }
 
+#black-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0);
+    display: block;
+    z-index: 114514;
+}
+
 #gameContainer {
     position: fixed;
     top: 50%;
@@ -42,7 +53,9 @@ body {
     background-color: transparent;
 }
 
-#gameContainer div, #gameContainer img, #gameContainer span {
+#gameContainer div:not(#backlog-container):not(#backlog-container *), 
+#gameContainer img:not(#backlog-container *), 
+#gameContainer span:not(#backlog-container *) {
     position: absolute;
     top: 0;
     left: 0;
@@ -79,12 +92,12 @@ body {
     background-color: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    position: fixed;
-    left: 50%;
-    transform: translateX(-50%);
+    position: absolute;
+    top: 0;
+    left: 0;
     overflow: hidden;
     display: none;
-    z-index: 1000;
+    z-index: 99999999;
 }
 
 #backlog-container::after {
