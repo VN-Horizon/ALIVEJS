@@ -17,6 +17,17 @@ body {
     -ms-user-select: none; /* For IE 10 and 11 */
 }
 
+#black-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0);
+    display: block;
+    z-index: 114514;
+}
+
 #gameContainer {
     position: fixed;
     top: 50%;

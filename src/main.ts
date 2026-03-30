@@ -12,6 +12,7 @@ import { initSE } from "./Audio/Se";
 import "./Audio/Voice";
 import "./Audio/🔓";
 import { initEventGraphOverlay } from "./Debug/Graph/EventGraphEditor";
+import "./styles/NotUnityPlayer.css";
 
 declare global {
   interface Window {
@@ -24,16 +25,14 @@ declare global {
   }
 }
 
-let notUnityEngine = new GameEngine();
-initEventGraphOverlay();
-notUnityEngine.start();
-
-window.getEngine = () => notUnityEngine;
-
-async function main() {
+async function init() {
   try {
+    let notUnityEngine = new GameEngine();
+    notUnityEngine.start();
+    window.getEngine = () => notUnityEngine;
     console.log("Initializing application...");
     await loadEvents();
+    initEventGraphOverlay();
     initBGM();
     initSE();
     await loadStartScene();
@@ -61,4 +60,4 @@ window.exit = () => {
   });
 };
 
-main().then(() => console.log("Init Finished."));
+init().then(() => console.log("Init Finished."));
