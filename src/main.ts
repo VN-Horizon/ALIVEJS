@@ -46,8 +46,17 @@ async function main() {
 }
 
 window.exit = () => {
-  $("#black-overlay").fadeIn(600, () => {
-    window.close();
+  $("#black-overlay").fadeIn(600, async () => {
+    try {
+      if ('__TAURI_INTERNALS__' in window) {
+        const { getCurrentWindow } = await import("@tauri-apps/api/window");
+        getCurrentWindow().close();
+      } else {
+        window.close();
+      }
+    } catch (e) {
+      window.close();
+    }
     $("#gameContainer").remove();
   });
 };
