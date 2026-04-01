@@ -1,12 +1,57 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" style="background: #0000">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Alive Remake</title>
     <script type="module" src="./src/main.ts"></script>
   </head>
-  <body>
-    <div id="black-overlay"></div>
+  <body style="margin: 0; padding: 0; overflow: hidden; background: #0000; opacity: 0">
+    <div class="window" style="width: 100vw; height: 100vh">
+      <div data-tauri-drag-region class="title-bar" style="padding: 2px 2px 2px 3px;">
+        <div data-tauri-drag-region class="title-bar-text" style="display: inline-flex; align-items: center; gap: 4px;">
+          <img data-tauri-drag-region src="/icon.png" style="width: 16px;" alt="App Icon" />
+          <span data-tauri-drag-region>ALIVE Renewal</span>
+        </div>
+        <div data-tauri-drag-region class="title-bar-controls">
+          <button onclick="window.minimize()" aria-label="Minimize"></button>
+          <button id="toggleMaximizeBtn" onclick="window.toggleMaximize()" aria-label="Maximize"></button>
+          <button onclick="window.exit(0)" aria-label="Close"></button>
+        </div>
+      </div>
+
+      <div class="menu-bar">
+        <div class="menu-bar-item">
+          <button aria-label="File">文件 (<u>F</u>)</button>
+          <ul class="menu">
+            <li onclick="location.reload()">主界面 (<u>N</u>)</li>
+            <li aria-disabled="true">保存 (<u>S</u>)</li>
+            <li>加载 (<u>L</u>)</li>
+            <li class="divider"></li>
+            <li>设置 (<u>T</u>)</li>
+            <li class="divider"></li>
+            <li>隐藏对话框 (<u>H</u>)</li>
+            <li>全屏 (<u>F</u>)</li>
+            <li class="divider"></li>
+            <li onclick="window.exit(0)">退出 (<u>X</u>)</li>
+          </ul>
+        </div>
+        <div class="menu-bar-item">
+          <button aria-label="File">帮助 (<u>H</u>)</button>
+          <ul class="menu">
+            <li onclick="window.openVersionInfo()">版本信息 (<u>A</u>)...</li>
+            <li onclick="window.openCodecVersionInfo()">编解码器版本信息 (<u>C</u>)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="window-body">
+        <div id="gameContainer"></div>
+        <div id="black-overlay"></div>
+      </div>
+    </div>
+    <!-- <div id="loading-overlay">
+      <img style="width: 100px;margin-bottom: 20px; shape-rendering: geometricPrecision;image-rendering: optimizeQuality;" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYxNyIgaGVpZ2h0PSIxODYyIiB2aWV3Qm94PSIwIDAgMTYxNyAxODYyIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8ZyBmaWx0ZXI9InVybCgjZmlsdGVyMF9kXzIwMTBfMikiPgo8cGF0aCBkPSJNMTM3OC40MSA1OC4wNzYzQzEzNjkuMjkgNDkuMzgwOSAxMzU2Ljk4IDQ0Ljg1MzcgMTM0NC40IDQ1LjU3NDNMMjI3LjQgMTA5LjU3NEMyMDMuMDcxIDExMC45NjggMTg0LjE1OSAxMzEuMjg0IDE4NC41MDcgMTU1LjY1MUwxODguOTYyIDQ2Ny40NzdMNDkuODU2IDE1NzYuMzRDNDcuNTY4MiAxNTk0LjU4IDU2LjQ3OTUgMTYxMi40IDcyLjQ0MTkgMTYyMS41MUwzODkuNDQyIDE4MDIuNTFDMzk4LjEyMSAxODA3LjQ3IDQwOC4xOTIgMTgwOS40MyA0MTguMDk2IDE4MDguMDlMMTUyOC4xIDE2NTguMDlDMTU0MC4xNCAxNjU2LjQ2IDE1NTEuMDIgMTY1MC4wOSAxNTU4LjM0IDE2NDAuMzlDMTU2NS42NSAxNjMwLjY5IDE1NjguNzggMTYxOC40NiAxNTY3LjAzIDE2MDYuNDRMMTM4OS41NCAzODcuOTM1TDEzOTIuNSA5MS40NTUyQzEzOTIuNjMgNzguODU3NiAxMzg3LjUyIDY2Ljc3MTggMTM3OC40MSA1OC4wNzYzWiIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSI5MSIgc3Ryb2tlLW1pdGVybGltaXQ9IjIiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPgo8L2c+CjxkZWZzPgo8ZmlsdGVyIGlkPSJmaWx0ZXIwX2RfMjAxMF8yIiB4PSIwIiB5PSIwIiB3aWR0aD0iMTYxNyIgaGVpZ2h0PSIxODYyIiBmaWx0ZXJVbml0cz0idXNlclNwYWNlT25Vc2UiIGNvbG9yLWludGVycG9sYXRpb24tZmlsdGVycz0ic1JHQiI+CjxmZUZsb29kIGZsb29kLW9wYWNpdHk9IjAiIHJlc3VsdD0iQmFja2dyb3VuZEltYWdlRml4Ii8+CjxmZUNvbG9yTWF0cml4IGluPSJTb3VyY2VBbHBoYSIgdHlwZT0ibWF0cml4IiB2YWx1ZXM9IjAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDEyNyAwIiByZXN1bHQ9ImhhcmRBbHBoYSIvPgo8ZmVPZmZzZXQgZHk9IjQiLz4KPGZlR2F1c3NpYW5CbHVyIHN0ZERldmlhdGlvbj0iMiIvPgo8ZmVDb21wb3NpdGUgaW4yPSJoYXJkQWxwaGEiIG9wZXJhdG9yPSJvdXQiLz4KPGZlQ29sb3JNYXRyaXggdHlwZT0ibWF0cml4IiB2YWx1ZXM9IjAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAuMjUgMCIvPgo8ZmVCbGVuZCBtb2RlPSJub3JtYWwiIGluMj0iQmFja2dyb3VuZEltYWdlRml4IiByZXN1bHQ9ImVmZmVjdDFfZHJvcFNoYWRvd18yMDEwXzIiLz4KPGZlQmxlbmQgbW9kZT0ibm9ybWFsIiBpbj0iU291cmNlR3JhcGhpYyIgaW4yPSJlZmZlY3QxX2Ryb3BTaGFkb3dfMjAxMF8yIiByZXN1bHQ9InNoYXBlIi8+CjwvZmlsdGVyPgo8L2RlZnM+Cjwvc3ZnPgo=">
+      <progress id="progress-bar"></progress>
+    </div> -->
   </body>
 </html>

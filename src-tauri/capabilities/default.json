@@ -2,10 +2,18 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Capability for the main window",
-  "windows": ["main"],
+  "windows": ["main", "version-info", "codec-version"],
   "permissions": [
     "core:default",
     "core:window:allow-close",
+    "core:window:allow-start-dragging",
+    "core:window:allow-minimize",
+    "core:window:allow-maximize",
+    "core:webview:allow-create-webview-window",
+    "core:window:default",
+    "core:app:default",
+    "core:window:allow-create",
+    "core:window:allow-toggle-maximize",
     "opener:default"
   ]
 }

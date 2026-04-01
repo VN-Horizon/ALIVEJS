@@ -33,5 +33,12 @@ export default defineConfig(async () => ({
   build: {
     outDir: "dist",
     target: "esnext",
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, "index.html"),
+        version: path.resolve(__dirname, "dialogs/version.html"),
+        "codec-version": path.resolve(__dirname, "dialogs/codec-version.html"),
+      },
+    },
   },
 }));
