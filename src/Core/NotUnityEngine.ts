@@ -49,8 +49,7 @@ export class GameEngine implements IGameEngine {
     scenePaths: string[] = []; // Array to hold scene paths
 
     createContainer() {
-        const $container = $('<div id="gameContainer"></div>');
-        $("body").append($container);
+        const $container = $('#gameContainer');
         return $container[0];
     }
 
@@ -80,8 +79,12 @@ export class GameEngine implements IGameEngine {
         const baseWidth = 640;
         const baseHeight = 480;
         
-        const scaleX = window.innerWidth / baseWidth;
-        const scaleY = window.innerHeight / baseHeight;
+        const parent = this.container.parentElement;
+        const targetWidth = parent ? parent.clientWidth : window.innerWidth;
+        const targetHeight = parent ? parent.clientHeight : window.innerHeight;
+        
+        const scaleX = targetWidth / baseWidth;
+        const scaleY = targetHeight / baseHeight;
         const scale = Math.min(scaleX, scaleY);
         
         this.container.style.transform = `translate(-50%, -50%) scale(${scale})`;

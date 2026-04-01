@@ -26,15 +26,7 @@ export interface ScreenplayContextState {
 
 export interface ResolvedInstruction extends Instruction {}
 
-// Global declaration for window
-declare global {
-    interface Window {
-        ScreenplayContext: ScreenplayContextState;
-    }
-}
-
 // -- State --
-
 let ScreenplayContext: ScreenplayContextState = {
     blocks: [],
     textPool: [],

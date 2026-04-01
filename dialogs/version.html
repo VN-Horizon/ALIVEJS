@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>版本信息</title>
+    <!-- Using 98.css directly via local build module to ensure it looks like a windows 98 dialog -->
+    <style>
+      body { margin: 0; padding: 0; background-color: #c0c0c0; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+      .window { box-shadow: none; border: none; flex: 1; display: flex; flex-direction: column; }
+      .window-body { flex: 1; margin: 0; padding: 10px; display: flex; flex-direction: column; }
+      fieldset { flex: 1; display: flex; flex-direction: column; }
+      .sunken-panel { flex: 1; background: white; margin-top: 10px; }
+      [data-tauri-drag-region] {
+        user-select: none;
+        -webkit-user-select: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="window">
+      <div data-tauri-drag-region class="title-bar" style="padding: 2px 2px 2px 3px;">
+        <div data-tauri-drag-region class="title-bar-text" style="display: inline-flex; align-items: center; gap: 4px;">
+          <img src="/icon.png" style="width: 16px; height: 16px; display: inline-block; pointer-events: none;" alt="App Icon" />
+          <span style="pointer-events: none;">版本信息</span>
+        </div>
+        <div data-tauri-drag-region class="title-bar-controls">
+          <button aria-label="Close" onclick="closeWindow()"></button>
+        </div>
+      </div>
+      <div class="window-body">
+        <fieldset style="padding: 10px; margin: 0;">
+          <legend>Alive renewal</legend>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div style="display: flex; gap: 15px;">
+              <img src="/icon.png" style="width: 32px; height: 32px; image-rendering: pixelated; margin-top: 13px;" alt="App Icon" />
+              <div style="font-size: 11px; line-height: 1.8;">
+                <div>AliveJS 版本 0.0.0.0</div>
+                <div>版权所有 (C)1999-2001 Witch/Artemis</div>
+                <div>由 DaVinci 汉化，LC_022 重置</div>
+              </div>
+            </div>
+            <button onclick="closeWindow()" style="width: 80px; padding: 2px 0;">OK</button>
+          </div>
+          <div class="sunken-panel"></div>
+        </fieldset>
+      </div>
+    </div>
+    <script type="module" src="/src/version.ts"></script>
+  </body>
+</html>

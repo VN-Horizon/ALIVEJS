@@ -4,6 +4,85 @@
     box-sizing: border-box;
 }
 
+[data-tauri-drag-region] {
+  user-select: none;
+}
+
+
+.menu-bar {
+  display: flex;
+}
+
+.menu-bar .menu-bar-item {
+  position: relative;
+}
+
+.menu-bar .menu-bar-item > button {
+  box-shadow: none;
+  min-height: 20px;
+  min-width: auto;
+  outline: none;
+  padding: 0 6px;
+}
+
+.menu-bar .menu-bar-item > button:hover {
+  box-shadow: inset 1px 1px #fff, inset 0px 0px #0a0a0a, inset 1px 1px #dfdfdf, inset -1px -1px grey;
+}
+
+.menu-bar .menu-bar-item > button:active,
+.menu-bar .menu-bar-item > button:focus,
+.menu-bar .menu-bar-item.open > button {
+  box-shadow: inset -1px -1px #fff, inset 0px 0px #0a0a0a, inset -1px -1px #dfdfdf, inset 1px 1px grey;
+  text-shadow: 0 0 #222;
+}
+
+.menu-bar .menu-bar-item.open .menu {
+  display: block;
+}
+
+.window-body.frame {
+  margin: 2px;
+}
+
+ul.menu {
+  background: silver;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #dfdfdf, inset -2px -2px grey, inset 2px 2px #fff;
+  display: none;
+  list-style-type: none;
+  margin: 0;
+  min-width: 100px;
+  padding: 4px 2px;
+  position: absolute;
+  width: max-content;
+  z-index: 99999999;
+}
+
+ul.menu > li:not(.divider) {
+  cursor: default;
+  padding: 3px 20px 3px 20px;
+}
+
+ul.menu li:not(.disabled):not(.divider):hover {
+  --dialog-blue: #000080;
+  background: var(--dialog-blue);
+  color: #fff;
+}
+
+ul.menu li.disabled {
+  color: var(--button-shadow);
+}
+
+ul.menu li.divider {
+  border-bottom: 1px solid #dfdfdf;
+  border-top: 1px solid grey;
+  margin: 2px;
+}
+
+ul.menu li > span {
+  float: right;
+  margin-left: 10px;
+}
+
 body {
     background: #000;
     overflow: hidden;
@@ -17,29 +96,51 @@ body {
     -ms-user-select: none; /* For IE 10 and 11 */
 }
 
-#black-overlay {
+.window {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.window-body {
+    background-color: black; margin: 2px 0;
+    flex-grow: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+#loading-overlay {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0);
+    background: black;
+    z-index: 114515;
+}
+#black-overlay {
+    position: absolute;
+    inset: 0;
+    background: black;
     display: block;
     z-index: 114514;
 }
 
 #gameContainer {
-    position: fixed;
+    position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     width: 640px;
     height: 480px;
     overflow: hidden;
-    background: #000;
+    background: black;
 }
 
-#gameContainer > button {
+#gameContainer button {
     position: absolute;
     top: 0;
     left: 0;
@@ -51,6 +152,7 @@ body {
     background-repeat: no-repeat;
     overflow: hidden;
     background-color: transparent;
+    box-shadow: none;
 }
 
 #gameContainer div:not(#backlog-container):not(#backlog-container *), 
@@ -89,7 +191,7 @@ body {
 }
 
 #backlog-container {
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: rgba(0, 0, 0, 0.75);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     position: absolute;
@@ -107,25 +209,9 @@ body {
     left: -6px;
     font-size: 7.5rem;
     font-family: monospace;
-    color: rgba(255, 255, 255, 0.2);
-}
-#backlog-content::-webkit-scrollbar {
-    width: 8px;
-    background: transparent;
-}
-#backlog-content::-webkit-scrollbar-track {
-    background: transparent;
-}
-#backlog-content::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 4px;
-}
-#backlog-content::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.5);
+    color: rgba(255, 255, 255, 0.3);
 }
 #backlog-content {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
     width: 100%;
     height: 100%;
     padding: 16px;

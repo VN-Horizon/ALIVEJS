@@ -14,9 +14,13 @@
     "windows": [
       {
         "title": "ALIVE Renewal",
-        "width": 640,
-        "height": 480,
-        "additionalBrowserArgs": "--autoplay-policy=no-user-gesture-required"
+        "width": 647,
+        "height": 531,
+        "minWidth": 199,
+        "minHeight": 195,
+        "additionalBrowserArgs": "--autoplay-policy=no-user-gesture-required",
+        "decorations": false,
+        "transparent": true
       }
     ],
     "security": {
