@@ -37,6 +37,8 @@ export class SceneElement {
     parent: SceneElement | null = null;
     children: SceneElement[] = [];
 
+    imageLoadPromise?: Promise<void>;
+
     constructor(data: SceneElementData, parent: SceneElement | null = null, scene: IScene | null = null) {
         // Core transform grouped
         this.transform = {
@@ -59,7 +61,7 @@ export class SceneElement {
         this.parent = parent;
 
         this.createDOMElement();
-        if (data.path) this.loadImage(data.path);
+        if (data.path) this.imageLoadPromise = this.loadImage(data.path);
         if (parent) parent.addChild(this);
         this.update(1);
     }
@@ -155,8 +157,22 @@ export class SceneElement {
             return;
         }
         const fullImagePath = `/assets/scenes/${this.scene?.name}/${path}.avif`;
-        $(this.domElement).attr("src", fullImagePath);
-        this.syncDom();
+        
+        return new Promise<void>((resolve, reject) => {
+            if (!this.domElement) {
+                resolve();
+                return;
+            }
+            
+            this.domElement.onload = () => resolve();
+            this.domElement.onerror = () => {
+                console.warn(`Failed to load image: ${fullImagePath}`);
+                resolve(); // resolve anyway to not block
+            };
+            
+            $(this.domElement).attr("src", fullImagePath);
+            this.syncDom();
+        });
     }
 
     addChild(child: SceneElement) {

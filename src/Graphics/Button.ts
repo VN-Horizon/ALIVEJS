@@ -32,6 +32,15 @@ export class Button extends FocusableElement {
         this.height = this.transforms[0]?.[3] || 10;
 
         this.images = data.images;
+        
+        // Preload variant images to ensure they are cached before hover/active states
+        this.images.forEach(src => {
+            if (src) {
+                const img = new Image();
+                img.src = src;
+            }
+        });
+
         this.onClickHandler = null;
         this.buttonId = `btn-${Math.random().toString(36).substr(2, 9)}`;
         this.transform.z = data.z || 0;
@@ -128,6 +137,7 @@ export interface ToButtonOptions {
     cursor?: string;
     callback?: () => void;
     focusable?: boolean;
+    visible?: boolean;
 }
 
 export function toButton(group: SceneElement | null, options: Partial<ToButtonOptions> = {}) {
@@ -142,6 +152,7 @@ export function toButton(group: SceneElement | null, options: Partial<ToButtonOp
         cursor = "pointer",
         callback = null,
         focusable = true,
+        visible = true,
     } = options;
 
     if (!Array.isArray(group.children) || group.children.length === 0) {
@@ -173,6 +184,7 @@ export function toButton(group: SceneElement | null, options: Partial<ToButtonOp
         zIndex: group.zIndex,
         callback,
         focusable,
+        visible,
     } as ButtonData;
 
     const button = new Button(buttonData, group.parent, group.scene);

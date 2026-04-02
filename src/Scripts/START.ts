@@ -9,16 +9,22 @@ import { loadBackgroundScene } from "./BACKGROUND";
 import { initGallery } from "./GALLERY";
 import { pushDialogWindow } from "./WINDOW/WINDOW";
 
-export async function loadStartScene(hasGallery = true) {
+export async function loadStartScene(hasGallery = true, eventsPromise?: Promise<any>) {
     const startScene = await loadScene("UI/START");
     if (!startScene) {
         console.error("Failed to load START scene");
         return;
     }
 
-    let exitBtn = hasGallery ? startScene.getObjectByName("EXIT2") : startScene.getObjectByName("EXIT1");
+    const exit1Orig = startScene.getObjectByName("EXIT1");
+    const exit2Orig = startScene.getObjectByName("EXIT2");
+    
+    exit1Orig?.hide();
+    exit2Orig?.hide();
 
-    toButton(startScene.getObjectByName("START"), {
+    let exitBtnOrig = hasGallery ? exit2Orig : exit1Orig;
+
+    const startBtn = toButton(startScene.getObjectByName("START"), {
         callback: async () => {
             document.getElementById("menu-save")?.removeAttribute("aria-disabled");
             await loadBackgroundScene();
@@ -26,7 +32,7 @@ export async function loadStartScene(hasGallery = true) {
         },
     });
 
-    toButton(startScene.getObjectByName("LOAD"), {
+    const loadBtn = toButton(startScene.getObjectByName("LOAD"), {
         callback: async () => {
             console.log("LOAD button clicked");
             const slotIndex = await window.openSaveLoadDialog("load");
@@ -44,19 +50,40 @@ export async function loadStartScene(hasGallery = true) {
         },
     });
 
-    toButton(startScene.getObjectByName("CONFIG"), {
+    const configBtn = toButton(startScene.getObjectByName("CONFIG"), {
         callback: () => {
             console.log("CONFIG button clicked");
         },
     });
+
+    let galleryBtn = null;
     if (hasGallery) {
-        toButton(startScene.getObjectByName("GALLERY"), {
+        galleryBtn = toButton(startScene.getObjectByName("GALLERY"), {
             callback: () => {
                 initGallery();
             },
         });
     }
-    exitBtn = toButton(exitBtn, { callback: window.exit });
+    
+    const exitBtn = toButton(exitBtnOrig, { callback: window.exit });
+
+    startBtn?.hide();
+    loadBtn?.hide();
+    configBtn?.hide();
+    galleryBtn?.hide();
+    exitBtn?.hide();
+
+    $("#black-overlay").fadeOut(600);
+
+    if (eventsPromise) {
+        await eventsPromise;
+    }
+
+    startBtn?.show();
+    loadBtn?.show();
+    configBtn?.show();
+    galleryBtn?.show();
+    exitBtn?.show();
 
     setExitListener(() => {
         if ($(exitBtn?.domElement).is(":focus")) {

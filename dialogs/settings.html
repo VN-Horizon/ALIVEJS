@@ -7,13 +7,13 @@
     <style>
       body { margin: 0; padding: 0; background-color: #c0c0c0; overflow: hidden; height: 100vh; display: flex; flex-direction: column; font-family: "MS UI Gothic", "Microsoft YaHei", sans-serif; font-size: 12px; }
       .window { box-shadow: none; border: none; flex: 1; display: flex; flex-direction: column; height: 100%; }
-      .window-body { flex: 1; margin: 0; padding: 8px; display: flex; flex-direction: column; }
+      .window-body { flex: 1; margin: 0; padding: 4px; display: flex; flex-direction: column; }
       
       menu[role="tablist"] { display: flex; margin: 0; padding: 0 0 0 2px; border-bottom: none; z-index: 1; }
       menu[role="tablist"] button { padding: 4px 8px; border-bottom: none; border-bottom-left-radius: 0; border-bottom-right-radius: 0; background: #c0c0c0; margin-right: 2px; }
       menu[role="tablist"] button[aria-selected="true"] { z-index: 2; border-bottom: 1px solid #c0c0c0; margin-bottom: -1px; padding-bottom: 5px; }
       
-      .tab-content { display: none; padding: 12px; border: 2px solid; border-color: #dfdfdf #404040 #404040 #dfdfdf; flex: 1; margin-top: -1px; background: #c0c0c0; box-shadow: inset 1px 1px #fff, inset -1px -1px #808080; }
+      .tab-content { display: none; padding: 12px; border: 1px solid; border-color: #dfdfdf #404040 #404040 #dfdfdf; flex: 1; margin-top: -1px; background: #c0c0c0; box-shadow: inset 1px 1px #fff, inset -1px -1px #808080; }
       .tab-content.active { display: block; }
 
       fieldset { margin-bottom: 8px; padding: 8px; }
@@ -78,7 +78,7 @@
             </fieldset>
           </div>
 
-          <fieldset>
+          <fieldset style="margin-top: 8px;">
             <legend>字体设置</legend>
             <div style="display: flex; gap: 10px;">
               <div class="flex-col" style="flex: 1;">
@@ -124,7 +124,7 @@
               <div class="checkbox-indent"><input type="checkbox" id="save-skip-auto" checked /> <label for="save-skip-auto">但是不自动选择自动存档的数据</label></div>
             </div>
           </fieldset>
-          <fieldset>
+          <fieldset style="margin: 8px 0;">
             <legend>读档对话框行为</legend>
             <div class="flex-col">
               <div><input type="checkbox" id="load-confirm" checked /> <label for="load-confirm">读取数据时显示确认信息</label></div>
@@ -188,7 +188,7 @@
               </div>
             </div>
           </fieldset>
-          <fieldset>
+          <fieldset style="margin-top: 8px;">
             <legend>CD-DA设置</legend>
             <label>不可用</label>
           </fieldset>
@@ -211,6 +211,6 @@
         document.getElementById(targetId).classList.add('active');
       }
     </script>
-    <script type="module" src="/src/settings.ts"></script>
+    <script type="module" src="/src/Dialogs/settings.ts"></script>
   </body>
 </html>

@@ -77,6 +77,7 @@ export async function loadBackgroundScene() {
     // Handler to restore background image from saved state
     const restoreGraphicsHandler = (e: any) => {
         const { bg, character } = (e as CustomEvent).detail;
+        console.log("restore graphics handler fired with:", bg, character);
         backgroundCG?.updateBackgroundImage(bg);
         portrait?.updateBackgroundImage(character);
     };

@@ -16,8 +16,8 @@
         "title": "ALIVE Renewal",
         "width": 647,
         "height": 531,
-        "minWidth": 199,
-        "minHeight": 195,
+        "minWidth": 229,
+        "minHeight": 217,
         "additionalBrowserArgs": "--autoplay-policy=no-user-gesture-required",
         "decorations": false,
         "transparent": true
