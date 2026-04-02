@@ -2,7 +2,7 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Capability for the main window",
-  "windows": ["main", "version-info", "codec-version", "settings"],
+  "windows": ["main", "version-info", "codec-version", "settings", "save_load"],
   "permissions": [
     "core:default",
     "core:window:allow-close",

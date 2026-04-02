@@ -10,54 +10,31 @@ export async function pushPauseScreen() {
     if (!pauseScene) return;
 
     toButton(pauseScene.getObjectByName("SAVE"), {
-        callback: () => {
+        callback: async () => {
             console.log("SAVE button clicked");
-            window.open("/save_load.html?mode=save", "SaveGame", "width=600,height=600");
-
-            // Listen for messages from the save/load window
-            const messageHandler = (event: MessageEvent) => {
-                if (event.data.type === "save-game") {
-                    const slotIndex = event.data.slotIndex;
+            window.openSaveLoadDialog("save").then((slotIndex) => {
+                if (slotIndex !== null) {
                     console.log("Saving game to slot:", slotIndex);
                     saveGame(slotIndex);
-                    window.removeEventListener("message", messageHandler);
-                } else if (event.data.type === "save-load-cancelled") {
-                    window.removeEventListener("message", messageHandler);
                 }
-            };
-
-            window.addEventListener("message", messageHandler);
+            });
         },
     });
 
     toButton(pauseScene.getObjectByName("LOAD"), {
-        callback: () => {
+        callback: async () => {
             console.log("LOAD button clicked");
-            window.open("/save_load.html?mode=load", "LoadGame", "width=600,height=600");
-
-            // Listen for messages from the save/load window
-            const messageHandler = (event: MessageEvent) => {
-                if (event.data.type === "load-game") {
-                    const slotIndex = event.data.slotIndex;
+            window.openSaveLoadDialog("load").then((slotIndex) => {
+                if (slotIndex !== null) {
                     console.log("Loading game from slot:", slotIndex);
-
                     const gameState = loadGame(slotIndex);
                     if (gameState) {
-                        // Apply the loaded state
                         applyGameState(gameState);
-                        // Close the pause menu
                         destroyScene();
-                        // Execute to the next line to refresh UI
                         execUntilNextLine();
                     }
-
-                    window.removeEventListener("message", messageHandler);
-                } else if (event.data.type === "save-load-cancelled") {
-                    window.removeEventListener("message", messageHandler);
                 }
-            };
-
-            window.addEventListener("message", messageHandler);
+            });
         },
     });
 
