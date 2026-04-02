@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Alive renewal的设置属性</title>
+    <style>
+      body { margin: 0; padding: 0; background-color: #c0c0c0; overflow: hidden; height: 100vh; display: flex; flex-direction: column; font-family: "MS UI Gothic", "Microsoft YaHei", sans-serif; font-size: 12px; }
+      .window { box-shadow: none; border: none; flex: 1; display: flex; flex-direction: column; height: 100%; }
+      .window-body { flex: 1; margin: 0; padding: 8px; display: flex; flex-direction: column; }
+      
+      menu[role="tablist"] { display: flex; margin: 0; padding: 0 0 0 2px; border-bottom: none; z-index: 1; }
+      menu[role="tablist"] button { padding: 4px 8px; border-bottom: none; border-bottom-left-radius: 0; border-bottom-right-radius: 0; background: #c0c0c0; margin-right: 2px; }
+      menu[role="tablist"] button[aria-selected="true"] { z-index: 2; border-bottom: 1px solid #c0c0c0; margin-bottom: -1px; padding-bottom: 5px; }
+      
+      .tab-content { display: none; padding: 12px; border: 2px solid; border-color: #dfdfdf #404040 #404040 #dfdfdf; flex: 1; margin-top: -1px; background: #c0c0c0; box-shadow: inset 1px 1px #fff, inset -1px -1px #808080; }
+      .tab-content.active { display: block; }
+
+      fieldset { margin-bottom: 8px; padding: 8px; }
+      legend { padding: 0 4px; }
+      
+      .flex-row { display: flex; align-items: center; gap: 8px; }
+      .flex-col { display: flex; flex-direction: column; gap: 4px; }
+      .space-between { justify-content: space-between; }
+      
+      .slider-container { display: flex; flex-direction: column; width: 100%; }
+      .slider-labels { display: flex; justify-content: space-between; margin-bottom: 4px; }
+      
+      .footer-buttons { display: flex; justify-content: flex-end; gap: 6px; margin-top: 8px; }
+      .footer-buttons button { width: 75px; }
+
+      .speed-boxes { display: flex; gap: 8px; }
+      .speed-boxes fieldset { flex: 1; }
+
+      .font-sample { background: #008080; color: white; padding: 4px; border: inset 2px; font-family: "MS Gothic", monospace; height: 60px; overflow: hidden; line-height: 1.2; word-break: break-all; }
+
+      .checkbox-indent { margin-left: 20px; }
+      li[role="tab"] { padding: 2px 8px; cursor: default; }
+
+      input[type="range"] { margin: 4px 0; }
+      input[type="range"]::-webkit-slider-runnable-track { background: #000; height: 2px; }
+      select { padding: 2px; }
+    </style>
+  </head>
+  <body>
+    <div class="window">
+      <div data-tauri-drag-region class="title-bar" style="padding: 2px 2px 2px 3px;">
+        <div data-tauri-drag-region class="title-bar-text">Alive renewal的设置属性</div>
+        <div class="title-bar-controls">
+          <button aria-label="Help"></button>
+          <button aria-label="Close" onclick="closeWindow()"></button>
+        </div>
+      </div>
+      
+      <div class="window-body">
+        <menu role="tablist">
+          <li role="tab" aria-selected="true" onclick="switchTab(event, 'basic')">基础设置</li>
+          <li role="tab" aria-selected="false" onclick="switchTab(event, 'saveload')">存档・读档设置</li>
+          <li role="tab" aria-selected="false" onclick="switchTab(event, 'sound')">声音设置</li>
+        </menu>
+
+        <!-- 基础设置 -->
+        <article role="tabpanel" id="basic" class="tab-content active">
+          <div class="speed-boxes">
+            <fieldset>
+              <legend>文本速度</legend>
+              <div class="slider-container">
+                <div class="slider-labels"><span>慢</span><span>快</span></div>
+                <input type="range" min="0" max="10" value="0" />
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend><input type="checkbox" id="screen-effects" checked /> <label for="screen-effects">画面效果速度</label></legend>
+              <div class="slider-container">
+                <div class="slider-labels"><span>慢</span><span>快</span></div>
+                <input type="range" min="0" max="10" value="0" />
+              </div>
+            </fieldset>
+          </div>
+
+          <fieldset>
+            <legend>字体设置</legend>
+            <div style="display: flex; gap: 10px;">
+              <div class="flex-col" style="flex: 1;">
+                <div class="flex-row">
+                  <select style="width: 120px;"><option>MS ゴシック</option><option>黑体</option></select>
+                  <button>选择字体</button>
+                </div>
+                <div style="margin-top: 4px;">
+                  <input type="checkbox" id="drop-shadow" checked />
+                  <label for="drop-shadow">投影</label>
+                </div>
+                <div class="slider-container" style="margin-top: 8px;">
+                  <div class="flex-row" style="margin-bottom: 2px;">
+                    <span style="margin-right: auto;">抗锯齿</span>
+                    <span style="font-size: 10px;">无</span>
+                    <span style="margin-left: 60px; font-size: 10px;">最大</span>
+                  </div>
+                  <div style="display: flex; justify-content: flex-end;">
+                  <input type="range" min="0" max="3" value="3" style="width: 100px;" />
+                  </div>
+                </div>
+              </div>
+              <div class="flex-col" style="flex: 1;">
+                <div>显示示例</div>
+                <div class="font-sample">
+                  Aaあぁアァ亜以宇江尾<br>
+                  Aaあぁアァ亜以<br>
+                  Aaあぁアァ
+                </div>
+              </div>
+            </div>
+          </fieldset>
+        </article>
+
+        <!-- 存档读档设置 -->
+        <article role="tabpanel" id="saveload" class="tab-content">
+          <fieldset>
+            <legend>存档对话框行为</legend>
+            <div class="flex-col">
+              <div><input type="checkbox" id="save-confirm" checked /> <label for="save-confirm">覆盖存档时显示确认信息</label></div>
+              <div><input type="checkbox" id="save-dblclick" checked /> <label for="save-dblclick">双击项目存档时，自动关闭对话框</label></div>
+              <div><input type="checkbox" id="save-auto-select" checked /> <label for="save-auto-select">打开对话框时，自动选择最后存档的数据</label></div>
+              <div class="checkbox-indent"><input type="checkbox" id="save-skip-auto" checked /> <label for="save-skip-auto">但是不自动选择自动存档的数据</label></div>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>读档对话框行为</legend>
+            <div class="flex-col">
+              <div><input type="checkbox" id="load-confirm" checked /> <label for="load-confirm">读取数据时显示确认信息</label></div>
+              <div><input type="checkbox" id="load-dblclick" checked /> <label for="load-dblclick">双击选择读档时，自动关闭对话框</label></div>
+              <div><input type="checkbox" id="load-auto-select" checked /> <label for="load-auto-select">打开对话框时，自动选择最后存档的数据</label></div>
+              <div class="checkbox-indent"><input type="checkbox" id="load-skip-auto" checked /> <label for="load-skip-auto">但是不自动选择自动存档的数据</label></div>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend><input type="checkbox" id="auto-save" checked /> <label for="auto-save">启用自动存档</label></legend>
+            <div class="flex-col">
+              <div class="flex-row">
+                <input type="number" value="99" min="1" max="99" style="width: 40px;" />
+                <span>号数据作为自动存档对象</span>
+              </div>
+              <div>自动存档时的注释 (最多255个半角字符)</div>
+              <input type="text" style="width: 100%;" />
+            </div>
+          </fieldset>
+        </article>
+
+        <!-- 声音设置 -->
+        <article role="tabpanel" id="sound" class="tab-content">
+          <fieldset>
+            <legend>音量设置</legend>
+            <div class="flex-col" style="gap: 8px;">
+              <div class="flex-row space-between">
+                <div class="flex-col" style="width: 140px;">
+                  <div><input type="checkbox" id="bgm-vol-check" checked /> <label for="bgm-vol-check">BGM 音量</label></div>
+                  <input type="range" min="0" max="100" value="25" />
+                </div>
+                <div>25%</div>
+                <div class="flex-col">
+                  <div><input type="checkbox" id="bgm-sys" checked /> <label for="bgm-sys">使用系统的音量设置</label></div>
+                  <div><input type="checkbox" id="bgm-fade" checked /> <label for="bgm-fade">启用淡入淡出</label></div>
+                </div>
+              </div>
+              <hr style="width: 100%;" />
+              <div class="flex-row space-between">
+                <div class="flex-col" style="width: 140px;">
+                  <div><input type="checkbox" id="voice-vol-check" checked /> <label for="voice-vol-check">VOICE 音量</label></div>
+                  <input type="range" min="0" max="100" value="49" />
+                </div>
+                <div>49%</div>
+                <div class="flex-col">
+                  <div><input type="checkbox" id="voice-sys" checked /> <label for="voice-sys">使用系统的音量设置</label></div>
+                  <div><input type="checkbox" id="voice-fade" checked /> <label for="voice-fade">启用淡入淡出</label></div>
+                </div>
+              </div>
+              <hr style="width: 100%;" />
+              <div class="flex-row space-between">
+                <div class="flex-col" style="width: 140px;">
+                  <div><input type="checkbox" id="se-vol-check" checked /> <label for="se-vol-check">SE 音量</label></div>
+                  <input type="range" min="0" max="100" value="49" />
+                </div>
+                <div>49%</div>
+                <div class="flex-col">
+                  <div><input type="checkbox" id="se-sys" checked /> <label for="se-sys">使用系统的音量设置</label></div>
+                  <div><input type="checkbox" id="se-fade" checked /> <label for="se-fade">启用淡入淡出</label></div>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>CD-DA设置</legend>
+            <label>不可用</label>
+          </fieldset>
+        </article>
+
+        <div class="footer-buttons">
+          <button onclick="closeWindow()">OK</button>
+          <button onclick="closeWindow()">取消</button>
+          <button>应用(A)</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function switchTab(event, targetId) {
+        document.querySelectorAll('menu[role="tablist"] li').forEach(b => b.setAttribute('aria-selected', 'false'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        
+        event.target.setAttribute('aria-selected', 'true');
+        document.getElementById(targetId).classList.add('active');
+      }
+    </script>
+    <script type="module" src="/src/settings.ts"></script>
+  </body>
+</html>

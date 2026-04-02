@@ -22,6 +22,7 @@ declare global {
   interface Window {
     openVersionInfo: () => void;
     openCodecVersionInfo: () => void;
+    openSettings: () => void;
     getEngine: () => GameEngine;
     exit: () => void;
     minimize: () => void;
