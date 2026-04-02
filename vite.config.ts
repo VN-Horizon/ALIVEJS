@@ -38,6 +38,7 @@ export default defineConfig(async () => ({
         main: path.resolve(__dirname, "index.html"),
         version: path.resolve(__dirname, "dialogs/version.html"),
         "codec-version": path.resolve(__dirname, "dialogs/codec-version.html"),
+        settings: path.resolve(__dirname, "dialogs/settings.html"),
       },
     },
   },
