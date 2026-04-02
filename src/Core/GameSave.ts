@@ -1,5 +1,5 @@
-import { Background } from "@/Graphics/Background";
 import { getCurrentBGM } from "@/Audio/Bgm";
+import { Background } from "@/Graphics/Background";
 import { getCurrentEvent } from "./Events";
 
 const SAVE_KEY_PREFIX = "alive_save_";
@@ -13,6 +13,7 @@ export interface GameState {
     currentPortrait: any;
     timestamp: string;
     eventName: string | number;
+    comment?: string;
 }
 
 export function getCurrentGameState(): GameState {
@@ -36,6 +37,10 @@ export function getCurrentGameState(): GameState {
 
     // Get screenplay context from Events
     const currentEvent = getCurrentEvent();
+    
+    // Check for comment from save dialog
+    let comment = localStorage.getItem("_temp_save_comment") || "";
+    localStorage.removeItem("_temp_save_comment"); // clear it immediately
 
     return {
         currentBlockIndex: window.ScreenplayContext?.currentBlockIndex || 0,
@@ -45,6 +50,7 @@ export function getCurrentGameState(): GameState {
         currentPortrait: currentPortrait,
         timestamp: new Date().toISOString(),
         eventName: currentEvent?.evId || "Unknown",
+        comment: comment,
     };
 }
 

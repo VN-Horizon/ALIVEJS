@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Save/Load</title>
+    <style>
+      body { margin: 0; padding: 0; background-color: #c0c0c0; overflow: hidden; height: 100vh; display: flex; flex-direction: column; font-family: "MS UI Gothic", "Microsoft YaHei", sans-serif; font-size: 12px; }
+      .window { box-shadow: none; border: none; flex: 1; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; }
+      .window-body { flex: 1; margin: 0; padding: 2px; display: flex; flex-direction: column; }
+      
+      menu[role="tablist"] { display: flex; margin: 0; padding: 0 0 0 2px; border-bottom: none; z-index: 1; }
+      menu[role="tablist"] button { padding: 2px 8px; border-bottom: none; border-bottom-left-radius: 0; border-bottom-right-radius: 0; background: #c0c0c0; margin-right: 2px; outline: none; }
+      menu[role="tablist"] button[aria-selected="true"] { z-index: 2; border-bottom: 1px solid #c0c0c0; margin-bottom: -1px; padding-bottom: 5px; }
+
+      .tab-content { display: none; padding: 12px; border: 2px solid; border-color: #dfdfdf #404040 #404040 #dfdfdf; flex: 1; margin-top: -1px; background: #c0c0c0; box-shadow: inset 1px 1px #fff, inset -1px -1px #808080; flex-direction: column; }
+      .tab-content.active { display: flex; }
+      
+      .table-view { width: 100%; border-collapse: collapse; font-family: monospace; white-space: pre; }
+      .table-view tr { line-height: 1.2; }
+      .table-view td { padding: 2px 4px; border: none; user-select: none; }
+      .table-view tr.selected { background-color: #000080; color: white; }
+
+      fieldset { margin-bottom: 8px; padding: 8px; }
+      .input-container { margin-bottom: 8px; }
+      .input-container label { display: block; margin-bottom: 2px; }
+      .input-container input { width: 100%; box-sizing: border-box; }
+
+      .footer-buttons { display: flex; justify-content: flex-end; gap: 6px; margin-top: 6px; }
+      .footer-buttons button { width: 75px; }
+
+      li[role="tab"] { padding: 2px 8px; cursor: default; }
+    </style>
+  </head>
+  <body>
+    <div class="window">
+      <div data-tauri-drag-region class="title-bar" style="padding: 2px 2px 2px 3px;">
+        <div data-tauri-drag-region class="title-bar-text">加载/保存</div>
+        <div class="title-bar-controls">
+          <button aria-label="Close" id="closeBtn"></button>
+        </div>
+      </div>
+      
+      <div class="window-body">
+        <menu role="tablist">
+          <li role="tab" aria-selected="true" id="tab-save">保存存档</li>
+          <li role="tab" aria-selected="false" id="tab-load">加载存档</li>
+        </menu>
+
+        <div class="tab-content active" id="content">
+          <div class="sunken-panel" id="saveListContainer">
+            <table class="table-view" id="saveTable">
+              <tbody id="saveTbody">
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="input-container">
+            <label for="commentInput">保存注释 (最大255字符)</label>
+            <input type="text" id="commentInput" maxlength="255" />
+          </div>
+        </div>
+
+        <div class="footer-buttons">
+          <button id="okBtn">OK</button>
+          <button id="cancelBtn">取消</button>
+          <button id="applyBtn">应用</button>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/save_load.ts"></script>
+  </body>
+</html>

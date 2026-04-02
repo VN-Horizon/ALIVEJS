@@ -87,6 +87,61 @@ export async function initWindowManager() {
     await openDialog("settings", "/dialogs/settings.html", "Alive renewal的设置属性", 480, 520, 480, 420);
   };
 
+  window.openSaveLoadDialog = (mode: "save" | "load") => {
+    return new Promise((resolve) => {
+      const url = `/dialogs/save_load.html?mode=${mode}`;
+      if ('__TAURI_INTERNALS__' in window) {
+        import("@tauri-apps/api/event").then(({ listen }) => {
+          let unlistenClose: () => void;
+          let unlistenAction: () => void;
+
+          const cleanup = () => {
+            if (unlistenClose) unlistenClose();
+            if (unlistenAction) unlistenAction();
+          };
+
+          listen("save-load-closed", () => {
+            cleanup();
+            resolve(null);
+          }).then(u => unlistenClose = u);
+
+          listen("save-load-action", (event: any) => {
+            cleanup();
+            if (event.payload.mode === mode) {
+              if (mode === "save") {
+                localStorage.setItem("_temp_save_comment", event.payload.comment || "");
+              }
+              resolve(event.payload.slotIndex);
+            } else {
+              resolve(null);
+            }
+          }).then(u => unlistenAction = u);
+
+          openDialog("save_load", url, "Save/Load", 450, 600);
+        });
+      } else {
+        const messageHandler = (event: MessageEvent) => {
+          if (event.data.type === "save-load-action") {
+            window.removeEventListener("message", messageHandler);
+            if (event.data.mode === mode) {
+              if (mode === "save") {
+                localStorage.setItem("_temp_save_comment", event.data.comment || "");
+              }
+              resolve(event.data.slotIndex);
+            } else {
+              resolve(null);
+            }
+          } else if (event.data.type === "save-load-closed") {
+            window.removeEventListener("message", messageHandler);
+            resolve(null);
+          }
+        };
+        window.addEventListener("message", messageHandler);
+        openDialog("save_load", url, "Save/Load", 450, 520);
+      }
+    });
+  };
+
   window.exit = (timeout: number=600) => {
     $("#black-overlay").fadeIn(timeout, async () => {
       window.tWindow?.close() || window.close();

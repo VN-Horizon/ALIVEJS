@@ -20,42 +20,27 @@ export async function loadStartScene(hasGallery = true) {
 
     toButton(startScene.getObjectByName("START"), {
         callback: async () => {
+            document.getElementById("menu-save")?.removeAttribute("aria-disabled");
             await loadBackgroundScene();
             await pushDialogWindow();
         },
     });
 
     toButton(startScene.getObjectByName("LOAD"), {
-        callback: () => {
+        callback: async () => {
             console.log("LOAD button clicked");
-            const loadWindow = window.open("/save_load.html?mode=load", "LoadGame", "width=600,height=600");
-
-            // Listen for messages from the save/load window
-            const messageHandler = (event: MessageEvent) => {
-                if (event.data.type === "load-game") {
-                    const slotIndex = event.data.slotIndex;
-                    console.log("Loading game from slot:", slotIndex);
-
-                    const gameState = loadGame(slotIndex);
-                    if (gameState) {
-                        // Load background scene and dialog window first
-                        loadBackgroundScene().then(() => {
-                            pushDialogWindow().then(() => {
-                                // Apply the loaded state
-                                applyGameState(gameState);
-                                // Execute to the next line to refresh UI
-                                execUntilNextLine();
-                            });
-                        });
-                    }
-
-                    window.removeEventListener("message", messageHandler);
-                } else if (event.data.type === "save-load-cancelled") {
-                    window.removeEventListener("message", messageHandler);
+            const slotIndex = await window.openSaveLoadDialog("load");
+            if (slotIndex !== null) {
+                console.log("Loading game from slot:", slotIndex);
+                const gameState = loadGame(slotIndex);
+                if (gameState) {
+                    document.getElementById("menu-save")?.removeAttribute("aria-disabled");
+                    await loadBackgroundScene();
+                    await pushDialogWindow();
+                    applyGameState(gameState);
+                    execUntilNextLine();
                 }
-            };
-
-            window.addEventListener("message", messageHandler);
+            }
         },
     });
 
