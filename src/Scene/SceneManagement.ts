@@ -52,9 +52,11 @@ export async function loadScene(
         // Each newly loaded scene gets a increasing base z offset.
         const scene = new Scene(path, engine, __sceneZCounter * 114514); // large gap to avoid overlap
         __sceneZCounter++;
+        const loadPromises: Promise<any>[] = [];
         if (sceneData.children) {
-            createSceneObjects(sceneData.children, null, scene);
+            createSceneObjects(sceneData.children, null, scene, loadPromises);
         }
+        await Promise.all(loadPromises);
         engine.pushScene(scene);
         console.log("Scene loaded successfully:", path);
         return scene;
@@ -66,13 +68,23 @@ export async function loadScene(
     }
 }
 
-function createSceneObjects(children: SceneElementData[], parent: SceneElement | null, scene: Scene | null) {
+function createSceneObjects(
+    children: SceneElementData[],
+    parent: SceneElement | null,
+    scene: Scene | null,
+    loadPromises: Promise<any>[],
+) {
     if (!children || !Array.isArray(children)) return;
     children.forEach(childData => {
         if (currentExclusionList.includes(childData.name ?? "")) return;
         // Use AnimatedSceneElement for elements marked as animated
         const ElementClass = childData.animated ? AnimatedSceneElement : SceneElement;
         const obj = new ElementClass(childData, parent, scene);
+        
+        if (obj.imageLoadPromise) {
+            loadPromises.push(obj.imageLoadPromise);
+        }
+
         // Track root objects for cleanup
         if (!parent) {
             // Add to scene
@@ -85,7 +97,7 @@ function createSceneObjects(children: SceneElementData[], parent: SceneElement |
 
         // Recursively create children
         if (childData.children && childData.children.length) {
-            createSceneObjects(childData.children, obj, scene);
+            createSceneObjects(childData.children, obj, scene, loadPromises);
         }
 
         // Initialize animation frames if this is an AnimatedSceneElement

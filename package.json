@@ -9,7 +9,7 @@
         "dev": "pnpm run sync:ogv && vite",
         "build": "pnpm run sync:ogv && tsc && vite build",
         "preview": "pnpm run sync:ogv && vite preview",
-        "tauri": "tauri"
+        "tauri": "WEBKIT_DISABLE_COMPOSITING_MODE=1 tauri"
     },
     "keywords": [],
     "author": "",

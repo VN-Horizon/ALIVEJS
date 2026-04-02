@@ -84,7 +84,7 @@ export async function initWindowManager() {
   };
 
   window.openSettings = async () => {
-    await openDialog("settings", "/dialogs/settings.html", "Alive renewal的设置属性", 480, 520, 480, 420);
+    await openDialog("settings", "/dialogs/settings.html", "Alive renewal 设置", 480, 500, 480, 420);
   };
 
   window.openSaveLoadDialog = (mode: "save" | "load") => {

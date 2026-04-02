@@ -143,6 +143,7 @@ export async function pushDialogWindow() {
 
   document.addEventListener("PlayDialogInternal", playDialogHandler);
   dialogWindow?.onDestroyCallbacks.push(() => {
+
     document.removeEventListener("PlayDialogInternal", playDialogHandler);
   });
 

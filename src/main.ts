@@ -47,13 +47,14 @@ async function init() {
 
     $("body").css("opacity", "1");
     console.log("Initializing application...");
-    await loadEvents();
+    const eventsPromise = loadEvents();
     initEventGraphOverlay();
-    initBGM();
-    initSE();
-    await loadStartScene();
-    await initTranslation();
-    $("#black-overlay").fadeOut(600);
+    initTranslation();
+    setTimeout(() => {
+      initBGM();
+      initSE();
+    }, 0);
+    loadStartScene(true, eventsPromise);
   } catch (error: any) {
     console.error(error);
   }
