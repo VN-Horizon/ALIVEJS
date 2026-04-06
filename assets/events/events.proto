@@ -10,7 +10,7 @@ enum InstructionType {
   PlaySe = 3;
   SetBgImg = 4;
   SetCharaImg = 5;
-  SleepOrFade = 6;
+  ShakeScreen = 6;
   TransitionToGraphics = 7;
   TransitionToGraphicsFade = 8;
   ShowCg = 9;

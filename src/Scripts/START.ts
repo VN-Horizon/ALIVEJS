@@ -4,7 +4,7 @@ import { execUntilNextLine } from "../Core/Events";
 import { applyGameState, loadGame } from "../Core/GameSave";
 import { toButton } from "../Graphics/Button";
 import { setExitListener, setOverrideRightKeys } from "../InputSystem/InputSystem.Keyboard";
-import { loadScene } from "../Scene/SceneManagement";
+import { destroySceneByName, loadScene } from "../Scene/SceneManagement";
 import { loadBackgroundScene } from "./BACKGROUND";
 import { initGallery } from "./GALLERY";
 import { pushDialogWindow } from "./WINDOW/WINDOW";
@@ -28,7 +28,10 @@ export async function loadStartScene(hasGallery = true, eventsPromise?: Promise<
         callback: async () => {
             document.getElementById("menu-save")?.removeAttribute("aria-disabled");
             await loadBackgroundScene();
-                await pushDialogWindow({ autoAdvance: false });
+            await pushDialogWindow({ autoAdvance: true });
+            setTimeout(() => {
+                destroySceneByName("UI/START");
+            }, 1000);
         },
     });
 

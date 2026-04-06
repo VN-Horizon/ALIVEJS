@@ -30,11 +30,11 @@ export function initCutscenePlayer(dialogWindow: IScene | null) {
         if (stringParams.length < 3) return;
         if (window.skipping) return;
         
-        const thirdParam = stringParams[2];
+        const thirdParam: string = stringParams[2];
         
         if (thirdParam && thirdParam !== "0") {
             videoElement.style.transition = "none";
-            videoElement.src = `/assets/scenes/Cutscenes/F_${thirdParam}.webm`;
+            videoElement.src = `/assets/scenes/Cutscenes/F_${thirdParam.replace("・", "")}.webm`;
             videoElement.style.opacity = "1";
             videoElement.play().catch(err => {
                 console.error("Failed to play cutscene", err);
@@ -55,7 +55,6 @@ export function initCutscenePlayer(dialogWindow: IScene | null) {
     });
 
     $(document).on("TransitionToGraphics", (e) => onTransitionToGraphics(e, false));
-    $(document).on("TransitionToGraphicsFade", (e) => onTransitionToGraphics(e, true));
 
     dialogWindow.onDestroyCallbacks.push(() => {
         $(document).off("TransitionToGraphics", onTransitionToGraphics);

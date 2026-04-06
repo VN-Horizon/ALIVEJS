@@ -1,3 +1,4 @@
+import { updateCurrentDate } from "@/Debug/Graph/DateDebugger";
 import { Background } from "@/Graphics/Background";
 import { createBlankScene } from "@/Scene/SceneManagement";
 import $ from "jquery";
@@ -67,18 +68,22 @@ export async function loadBackgroundScene() {
         }
     };
     const setCgHandler = (e: any) => {
-        const { stringParams } = (e as CustomEvent).detail;
-        if (stringParams.length < 1 || !stringParams[0]) return;
-
-        const [sceneName, calendarVariant] = stringParams;
         portrait?.updateBackgroundImage(null);
-
-        if (sceneName.toLowerCase() === "calendar" && calendarVariant) {
-            backgroundCG?.updateBackgroundImage(`/assets/scenes/Calendar/CALENDAR/${calendarVariant}.avif`);
+        const { stringParams } = (e as CustomEvent).detail;
+        const [rawSceneName, calendarVariant] = stringParams;
+        if (!rawSceneName) {
+            backgroundCG?.updateBackgroundImage(`/assets/scenes/CG/BLACK/BLACK.avif`);
             return;
         }
 
-        const bgName = sceneName === "0" ? "BLACK" : sceneName.toUpperCase();
+        const sceneName = rawSceneName.toLowerCase();
+        if (sceneName === "calendar" && calendarVariant) {
+            backgroundCG?.updateBackgroundImage(`/assets/scenes/Calendar/CALENDAR/${calendarVariant}.avif`);
+            updateCurrentDate(calendarVariant);
+            return;
+        }
+
+        const bgName = rawSceneName === "0" ? "BLACK" : rawSceneName.toUpperCase();
         backgroundCG?.updateBackgroundImage(
             `/assets/scenes/CG/${bgName}/${bgName}.avif`,
         );
@@ -107,6 +112,7 @@ export async function loadBackgroundScene() {
     $(document).on("ShowCg", setCgHandler);
     $(document).on("SetCharaImg", setCharaImgHandler);
     $(document).on("RestoreGraphics", restoreGraphicsHandler);
+    $(document).on("FadeSystemToBlack", setCgHandler); // Reuse CG handler for fade to black
 
     backgroundScene.onDestroyCallbacks.push(() => {
         $(document).off("SetBgImg", setBgImgHandler);
@@ -114,6 +120,7 @@ export async function loadBackgroundScene() {
         $(document).off("ShowCg", setCgHandler);
         $(document).off("SetCharaImg", setCharaImgHandler);
         $(document).off("RestoreGraphics", restoreGraphicsHandler);
+        $(document).off("FadeSystemToBlack", setCgHandler);
     });
     return backgroundScene;
 }
