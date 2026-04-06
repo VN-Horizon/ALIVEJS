@@ -17,7 +17,7 @@ enum InstructionType {
   FadeSystemToBlack = 10;
   SetGraphicsState = 11;
   ToggleGraphicsFlag = 12;
-  ShakeScreen = 13;
+  AutoContinue = 13;
   ToggleStaffState = 14;
   ShowStaffA = 15;
   ShowStaffB = 16;

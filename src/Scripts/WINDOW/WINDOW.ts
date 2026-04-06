@@ -1,4 +1,4 @@
-import { execUntilNextLine } from "@/Core/Events";
+import { execUntilNextLine, skipAutoContinueWait } from "@/Core/Events";
 import type { AnimatedSceneElement } from "@/Graphics/AnimatedSceneElement";
 import { Button, toButton } from "@/Graphics/Button";
 import { TMP_Text, TMP_TypeWriter } from "@/Graphics/TextMessPoor";
@@ -9,6 +9,7 @@ import { $translate } from "@/Utils/Translator";
 import $ from "jquery";
 import { pushPauseScreen } from "../SYSTEM";
 import { initBacklog } from "./WINDOW.Backlog";
+import { initCutscenePlayer } from "./WINDOW.CutscenePlayer";
 import { _hideDialogWindow } from "./WINDOW.DialogHider";
 import { initSelectionsBox } from "./WINDOW.SelectionsBox";
 
@@ -23,6 +24,7 @@ export async function pushDialogWindow() {
 
   initSelectionsBox(dialogWindow);
   initBacklog(dialogWindow);
+  initCutscenePlayer(dialogWindow);
 
   const nextLineBtn = dialogWindow?.addObject(
     new Button({
@@ -158,6 +160,24 @@ export async function pushDialogWindow() {
     document.removeEventListener("SkipModeStarted", skipModeStartHandler);
   });
 
+  let hiddenByAutoContinue = false;
+  const autoContinuePauseStartHandler = () => {
+    if (!dialogWindow || hiddenByAutoContinue) return;
+    hiddenByAutoContinue = true;
+    dialogWindow.hide();
+  };
+  const autoContinuePauseEndHandler = () => {
+    if (!dialogWindow || !hiddenByAutoContinue) return;
+    hiddenByAutoContinue = false;
+    dialogWindow.show();
+  };
+  document.addEventListener("AutoContinuePauseStart", autoContinuePauseStartHandler);
+  document.addEventListener("AutoContinuePauseEnd", autoContinuePauseEndHandler);
+  dialogWindow?.onDestroyCallbacks.push(() => {
+    document.removeEventListener("AutoContinuePauseStart", autoContinuePauseStartHandler);
+    document.removeEventListener("AutoContinuePauseEnd", autoContinuePauseEndHandler);
+  });
+
   setExitListener(() => pushPauseScreen());
   dialogWindow?.onAfterFocusCallbacks.push(() => {
     setOverrideRightKeys(true);
@@ -172,9 +192,12 @@ export async function pushDialogWindow() {
   });
 
   nextLineBtn?.setFocus();
+  onNextLineRequest();
 }
 
 export function onNextLineRequest() {
+  if (skipAutoContinueWait()) return;
+
   const dialogWindow = window.getEngine().getSceneByName("UI/WINDOW");
   if (!dialogWindow) return;
 

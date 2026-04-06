@@ -21,9 +21,12 @@ export async function loadBackgroundScene() {
     // Update transition based on skipping state
     const updateTransition = () => {
         const transition = window.skipping ? "none" : "opacity 0.5s ease-in-out";
+        if (transition === lastTransition) return;
+        lastTransition = transition;
         if (backgroundCG) backgroundCG.transition = transition;
         if (portrait) portrait.transition = transition;
     };
+    let lastTransition = "opacity 0.5s ease-in-out";
     setInterval(updateTransition, 50);
 
     const portrait = backgroundScene.addObject(
@@ -39,26 +42,43 @@ export async function loadBackgroundScene() {
     const setBgImgHandler = (e: any) => {
         const { stringParams } = (e as CustomEvent).detail;
         if (stringParams.length < 2) return;
-        if (stringParams[0] === "0" || stringParams[1] === "0") {
+        const [bgFolder, bgFile] = stringParams;
+        if (bgFolder === "0" || bgFile === "0") {
             backgroundCG?.updateBackgroundImage(null);
             return;
         }
-        backgroundCG?.updateBackgroundImage(`/assets/scenes/BG/${stringParams[0]}/${stringParams[1]}.avif`);
+        backgroundCG?.updateBackgroundImage(`/assets/scenes/BG/${bgFolder}/${bgFile}.avif`);
     };
-    const transitionToGraphicsHandler = (e: any, paramOffset: number = 0) => {
+    const transitionToGraphicsHandler = (e: any) => {
         const { stringParams } = (e as CustomEvent).detail;
         if (stringParams.length < 4) return;
-        if (stringParams[paramOffset] === "0" || stringParams[paramOffset + 1] === "0") {
+        const [bgFolder, bgFile, portraitFolder, portraitFile] = stringParams;
+
+        if (bgFolder === "0" || bgFile === "0") {
             backgroundCG?.updateBackgroundImage(`/assets/scenes/CG/BLACK/BLACK.avif`);
-            return;
+        } else {
+            backgroundCG?.updateBackgroundImage(`/assets/scenes/BG/${bgFolder}/${bgFile}.avif`);
         }
-        backgroundCG?.updateBackgroundImage(`/assets/scenes/BG/${stringParams[paramOffset]}/${stringParams[paramOffset+1]}.avif`);
+
+        if (portraitFolder === "0" || portraitFile === "0" || portraitFile === "パネル") {
+            portrait?.updateBackgroundImage(null);
+        } else {
+            portrait?.updateBackgroundImage(`/assets/scenes/Portraits/${portraitFolder}/${portraitFile}.avif`);
+        }
     };
     const setCgHandler = (e: any) => {
         const { stringParams } = (e as CustomEvent).detail;
-        if (stringParams.length < 1) return;
-        const bgName = stringParams[0] === "0"? "BLACK" : stringParams[0].toUpperCase();
+        if (stringParams.length < 1 || !stringParams[0]) return;
+
+        const [sceneName, calendarVariant] = stringParams;
         portrait?.updateBackgroundImage(null);
+
+        if (sceneName.toLowerCase() === "calendar" && calendarVariant) {
+            backgroundCG?.updateBackgroundImage(`/assets/scenes/Calendar/CALENDAR/${calendarVariant}.avif`);
+            return;
+        }
+
+        const bgName = sceneName === "0" ? "BLACK" : sceneName.toUpperCase();
         backgroundCG?.updateBackgroundImage(
             `/assets/scenes/CG/${bgName}/${bgName}.avif`,
         );
@@ -67,24 +87,23 @@ export async function loadBackgroundScene() {
     const setCharaImgHandler = (e: any) => {
         const { stringParams } = (e as CustomEvent).detail;
         if (stringParams.length < 2) return;
-        if (stringParams[0] === "0" || stringParams[1] === "0") {
+        const [portraitFolder, portraitFile] = stringParams;
+        if (portraitFolder === "0" || portraitFile === "0") {
             portrait?.updateBackgroundImage(null);
             return;
         }
-        portrait?.updateBackgroundImage(`/assets/scenes/Portraits/${stringParams[0]}/${stringParams[1]}.avif`);
+        portrait?.updateBackgroundImage(`/assets/scenes/Portraits/${portraitFolder}/${portraitFile}.avif`);
     };
 
     // Handler to restore background image from saved state
     const restoreGraphicsHandler = (e: any) => {
         const { bg, character } = (e as CustomEvent).detail;
-        console.log("restore graphics handler fired with:", bg, character);
         backgroundCG?.updateBackgroundImage(bg);
         portrait?.updateBackgroundImage(character);
     };
 
     $(document).on("SetBgImg", setBgImgHandler);
-    $(document).on("TransitionToGraphicsFade", e => transitionToGraphicsHandler(e, 0));
-    $(document).on("TransitionToGraphics", e => transitionToGraphicsHandler(e, 2));
+    $(document).on("TransitionToGraphics TransitionToGraphicsFade", transitionToGraphicsHandler);
     $(document).on("ShowCg", setCgHandler);
     $(document).on("SetCharaImg", setCharaImgHandler);
     $(document).on("RestoreGraphics", restoreGraphicsHandler);

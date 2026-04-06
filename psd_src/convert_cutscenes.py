@@ -16,7 +16,7 @@ def convert_psd_to_webm(psd_path, output_path):
         # but we'll read them in the order psd-tools provides (top to bottom).
         # You can reverse `psd` if the animation should be bottom-up.
         frames = list(psd)
-        frames.reverse() # Usually animations in PSD are built bottom-layer = first frame
+        # frames.reverse() # Usually animations in PSD are built bottom-layer = first frame
         
         for i, layer in enumerate(frames):
             # Temporarily turn on visibility for the target layer 
@@ -26,6 +26,15 @@ def convert_psd_to_webm(psd_path, output_path):
             layer.visible = True
             
             frame_image = psd.composite(viewport=(0, 0, psd.width, psd.height))
+            
+            # Apply layer opacity manually
+            if hasattr(layer, 'opacity') and layer.opacity < 255:
+                if frame_image.mode != 'RGBA':
+                    frame_image = frame_image.convert('RGBA')
+                r, g, b, a = frame_image.split()
+                a = a.point(lambda p: p * layer.opacity // 255)
+                frame_image.putalpha(a)
+                
             frame_path = temp_dir_path / f"frame_{i:04d}.png"
             frame_image.save(frame_path)
             
