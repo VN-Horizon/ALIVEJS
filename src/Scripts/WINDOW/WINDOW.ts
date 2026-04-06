@@ -1,3 +1,4 @@
+import { isAutoContinuePaused, setAutoContinuePauseHandler } from "@/Core/AutoContinueTimer";
 import { execUntilNextLine, skipAutoContinueWait } from "@/Core/Events";
 import type { AnimatedSceneElement } from "@/Graphics/AnimatedSceneElement";
 import { Button, toButton } from "@/Graphics/Button";
@@ -17,7 +18,12 @@ export interface DialogWindowScene extends IScene {
   _frameAnimation: AnimatedSceneElement | null | undefined;
 }
 
-export async function pushDialogWindow() {
+export interface PushDialogWindowOptions {
+  autoAdvance?: boolean;
+}
+
+export async function pushDialogWindow(options: PushDialogWindowOptions = {}) {
+  const { autoAdvance = true } = options;
   const dialogWindow = (await loadScene("UI/WINDOW", {
     exclusionList: ["通常クリック範囲", "メッセージ文字", "選択肢文字", "名前ウィンドウ", "名前文字", "枠アニメ"],
   })) as DialogWindowScene | null;
@@ -161,21 +167,25 @@ export async function pushDialogWindow() {
   });
 
   let hiddenByAutoContinue = false;
-  const autoContinuePauseStartHandler = () => {
-    if (!dialogWindow || hiddenByAutoContinue) return;
-    hiddenByAutoContinue = true;
-    dialogWindow.hide();
-  };
-  const autoContinuePauseEndHandler = () => {
-    if (!dialogWindow || !hiddenByAutoContinue) return;
+  setAutoContinuePauseHandler(paused => {
+    if (!dialogWindow) return;
+    if (paused) {
+      if (hiddenByAutoContinue) return;
+      hiddenByAutoContinue = true;
+      dialogWindow.hide();
+      return;
+    }
+
+    if (!hiddenByAutoContinue) return;
     hiddenByAutoContinue = false;
     dialogWindow.show();
-  };
-  document.addEventListener("AutoContinuePauseStart", autoContinuePauseStartHandler);
-  document.addEventListener("AutoContinuePauseEnd", autoContinuePauseEndHandler);
+  });
+  if (isAutoContinuePaused() && dialogWindow) {
+    hiddenByAutoContinue = true;
+    dialogWindow.hide();
+  }
   dialogWindow?.onDestroyCallbacks.push(() => {
-    document.removeEventListener("AutoContinuePauseStart", autoContinuePauseStartHandler);
-    document.removeEventListener("AutoContinuePauseEnd", autoContinuePauseEndHandler);
+    setAutoContinuePauseHandler(null);
   });
 
   setExitListener(() => pushPauseScreen());
@@ -192,7 +202,9 @@ export async function pushDialogWindow() {
   });
 
   nextLineBtn?.setFocus();
-  onNextLineRequest();
+  if (autoAdvance) {
+    onNextLineRequest();
+  }
 }
 
 export function onNextLineRequest() {
