@@ -28,7 +28,7 @@ export async function loadStartScene(hasGallery = true, eventsPromise?: Promise<
         callback: async () => {
             document.getElementById("menu-save")?.removeAttribute("aria-disabled");
             await loadBackgroundScene();
-            await pushDialogWindow();
+                await pushDialogWindow({ autoAdvance: false });
         },
     });
 
@@ -42,7 +42,7 @@ export async function loadStartScene(hasGallery = true, eventsPromise?: Promise<
                 if (gameState) {
                     document.getElementById("menu-save")?.removeAttribute("aria-disabled");
                     await loadBackgroundScene();
-                    await pushDialogWindow();
+                        await pushDialogWindow({ autoAdvance: false });
                     applyGameState(gameState);
                     execUntilNextLine();
                 }

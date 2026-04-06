@@ -37,7 +37,7 @@ export function initMenuBar() {
         // Check if we are outside of dialogue.
         if (saveMenu?.getAttribute("aria-disabled") === "true") {
           await loadBackgroundScene();
-          await pushDialogWindow();
+          await pushDialogWindow({ autoAdvance: false });
           saveMenu?.removeAttribute("aria-disabled");
         }
         if (window.getEngine().getTopScene()?.name === "UI/SYSTEM") {
