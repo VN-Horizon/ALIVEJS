@@ -1,4 +1,6 @@
 import { clearAutoContinueTimer, scheduleAutoContinueTimer, setAutoContinueTimeoutHandler, skipAutoContinueTimer } from "@/Core/AutoContinueTimer";
+import { shakeScreen } from "@/Core/ScreenShakeComponent";
+import { currentDate } from "@/Debug/Graph/DateDebugger";
 import { extractDialogData } from "@/Utils/DialogHelper";
 import $ from "jquery";
 import protobuf from "protobufjs";
@@ -130,7 +132,7 @@ export function execUntilNextLine(decisionIndex: number = -1): string[] | undefi
 
         const resolvedInstruction = resolveCurrentInstruction();
         console.log(
-            `B${getCurrentBlockIndex()}/${ScreenplayContext.currentInstructionIndex}(${currentEvent.instructions.length})`,
+            `${currentDate}/B${getCurrentBlockIndex()}/${ScreenplayContext.currentInstructionIndex}(${currentEvent.instructions.length})`,
             resolvedInstruction,
         );
 
@@ -164,6 +166,11 @@ export function execUntilNextLine(decisionIndex: number = -1): string[] | undefi
                 }
                 scheduleAutoContinueTimer((Number(resolvedInstruction.params[0]) || 0) * 3);
                 return undefined;
+
+            case "ShakeScreen":
+                shakeScreen(Number(resolvedInstruction.params[0]) || 0);
+                updateBlockIndex(currentEvent);
+                break;
         }
 
         updateBlockIndex(currentEvent);

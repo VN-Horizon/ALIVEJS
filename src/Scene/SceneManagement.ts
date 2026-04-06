@@ -126,3 +126,10 @@ export function destroyScene() {
         engine.popScene();
     }
 }
+
+export function destroySceneByName(name: string) {
+    const engine = window.getEngine();
+    if (engine) {
+        engine.removeSceneByName(name);
+    }
+}

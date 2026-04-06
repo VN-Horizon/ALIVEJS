@@ -15,6 +15,7 @@ export interface IGameEngine {
     getAllObjects(): any[];
     pushScene(scene: any): void;
     popScene(): any;
+    removeSceneByName(name: string): any;
     getTopScene(): any;
     getSceneByName(name: string): any;
     clearAllScenes(): void;
@@ -86,9 +87,9 @@ export class GameEngine implements IGameEngine {
         const scaleX = targetWidth / baseWidth;
         const scaleY = targetHeight / baseHeight;
         const scale = Math.min(scaleX, scaleY);
-        
+
         this.container.style.transform = `translate(-50%, -50%) scale(${scale})`;
-    };
+    }
 
     gameLoop = () => {
         if (!this.running) return;
@@ -158,6 +159,23 @@ export class GameEngine implements IGameEngine {
 
         // Enable focus on the new top scene
         if (this.scenes.length > 0) {
+            this.scenes[this.scenes.length - 1].setFocusable(true);
+        }
+
+        return scene;
+    }
+
+    removeSceneByName(name: string): IScene | null {
+        const index = this.scenes.findIndex(scene => scene.name === name);
+        if (index === -1) return null;
+
+        const wasTopScene = index === this.scenes.length - 1;
+        const [scene] = this.scenes.splice(index, 1);
+        this.scenePaths.splice(index, 1);
+        scene.destroy();
+
+        // If top scene was removed, restore focusability to the new top scene.
+        if (wasTopScene && this.scenes.length > 0) {
             this.scenes[this.scenes.length - 1].setFocusable(true);
         }
 
