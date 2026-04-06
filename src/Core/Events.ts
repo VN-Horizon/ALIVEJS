@@ -36,10 +36,43 @@ let ScreenplayContext: ScreenplayContextState = {
 };
 
 let lastInstruction: Instruction | null = null;
+let autoContinueTimeout: ReturnType<typeof setTimeout> | null = null;
+let isAutoContinuePaused = false;
+
+function setAutoContinuePaused(paused: boolean): void {
+    if (isAutoContinuePaused === paused) return;
+    isAutoContinuePaused = paused;
+    dispatchEvent(paused ? "AutoContinuePauseStart" : "AutoContinuePauseEnd");
+}
+
+function clearAutoContinueTimeout(): void {
+    if (autoContinueTimeout === null) return;
+    clearTimeout(autoContinueTimeout);
+    autoContinueTimeout = null;
+    setAutoContinuePaused(false);
+}
+
+function scheduleAutoContinue(delayMs: number): void {
+    clearAutoContinueTimeout();
+    setAutoContinuePaused(true);
+    autoContinueTimeout = setTimeout(() => {
+        autoContinueTimeout = null;
+        setAutoContinuePaused(false);
+        execUntilNextLine();
+    }, Math.max(0, delayMs));
+}
+
+export function skipAutoContinueWait(): boolean {
+    if (autoContinueTimeout === null) return false;
+    clearAutoContinueTimeout();
+    execUntilNextLine();
+    return true;
+}
 
 // -- Functions --
 
 export function initScreenplayContext(blocks: EventBlock[], textPool: string[]): void {
+    clearAutoContinueTimeout();
     const evIdToBlockIndex: Record<number, number> = {};
 
     blocks.forEach((block, i) => {
@@ -148,6 +181,23 @@ export function execUntilNextLine(decisionIndex: number = -1): string[] | undefi
                     stringParams,
                 });
                 return stringParams;
+            
+            case "TransitionToGraphics":
+                const [a, b, c, d] = resolvedInstruction.stringParams;
+                dispatchEvent("TransitionToGraphics", {
+                    stringParams: [c, d, b, a],
+                    param: resolvedInstruction.params,
+                });
+                updateBlockIndex(currentEvent);
+                break;
+
+            case "AutoContinue":
+                updateBlockIndex(currentEvent);
+                if (window.skipping) {
+                    continue;
+                }
+                scheduleAutoContinue(Number(resolvedInstruction.params[0]) || 0);
+                return undefined;
         }
 
         updateBlockIndex(currentEvent);
@@ -202,6 +252,7 @@ export async function loadEvents(): Promise<any> {
 
         $(document).on("RestoreSave", (e: any) => {
             const { currentBg, currentBgm, currentPortrait, currentBlockIndex, currentInstructionIndex } = e.detail;
+            clearAutoContinueTimeout();
             window.ScreenplayContext.currentBlockIndex = currentBlockIndex || 0;
             window.ScreenplayContext.currentInstructionIndex = currentInstructionIndex || 0;
             document.dispatchEvent(
