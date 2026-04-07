@@ -1,4 +1,5 @@
-import { getCurrentBlockIndex, resolveLastInstruction, type Instruction } from "@/Core/Events";
+import { getCurrentBlockIndex, resolveLastInstruction } from "@/Core/Events";
+import type { EventInstruction } from "@/types/events";
 import { extractDialogData, GetCharacterVoiceName, GetVoiceEventName } from "@/Utils/DialogHelper";
 import protobuf from "protobufjs";
 import { createAudioPlayer } from "./AudioPlayer";
@@ -207,7 +208,7 @@ export async function playCharacterVoice(characterName: string, eventName: strin
     }
 }
 
-export function OnPlayDialog(instruction: Instruction) {
+export function OnPlayDialog(instruction: EventInstruction) {
     if (instruction.params.length < 3) return;
     const voiceName = instruction.stringParams[0];
     const blockIndex = instruction.params[1];

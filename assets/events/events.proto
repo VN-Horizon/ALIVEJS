@@ -18,7 +18,7 @@ enum InstructionType {
   SetGraphicsState = 11;
   ToggleGraphicsFlag = 12;
   AutoContinue = 13;
-  ToggleStaffState = 14;
+  IncMemory = 14;
   ShowStaffA = 15;
   ShowStaffB = 16;
 }
@@ -27,7 +27,13 @@ enum InstructionType {
 message Instruction {
   InstructionType type = 1;
   repeated int32 params = 2;
-  repeated string string_params=3; // ['${strin_index}', ...] or ['{int_flag}', ...]
+  repeated string stringParams=3; // ['${strin_index}', ...] or ['{int_flag}', ...]
+}
+
+
+message ConditionalReturn {
+  repeated int32 passedEvIds = 1;
+  int32 returnValue = 2;
 }
 
 
@@ -36,14 +42,15 @@ message EventMapping {
   bool flag1 = 2;
   string evFunc = 3;
   repeated Instruction instructions = 4;
-  repeated int32 return_values = 5;
-  bool has_choices = 6;
-  repeated int32 from_events = 7;
+  repeated ConditionalReturn conditionalReturns = 5;
+  repeated int32 returnValues = 6;
+  bool hasChoices = 7;
+  repeated int32 fromEvents = 8;
 }
 
 
 message EventMappings {
-  repeated string text_pool = 1;
-  repeated EventMapping events = 2;
+  repeated string textPool = 2;
+  repeated EventMapping events = 3;
 }
 

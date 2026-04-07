@@ -44,25 +44,38 @@ export async function openDialog(id: string, url: string, title: string, width: 
   if ('__TAURI_INTERNALS__' in window) {
     try {
       const { WebviewWindow } = await import("@tauri-apps/api/webviewWindow");
+      
+      const existing = await WebviewWindow.getByLabel(id);
+      if (existing) {
+        await existing.show();
+        await existing.setFocus();
+        return;
+      }
+
       const webview = new WebviewWindow(id, {
         url,
         title,
         width,
         height,
         decorations: false,
-        transparent: true,
+        shadow: true,
         resizable: false,
         maximizable: false,
-        center: true
+        minimizable: false,
       });
-      webview.once("tauri://error", function () {
-        window.open(url, id, `width=${browserWidth},height=${browserHeight},toolbar=0,menubar=0,location=0,status=0,scrollbars=0,resizable=0`);
+      webview.once("tauri://error", function (e) {
+        console.error("Failed to open dialog with Tauri WebviewWindow", e);
+        const win = window.open(url, id, `width=${browserWidth},height=${browserHeight},toolbar=0,menubar=0,location=0,status=0,scrollbars=0,resizable=0`);
+        if (win) win.focus();
       });
     } catch (e) {
-      window.open(url, id, `width=${browserWidth},height=${browserHeight},toolbar=0,menubar=0,location=0,status=0,scrollbars=0,resizable=0`);
+      console.error("Failed to open dialog with Tauri WebviewWindow 2", e);
+      const win = window.open(url, id, `width=${browserWidth},height=${browserHeight},toolbar=0,menubar=0,location=0,status=0,scrollbars=0,resizable=0`);
+      if (win) win.focus();
     }
   } else {
-    window.open(url, id, `width=${browserWidth},height=${browserHeight},toolbar=0,menubar=0,location=0,status=0,scrollbars=0,resizable=0`);
+    const win = window.open(url, id, `width=${browserWidth},height=${browserHeight},toolbar=0,menubar=0,location=0,status=0,scrollbars=0,resizable=0`);
+    if (win) win.focus();
   }
 }
 

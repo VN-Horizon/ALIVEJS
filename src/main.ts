@@ -1,9 +1,10 @@
 import $ from "jquery";
 
-import { loadEvents, type ScreenplayContextState } from "./Core/Events";
+import type { ScreenplayContextState } from "@/types/events";
+import { loadEvents } from "./Core/Events";
 import { GameEngine } from "./Core/NotUnityEngine";
-import "./InputSystem/InputSystem.Gamepad.ts";
-import "./InputSystem/InputSystem.Keyboard.ts";
+import "./InputSystem/InputSystem.Gamepad";
+import "./InputSystem/InputSystem.Keyboard";
 
 import "98.css";
 import { initTranslation } from "@/Utils/Translator";
@@ -12,7 +13,7 @@ import { initBGM } from "./Audio/Bgm";
 import { initSE } from "./Audio/Se";
 import "./Audio/Voice";
 import "./Audio/🔓";
-import { initEventGraphOverlay } from "./Debug/Graph/EventGraphEditor";
+import { initSceneGraphPane } from "./Debug/SceneGraphPane";
 import { loadStartScene } from "./Scripts/START";
 import { initMenuBar } from "./Utils/MenuBar";
 import { initWindowManager } from "./Utils/WindowManager";
@@ -48,13 +49,15 @@ async function init() {
     $("body").css("opacity", "1");
     console.log("Initializing application...");
     const eventsPromise = loadEvents();
-    initEventGraphOverlay();
     initTranslation();
     setTimeout(() => {
       initBGM();
       initSE();
     }, 0);
     loadStartScene(true, eventsPromise);
+    eventsPromise.then(() => {
+      initSceneGraphPane();
+    });
   } catch (error: any) {
     console.error(error);
   }

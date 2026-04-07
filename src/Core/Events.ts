@@ -1,33 +1,10 @@
 import { clearAutoContinueTimer, scheduleAutoContinueTimer, setAutoContinueTimeoutHandler, skipAutoContinueTimer } from "@/Core/AutoContinueTimer";
 import { shakeScreen } from "@/Core/ScreenShakeComponent";
-import { currentDate } from "@/Debug/Graph/DateDebugger";
+import { currentDate } from "@/Debug/DateDebugger";
+import type { EventInstruction, EventMapping, EventMappingsPayload, ResolvedEventInstruction, ScreenplayContextState } from "@/types/events";
 import { extractDialogData } from "@/Utils/DialogHelper";
 import $ from "jquery";
 import protobuf from "protobufjs";
-
-// -- Interfaces --
-
-export interface Instruction {
-    type: string;
-    params: number[];
-    stringParams: string[];
-}
-
-export interface EventBlock {
-    evId: number;
-    instructions: Instruction[];
-    returnValues: number[];
-}
-
-export interface ScreenplayContextState {
-    blocks: EventBlock[];
-    textPool: string[];
-    currentBlockIndex: number;
-    currentInstructionIndex: number;
-    evIdToBlockIndex: Record<number, number>;
-}
-
-export interface ResolvedInstruction extends Instruction {}
 
 // -- State --
 let ScreenplayContext: ScreenplayContextState = {
@@ -38,7 +15,7 @@ let ScreenplayContext: ScreenplayContextState = {
     evIdToBlockIndex: {},
 };
 
-let lastInstruction: Instruction | null = null;
+let lastInstruction: EventInstruction | null = null;
 
 setAutoContinueTimeoutHandler(() => execUntilNextLine());
 
@@ -48,7 +25,7 @@ export function skipAutoContinueWait(): boolean {
 
 // -- Functions --
 
-export function initScreenplayContext(blocks: EventBlock[], textPool: string[]): void {
+export function initScreenplayContext(blocks: EventMapping[], textPool: string[]): void {
     clearAutoContinueTimer();
     const evIdToBlockIndex: Record<number, number> = {};
 
@@ -73,16 +50,16 @@ export function getCurrentBlockIndex(): number {
     return ScreenplayContext.currentBlockIndex;
 }
 
-export function getCurrentEvent(): EventBlock {
+export function getCurrentEvent(): EventMapping {
     return ScreenplayContext.blocks[ScreenplayContext.currentBlockIndex];
 }
 
-export function getCurrentInstruction(): Instruction {
+export function getCurrentInstruction(): EventInstruction {
     const currentEvent = getCurrentEvent();
     return currentEvent.instructions[ScreenplayContext.currentInstructionIndex];
 }
 
-export function resolveStrings(instruction: Instruction | null, textPool: string[]): string[] {
+export function resolveStrings(instruction: EventInstruction | null, textPool: string[]): string[] {
     const result: string[] = [];
     if (!instruction?.stringParams) return result;
 
@@ -100,7 +77,7 @@ export function resolveStrings(instruction: Instruction | null, textPool: string
     return result;
 }
 
-function updateBlockIndex(eventBlock: EventBlock, returnValueIndex: number = 0): void {
+function updateBlockIndex(eventBlock: EventMapping, returnValueIndex: number = 0): void {
     const currentEvent = getCurrentEvent();
     lastInstruction = getCurrentInstruction();
 
@@ -132,7 +109,7 @@ export function execUntilNextLine(decisionIndex: number = -1): string[] | undefi
 
         const resolvedInstruction = resolveCurrentInstruction();
         console.log(
-            `${currentDate}/B${getCurrentBlockIndex()}/${ScreenplayContext.currentInstructionIndex}(${currentEvent.instructions.length})`,
+            `${currentDate}/B${getCurrentBlockIndex()}/${ScreenplayContext.currentInstructionIndex}(${currentEvent.instructions.length})/${currentEvent.evFunc}:`,
             resolvedInstruction,
         );
 
@@ -178,7 +155,7 @@ export function execUntilNextLine(decisionIndex: number = -1): string[] | undefi
     return undefined;
 }
 
-export function resolveLastInstruction(): ResolvedInstruction | null {
+export function resolveLastInstruction(): ResolvedEventInstruction | null {
     const instruction = lastInstruction;
     if (!instruction) return null;
     return {
@@ -188,7 +165,7 @@ export function resolveLastInstruction(): ResolvedInstruction | null {
     };
 }
 
-export function resolveCurrentInstruction(): ResolvedInstruction | null {
+export function resolveCurrentInstruction(): ResolvedEventInstruction | null {
     const instruction = getCurrentInstruction();
     if (!instruction) return null;
     return {
@@ -214,7 +191,7 @@ export async function loadEvents(): Promise<any> {
         const eventMappings = EventMappings.toObject(decodedEvents, {
             enums: String, // enums as string names
             defaults: true, // includes default values
-        }) as { events: EventBlock[]; textPool: string[] };
+        }) as EventMappingsPayload;
 
         if (eventMappings.events && eventMappings.events.length > 0) {
             console.log("Events loaded successfully!");
