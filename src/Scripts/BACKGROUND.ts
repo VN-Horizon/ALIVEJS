@@ -1,4 +1,4 @@
-import { updateCurrentDate } from "@/Debug/Graph/DateDebugger";
+import { setCurrentDate } from "@/Debug/DateDebugger";
 import { Background } from "@/Graphics/Background";
 import { createBlankScene } from "@/Scene/SceneManagement";
 import $ from "jquery";
@@ -79,7 +79,7 @@ export async function loadBackgroundScene() {
         const sceneName = rawSceneName.toLowerCase();
         if (sceneName === "calendar" && calendarVariant) {
             backgroundCG?.updateBackgroundImage(`/assets/scenes/Calendar/CALENDAR/${calendarVariant}.avif`);
-            updateCurrentDate(calendarVariant);
+            setCurrentDate(calendarVariant);
             return;
         }
 
