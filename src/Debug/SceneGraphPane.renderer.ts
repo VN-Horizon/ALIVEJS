@@ -178,18 +178,18 @@ export function createSceneGraphRenderer(
                 d3.select(this).attr("stroke", null);
             })
             .on("click", function (_event: MouseEvent, d: SceneGraphNode) {
-                if (d.index === undefined || d.index < 0) {
+                if (d.id === undefined || d.id < 0) {
                     return;
                 }
 
                 const screenplayContext = getScreenplayContext();
-                if (screenplayContext && screenplayContext.blocks[d.index]) {
-                    screenplayContext.currentBlockIndex = d.index;
+                if (screenplayContext && screenplayContext.blocks[d.id]) {
+                    screenplayContext.currentBlockIndex = d.id;
                     screenplayContext.currentInstructionIndex = 0;
                     updateCurrentEventHighlight();
                     execUntilNextLine();
 
-                    console.log(`Jumped to event block ${d.index} (evId: ${d.id})`);
+                    console.log(`Jumped to event block ${d.id} (evId: ${d.id})`);
                 }
             });
 
@@ -240,12 +240,12 @@ export function createSceneGraphRenderer(
             .transition()
             .duration(300)
             .attr("fill", d => {
-                if (d.index === undefined || d.index < 0) {
+                if (d.id === undefined || d.id < 0) {
                     return DEFAULT_NODE_COLOR;
                 }
 
-                const block = screenplayContext.blocks[d.index];
-                if (d.index === currentIndex) {
+                const block = screenplayContext.blocks[d.id];
+                if (d.id === currentIndex) {
                     return ACTIVE_NODE_COLOR;
                 }
                 if (block?.hasChoices) {
@@ -257,13 +257,13 @@ export function createSceneGraphRenderer(
                 return DEFAULT_NODE_COLOR;
             })
             .attr("r", d => {
-                if (d.index === currentIndex) {
+                if (d.id === currentIndex) {
                     return (d.radius || 10) + 4;
                 }
                 return d.radius || 10;
             });
 
-        const currentNode = nodeSelection.data().find(d => d.index === currentIndex);
+        const currentNode = nodeSelection.data().find(d => d.id === currentIndex);
         if (currentNode && currentNode.x !== undefined && currentNode.y !== undefined) {
             const transform = d3.zoomIdentity
                 .scale(1)

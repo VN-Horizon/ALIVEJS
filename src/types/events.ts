@@ -11,10 +11,13 @@ export interface ConditionalReturn {
 
 export interface EventMapping {
     evId: number;
-    instructions: EventInstruction[];
-    returnValues: number[];
-    conditionalReturns: ConditionalReturn[];
+    flag1: boolean;
     evFunc?: string;
+    instructions: EventInstruction[];
+    conditionalReturns: ConditionalReturn[];
+    returnValues: number[];
+    hasChoices: boolean;
+    fromEvents: number[];
 }
 
 export interface ScreenplayContextState {
@@ -23,6 +26,7 @@ export interface ScreenplayContextState {
     currentBlockIndex: number;
     currentInstructionIndex: number;
     evIdToBlockIndex: Record<number, number>;
+    passedEvIds: Set<number>;
 }
 
 export interface ResolvedEventInstruction extends EventInstruction {}
