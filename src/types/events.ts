@@ -23,6 +23,7 @@ export interface EventMapping {
 export interface ScreenplayContextState {
     blocks: EventMapping[];
     textPool: string[];
+    currentEvId: number;
     currentBlockIndex: number;
     currentInstructionIndex: number;
     evIdToBlockIndex: Record<number, number>;

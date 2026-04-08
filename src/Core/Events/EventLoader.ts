@@ -17,7 +17,7 @@ export async function loadEvents(): Promise<any> {
         }) as EventMappingsPayload;
 
         if (eventMappings.events && eventMappings.events.length > 0) {
-            console.log("Events loaded successfully!");
+            console.log("Events loaded successfully!", eventMappings);
         }
 
         // Initialize screenplay context with loaded data
@@ -27,6 +27,7 @@ export async function loadEvents(): Promise<any> {
             const { currentBg, currentBgm, currentPortrait, currentBlockIndex, currentInstructionIndex, passedEvIds } = e.detail;
             clearAutoContinueTimer();
             window.ScreenplayContext.currentBlockIndex = currentBlockIndex || 0;
+            window.ScreenplayContext.currentEvId = window.ScreenplayContext.blocks[currentBlockIndex || 0]?.evId || 0;
             window.ScreenplayContext.currentInstructionIndex = currentInstructionIndex || 0;
             if (passedEvIds) {
                 window.ScreenplayContext.passedEvIds = new Set(passedEvIds);

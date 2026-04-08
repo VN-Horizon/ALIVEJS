@@ -1,5 +1,5 @@
 import { execUntilNextLine } from "../Core/Events";
-import { applyGameState, loadGame, saveGame } from "../Core/GameSave";
+import { applyGameState, loadGame, saveGame } from "../Core/Save/GameSave";
 import { toBackground } from "../Graphics/Background";
 import { toButton } from "../Graphics/Button";
 import { setExitListener, setOverrideRightKeys } from "../InputSystem/InputSystem.Keyboard";

@@ -3,6 +3,7 @@ import { currentDate } from "@/Debug/DateDebugger";
 import { type EventMapping } from "@/types/events";
 import { scheduleAutoContinueTimer, setAutoContinueTimeoutHandler, skipAutoContinueTimer } from "@/Utils/AutoContinueTimer";
 import { extractDialogData } from "@/Utils/DialogHelper";
+import { getProgress, incProgress } from "../Save/Progress";
 import { resolveCurrentInstruction } from "./InstructionResolver";
 import { getCurrentEvent, getCurrentInstruction, ScreenplayContext, setLastInstruction } from "./ScreenplayState";
 
@@ -19,9 +20,11 @@ function dispatchEvent(type: string, detail: any = {}): void {
 function updateBlockIndex(eventBlock: EventMapping, returnValueIndex: number = 0): void {
     const currentEvent = getCurrentEvent();
     
-    setLastInstruction(getCurrentInstruction());
+    if (currentEvent.instructions && currentEvent.instructions.length > 0) {
+        setLastInstruction(getCurrentInstruction());
+    }
 
-    if (ScreenplayContext.currentInstructionIndex === currentEvent.instructions.length - 1) {
+    if (!currentEvent.instructions || currentEvent.instructions.length === 0 || ScreenplayContext.currentInstructionIndex === currentEvent.instructions.length - 1) {
         console.log("Moving to next event block:", eventBlock);
         
         ScreenplayContext.passedEvIds.add(currentEvent.evId);
@@ -30,7 +33,12 @@ function updateBlockIndex(eventBlock: EventMapping, returnValueIndex: number = 0
 
         if (!eventBlock.hasChoices) {
             const matchedCond = eventBlock.conditionalReturns?.find(cond =>
-                cond.passedEvIds.every(id => ScreenplayContext.passedEvIds.has(id))
+                cond.passedEvIds.every(id => {
+                    if (id < 0) {
+                        return getProgress()[-id] > 0;
+                    }
+                    return ScreenplayContext.passedEvIds.has(id);
+                })
             );
             if (matchedCond) {
                 console.log("Conditional return matched:", matchedCond);
@@ -38,6 +46,7 @@ function updateBlockIndex(eventBlock: EventMapping, returnValueIndex: number = 0
             }
         }
 
+        ScreenplayContext.currentEvId = nextEvId;
         ScreenplayContext.currentBlockIndex = ScreenplayContext.evIdToBlockIndex[nextEvId];
         ScreenplayContext.currentInstructionIndex = 0;
         return;
@@ -55,6 +64,12 @@ export function execUntilNextLine(decisionIndex: number = -1): string[] | undefi
         }
 
         const currentEvent = getCurrentEvent();
+        
+        if (!currentEvent.instructions || currentEvent.instructions.length === 0) {
+            updateBlockIndex(currentEvent);
+            continue;
+        }
+
         const instruction = getCurrentInstruction();
 
         const resolvedInstruction = resolveCurrentInstruction();
@@ -86,6 +101,11 @@ export function execUntilNextLine(decisionIndex: number = -1): string[] | undefi
                 }
                 scheduleAutoContinueTimer((Number(resolvedInstruction.params[0]) || 0) * 3);
                 return;
+
+            case "IncMemory":
+                incProgress(Number(resolvedInstruction.params[0]) || 0);
+                updateBlockIndex(currentEvent);
+                break;
 
             case "ShakeScreen":
                 shakeScreen(Number(resolvedInstruction.params[0]) || 0);

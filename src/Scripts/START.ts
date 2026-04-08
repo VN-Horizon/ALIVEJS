@@ -1,7 +1,7 @@
 import $ from "jquery";
 import { playBGM } from "../Audio/Bgm";
-import { execUntilNextLine } from "../Core/Events";
-import { applyGameState, loadGame } from "../Core/GameSave";
+import { execUntilNextLine, ScreenplayContext } from "../Core/Events";
+import { applyGameState, loadGame } from "../Core/Save/GameSave";
 import { toButton } from "../Graphics/Button";
 import { setExitListener, setOverrideRightKeys } from "../InputSystem/InputSystem.Keyboard";
 import { destroySceneByName, loadScene } from "../Scene/SceneManagement";
@@ -27,6 +27,9 @@ export async function loadStartScene(hasGallery = true, eventsPromise?: Promise<
     const startBtn = toButton(startScene.getObjectByName("START"), {
         callback: async () => {
             document.getElementById("menu-save")?.removeAttribute("aria-disabled");
+            ScreenplayContext.currentBlockIndex = ScreenplayContext.evIdToBlockIndex[512] || 0;
+            ScreenplayContext.currentEvId = 512;
+            ScreenplayContext.currentInstructionIndex = 0;
             await loadBackgroundScene();
             await pushDialogWindow({ autoAdvance: true });
             setTimeout(() => {
