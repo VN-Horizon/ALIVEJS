@@ -1,4 +1,4 @@
-import { clearAutoContinueTimer } from "@/Core/AutoContinueTimer";
+import { clearAutoContinueTimer } from "@/Utils/AutoContinueTimer";
 import { type EventInstruction, type EventMapping, type ScreenplayContextState } from "@/types/events";
 
 export const ScreenplayContext: ScreenplayContextState = {

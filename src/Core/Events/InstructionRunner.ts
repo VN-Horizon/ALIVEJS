@@ -1,7 +1,7 @@
-import { scheduleAutoContinueTimer, setAutoContinueTimeoutHandler, skipAutoContinueTimer } from "@/Core/AutoContinueTimer";
 import { shakeScreen } from "@/Core/ScreenShakeComponent";
 import { currentDate } from "@/Debug/DateDebugger";
 import { type EventMapping } from "@/types/events";
+import { scheduleAutoContinueTimer, setAutoContinueTimeoutHandler, skipAutoContinueTimer } from "@/Utils/AutoContinueTimer";
 import { extractDialogData } from "@/Utils/DialogHelper";
 import { resolveCurrentInstruction } from "./InstructionResolver";
 import { getCurrentEvent, getCurrentInstruction, ScreenplayContext, setLastInstruction } from "./ScreenplayState";
@@ -19,9 +19,6 @@ function dispatchEvent(type: string, detail: any = {}): void {
 function updateBlockIndex(eventBlock: EventMapping, returnValueIndex: number = 0): void {
     const currentEvent = getCurrentEvent();
     
-    // We update lastInstruction indirectly by importing it, but since it's a let exported from another file inside an ES Module, 
-    // it's better to export a setter or just use the imported setter.
-    
     setLastInstruction(getCurrentInstruction());
 
     if (ScreenplayContext.currentInstructionIndex === currentEvent.instructions.length - 1) {
@@ -31,14 +28,13 @@ function updateBlockIndex(eventBlock: EventMapping, returnValueIndex: number = 0
 
         let nextEvId = eventBlock.returnValues[returnValueIndex];
 
-        if (!eventBlock.hasChoices && eventBlock.conditionalReturns && eventBlock.conditionalReturns.length > 0) {
-            for (const cond of eventBlock.conditionalReturns) {
-                const passedAll = cond.passedEvIds.every((id: number) => ScreenplayContext.passedEvIds.has(id));
-                if (passedAll) {
-                    console.log("Conditional return matched:", cond);
-                    nextEvId = cond.returnValue;
-                    break;
-                }
+        if (!eventBlock.hasChoices) {
+            const matchedCond = eventBlock.conditionalReturns?.find(cond =>
+                cond.passedEvIds.every(id => ScreenplayContext.passedEvIds.has(id))
+            );
+            if (matchedCond) {
+                console.log("Conditional return matched:", matchedCond);
+                nextEvId = matchedCond.returnValue;
             }
         }
 
@@ -74,21 +70,14 @@ export function execUntilNextLine(decisionIndex: number = -1): string[] | undefi
         switch (resolvedInstruction.type) {
             case "PlayDialog":
                 updateBlockIndex(currentEvent);
-                const lineText = resolvedInstruction.stringParams[0];
-                const lineData = extractDialogData(lineText);
-                dispatchEvent("PlayDialogInternal", {
-                    params: [lineData[2], ScreenplayContext.currentBlockIndex, resolvedInstruction.params[1]],
-                    stringParams: [lineData[0], lineData[1]],
-                });
-                return [lineData[0]]; // Returning dialog text essentially
+                const [text, voice, prm2] = extractDialogData(resolvedInstruction.stringParams[0]);
+                dispatchEvent("PlayDialogInternal", { params: [prm2, ScreenplayContext.currentBlockIndex, resolvedInstruction.params[1]], stringParams: [text, voice] });
+                return [text];
 
             case "ShowDecision":
-                const stringParams = resolvedInstruction.stringParams.filter((s: string) => s && s.length > 0);
-                dispatchEvent("ShowDecisionInternal", {
-                    params: [],
-                    stringParams,
-                });
-                return stringParams;
+                const choices = resolvedInstruction.stringParams.filter(Boolean);
+                dispatchEvent("ShowDecisionInternal", { params: [], stringParams: choices });
+                return choices;
 
             case "AutoContinue":
                 updateBlockIndex(currentEvent);
@@ -96,7 +85,7 @@ export function execUntilNextLine(decisionIndex: number = -1): string[] | undefi
                     continue;
                 }
                 scheduleAutoContinueTimer((Number(resolvedInstruction.params[0]) || 0) * 3);
-                return undefined;
+                return;
 
             case "ShakeScreen":
                 shakeScreen(Number(resolvedInstruction.params[0]) || 0);

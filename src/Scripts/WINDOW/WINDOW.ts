@@ -1,4 +1,3 @@
-import { isAutoContinuePaused, setAutoContinuePauseHandler } from "@/Core/AutoContinueTimer";
 import { execUntilNextLine, skipAutoContinueWait } from "@/Core/Events";
 import type { AnimatedSceneElement } from "@/Graphics/AnimatedSceneElement";
 import { Button, toButton } from "@/Graphics/Button";
@@ -6,6 +5,7 @@ import { TMP_Text, TMP_TypeWriter } from "@/Graphics/TextMessPoor";
 import { setExitListener, setOverrideRightKeys } from "@/InputSystem/InputSystem.Keyboard";
 import type { IScene } from "@/Scene/Scene";
 import { loadScene } from "@/Scene/SceneManagement";
+import { isAutoContinuePaused, setAutoContinuePauseHandler } from "@/Utils/AutoContinueTimer";
 import { $translate } from "@/Utils/Translator";
 import $ from "jquery";
 import { pushPauseScreen } from "../SYSTEM";

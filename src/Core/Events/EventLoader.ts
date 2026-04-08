@@ -1,4 +1,4 @@
-import { clearAutoContinueTimer } from "@/Core/AutoContinueTimer";
+import { clearAutoContinueTimer } from "@/Utils/AutoContinueTimer";
 import { type EventMappingsPayload } from "@/types/events";
 import $ from "jquery";
 import protobuf from "protobufjs";
