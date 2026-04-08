@@ -4,6 +4,7 @@ import { type EventInstruction, type EventMapping, type ScreenplayContextState }
 export const ScreenplayContext: ScreenplayContextState = {
     blocks: [],
     textPool: [],
+    currentEvId: 0,
     currentBlockIndex: 0,
     currentInstructionIndex: 0,
     evIdToBlockIndex: {},
@@ -28,6 +29,7 @@ export function initScreenplayContext(blocks: EventMapping[], textPool: string[]
     ScreenplayContext.blocks = blocks || [];
     ScreenplayContext.textPool = textPool || [];
     ScreenplayContext.currentBlockIndex = 0;
+    ScreenplayContext.currentEvId = 0;
     ScreenplayContext.currentInstructionIndex = 0;
     ScreenplayContext.evIdToBlockIndex = evIdToBlockIndex;
     ScreenplayContext.passedEvIds = new Set<number>();

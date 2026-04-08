@@ -1,6 +1,6 @@
 import { getCurrentBGM } from "@/Audio/Bgm";
 import { Background } from "@/Graphics/Background";
-import { getCurrentEvent } from "./Events";
+import { getCurrentEvent } from "../Events";
 
 const SAVE_KEY_PREFIX = "alive_save_";
 const MAX_SAVE_SLOTS = 20;

@@ -184,7 +184,8 @@ export function createSceneGraphRenderer(
 
                 const screenplayContext = getScreenplayContext();
                 if (screenplayContext && screenplayContext.blocks[d.id]) {
-                    screenplayContext.currentBlockIndex = d.id;
+                    screenplayContext.currentEvId = d.id;
+                    screenplayContext.currentBlockIndex = screenplayContext.evIdToBlockIndex[d.id] || 0;
                     screenplayContext.currentInstructionIndex = 0;
                     updateCurrentEventHighlight();
                     execUntilNextLine();
@@ -230,11 +231,11 @@ export function createSceneGraphRenderer(
             return;
         }
 
-        const currentIndex = screenplayContext.currentBlockIndex;
-        if (currentIndex === lastIndex) {
+        const currentEvId = screenplayContext.currentEvId;
+        if (currentEvId === lastIndex) {
             return;
         }
-        lastIndex = currentIndex;
+        lastIndex = currentEvId;
 
         nodeSelection.selectAll<SVGCircleElement, SceneGraphNode>("circle")
             .transition()
@@ -245,7 +246,7 @@ export function createSceneGraphRenderer(
                 }
 
                 const block = screenplayContext.blocks[d.id];
-                if (d.id === currentIndex) {
+                if (d.id === currentEvId) {
                     return ACTIVE_NODE_COLOR;
                 }
                 if (block?.hasChoices) {
@@ -257,13 +258,13 @@ export function createSceneGraphRenderer(
                 return DEFAULT_NODE_COLOR;
             })
             .attr("r", d => {
-                if (d.id === currentIndex) {
+                if (d.id === currentEvId) {
                     return (d.radius || 10) + 4;
                 }
                 return d.radius || 10;
             });
 
-        const currentNode = nodeSelection.data().find(d => d.id === currentIndex);
+        const currentNode = nodeSelection.data().find(d => d.id === currentEvId);
         if (currentNode && currentNode.x !== undefined && currentNode.y !== undefined) {
             const transform = d3.zoomIdentity
                 .scale(1)
