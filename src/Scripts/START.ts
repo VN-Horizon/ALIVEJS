@@ -1,3 +1,5 @@
+import { getProgress } from "@/Core/Save/Progress";
+import { getUnlockedCG } from "@/Core/Save/UnlockedCG";
 import $ from "jquery";
 import { playBGM } from "../Audio/Bgm";
 import { execUntilNextLine, ScreenplayContext } from "../Core/Events";
@@ -9,8 +11,19 @@ import { loadBackgroundScene } from "./BACKGROUND";
 import { initGallery } from "./GALLERY";
 import { pushDialogWindow } from "./WINDOW/WINDOW";
 
-export async function loadStartScene(hasGallery = true, eventsPromise?: Promise<any>) {
-    const startScene = await loadScene("UI/START");
+export async function loadStartScene(eventsPromise?: Promise<any>) {
+    let sceneName = "UI/START";
+    const progress = getProgress();
+    if (progress[1] + progress[2] + progress[3] > 0) {
+        sceneName = "UI/START01";
+    }
+    if (progress[1] > 0 && progress[2] > 0 && progress[3] > 0) {
+        sceneName = "UI/START02";
+    }
+    if (progress[4] > 0) {
+        sceneName = "UI/START03";
+    }
+    const startScene = await loadScene(sceneName);
     if (!startScene) {
         console.error("Failed to load START scene");
         return;
@@ -21,6 +34,8 @@ export async function loadStartScene(hasGallery = true, eventsPromise?: Promise<
     
     exit1Orig?.hide();
     exit2Orig?.hide();
+
+    const hasGallery = getUnlockedCG().length > 0 || sceneName !== "UI/START"
 
     let exitBtnOrig = hasGallery ? exit2Orig : exit1Orig;
 
@@ -33,7 +48,7 @@ export async function loadStartScene(hasGallery = true, eventsPromise?: Promise<
             await loadBackgroundScene();
             await pushDialogWindow({ autoAdvance: true });
             setTimeout(() => {
-                destroySceneByName("UI/START");
+                destroySceneByName(sceneName);
             }, 1000);
         },
     });
@@ -62,14 +77,11 @@ export async function loadStartScene(hasGallery = true, eventsPromise?: Promise<
         },
     });
 
-    let galleryBtn = null;
-    if (hasGallery) {
-        galleryBtn = toButton(startScene.getObjectByName("GALLERY"), {
-            callback: () => {
-                initGallery();
-            },
-        });
-    }
+    const galleryBtn = toButton(startScene.getObjectByName("GALLERY"), {
+        callback: () => {
+            initGallery();
+        },
+    });
     
     const exitBtn = toButton(exitBtnOrig, { callback: window.exit });
 
@@ -88,8 +100,10 @@ export async function loadStartScene(hasGallery = true, eventsPromise?: Promise<
     startBtn?.show();
     loadBtn?.show();
     configBtn?.show();
-    galleryBtn?.show();
     exitBtn?.show();
+    if (hasGallery) {
+        galleryBtn?.show();
+    }
 
     setExitListener(() => {
         if ($(exitBtn?.domElement).is(":focus")) {

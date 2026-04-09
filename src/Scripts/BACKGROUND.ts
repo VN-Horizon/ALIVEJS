@@ -1,3 +1,4 @@
+import { addUnlockedCG } from "@/Core/Save/UnlockedCG";
 import { setCurrentDate } from "@/Debug/DateDebugger";
 import { Background } from "@/Graphics/Background";
 import { createBlankScene } from "@/Scene/SceneManagement";
@@ -87,6 +88,9 @@ export async function loadBackgroundScene() {
         backgroundCG?.updateBackgroundImage(
             `/assets/scenes/CG/${bgName}/${bgName}.avif`,
         );
+        if (bgName !== "BLACK") {
+            addUnlockedCG(bgName);
+        }
     };
 
     const setCharaImgHandler = (e: any) => {
