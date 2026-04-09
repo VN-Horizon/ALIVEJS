@@ -45,6 +45,7 @@ function updateBlockIndex(eventBlock: EventMapping, returnValueIndex: number = 0
                 nextEvId = matchedCond.returnValue;
             }
         }
+        if (nextEvId === 7090644) location.reload();
 
         ScreenplayContext.currentEvId = nextEvId;
         ScreenplayContext.currentBlockIndex = ScreenplayContext.evIdToBlockIndex[nextEvId];
