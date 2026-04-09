@@ -72,8 +72,8 @@ export async function loadStartScene(eventsPromise?: Promise<any>) {
     });
 
     const configBtn = toButton(startScene.getObjectByName("CONFIG"), {
-        callback: () => {
-            console.log("CONFIG button clicked");
+        callback: async () => {
+            await window.openSettings();
         },
     });
 

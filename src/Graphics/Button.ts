@@ -11,16 +11,20 @@ export interface ButtonData extends SceneElementData {
     images: string[];
     z?: number;
     cursor?: string;
+    keepNWhileHovering?: boolean;
     callback?: () => void;
 }
 
 export class Button extends FocusableElement {
+    private static readonly STATE_COUNT = 4;
+    private static readonly SHARED_STYLE_ID = "button-shared-styles";
     transforms: Array<[number, number, number, number]>;
     images: string[];
     onClickHandler: (() => void) | null;
     buttonId: string;
     cursor: string;
     isButton: boolean = true;
+    keepNWhileHovering?: boolean;
 
     constructor(data: ButtonData, parent: SceneElement | null = null, scene: IScene | null = null) {
         data.isButton = true;
@@ -28,11 +32,15 @@ export class Button extends FocusableElement {
         super(data, parent, scene);
 
         this.transforms = data.transforms || [];
-        this.width = this.transforms[0]?.[2] || 10;
-        this.height = this.transforms[0]?.[3] || 10;
+        const baseTransform = this.transforms[0] || [0, 0, 10, 10];
+        this.x = baseTransform[0] || 0;
+        this.y = baseTransform[1] || 0;
+        this.width = baseTransform[2] || 10;
+        this.height = baseTransform[3] || 10;
 
         this.images = data.images;
-        
+        this.keepNWhileHovering = data.keepNWhileHovering;
+
         // Preload variant images to ensure they are cached before hover/active states
         this.images.forEach(src => {
             if (src) {
@@ -46,9 +54,18 @@ export class Button extends FocusableElement {
         this.transform.z = data.z || 0;
         this.cursor = data.cursor || "pointer";
 
+        Button.ensureSharedStyles();
         this.recreateDOMAsButton();
-        this.injectCSSRules();
         if (data.callback) this.onClick(data.callback);
+    }
+
+    private static ensureSharedStyles() {
+        let $styleSheet = $(`#${Button.SHARED_STYLE_ID}`);
+        if ($styleSheet.length) return;
+    }
+
+    injectCSSRules() {
+        Button.ensureSharedStyles();
     }
 
     recreateDOMAsButton() {
@@ -61,7 +78,7 @@ export class Button extends FocusableElement {
         this.domElement = $("<button>")
             .attr("id", this.buttonId)
             .attr("layer-name", this.sceneData.name || "Button")
-            .attr("class", classNames.join(" "))
+            .attr("class", ["vn-button", ...classNames].join(" "))
             .css({
                 opacity: this.opacity,
                 "mix-blend-mode": this.blendMode,
@@ -69,31 +86,31 @@ export class Button extends FocusableElement {
                 display: this.visible ? "block" : "none",
             })[0];
 
-        super.syncDom();
-    }
-
-    injectCSSRules() {
-        let $styleSheet = $("#button-styles");
-        if (!$styleSheet.length) {
-            $styleSheet = $('<style id="button-styles"></style>');
-            $("head").append($styleSheet);
+        const $button = $(this.domElement);
+        if (this.keepNWhileHovering) {
+            $button.addClass("keep-base-while-hover");
         }
 
-        const sheet = ($styleSheet[0] as HTMLStyleElement).sheet;
-        if (!sheet) return;
+        const baseTransform = this.transforms[0] || [0, 0, 10, 10];
+        for (let i = 0; i < Button.STATE_COUNT; i++) {
+            const current = this.transforms[i] || baseTransform;
+            const imageSrc = this.images[i] || "";
+            const layerX = (current[0] || 0) - (baseTransform[0] || 0);
+            const layerY = (current[1] || 0) - (baseTransform[1] || 0);
 
-        sheet.insertRule(
-            `#${this.buttonId} { background-image: url('${this.images[0]}'); width: ${this.transforms[0]?.[2] || 10}px; height: ${this.transforms[0]?.[3] || 10}px; transform: translate(${this.transforms[0]?.[0] || 0}px, ${this.transforms[0]?.[1] || 0}px); }`,
-            sheet.cssRules.length,
-        );
-        sheet.insertRule(
-            `#${this.buttonId}:hover, #${this.buttonId}:focus { background-image: url('${this.images[1]}'); width: ${this.transforms[1]?.[2] || 10}px; height: ${this.transforms[1]?.[3] || 10}px; transform: translate(${this.transforms[1]?.[0] || 0}px, ${this.transforms[1]?.[1] || 0}px); outline: none; }`,
-            sheet.cssRules.length,
-        );
-        sheet.insertRule(
-            `#${this.buttonId}:active, #${this.buttonId}.active:focus { background-image: url('${this.images[2]}'); width: ${this.transforms[2]?.[2] || 10}px; height: ${this.transforms[2]?.[3] || 10}px; transform: translate(${this.transforms[2]?.[0] || 0}px, ${this.transforms[2]?.[1] || 0}px); }`,
-            sheet.cssRules.length,
-        );
+            const $layer = $("<div>")
+                .addClass(`button-state-layer state-${i}`)
+                .css({
+                    width: `${current[2] || 10}px`,
+                    height: `${current[3] || 10}px`,
+                    transform: `translate(${layerX}px, ${layerY}px)`,
+                    "background-image": imageSrc ? `url('${imageSrc}')` : "none",
+                });
+
+            $button.append($layer);
+        }
+
+        super.syncDom();
     }
 
     setupClickListener() {
@@ -119,14 +136,12 @@ export class Button extends FocusableElement {
 
     updateDOMStyle() {
         if (!this.domElement) return;
-        const baseZOffset = this.scene?.baseZOffset || 0;
-        $(this.domElement).css({
-            opacity: this.opacity,
-            "z-index": this.transform.z + baseZOffset,
-            "mix-blend-mode": this.blendMode,
-            display: this.visible ? "block" : "none",
-            cursor: this.cursor,
-        });
+        $(this.domElement).css(
+            this.buildBaseStyle({
+                cursor: this.cursor,
+                background: "transparent",
+            }),
+        );
     }
 }
 
@@ -138,6 +153,7 @@ export interface ToButtonOptions {
     callback?: () => void;
     focusable?: boolean;
     visible?: boolean;
+    keepNWhileHovering?: boolean;
 }
 
 export function toButton(group: SceneElement | null, options: Partial<ToButtonOptions> = {}) {
@@ -153,6 +169,7 @@ export function toButton(group: SceneElement | null, options: Partial<ToButtonOp
         callback = null,
         focusable = true,
         visible = true,
+        keepNWhileHovering = false,
     } = options;
 
     if (!Array.isArray(group.children) || group.children.length === 0) {
@@ -185,6 +202,7 @@ export function toButton(group: SceneElement | null, options: Partial<ToButtonOp
         callback,
         focusable,
         visible,
+        keepNWhileHovering,
     } as ButtonData;
 
     const button = new Button(buttonData, group.parent, group.scene);

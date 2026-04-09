@@ -54,7 +54,8 @@ export async function gotoCharacterGallery(characterName: string) {
     }
     for (let i = 3; i <= 15; i++) {
         toButton(characterGalleryScene.sceneObjects[i] as SceneElement, {
-            stateIndexes: [1, 3, 2, 0],
+            keepNWhileHovering: true,
+            stateIndexes: [1, 2, 3, 0],
             callback: () => {
                 // Show full image or do something
             },
