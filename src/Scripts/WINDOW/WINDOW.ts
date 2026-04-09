@@ -28,7 +28,7 @@ export async function pushDialogWindow(options: PushDialogWindowOptions = {}) {
     exclusionList: ["通常クリック範囲", "メッセージ文字", "選択肢文字", "名前ウィンドウ", "名前文字", "枠アニメ"],
   })) as DialogWindowScene | null;
 
-  initSelectionsBox(dialogWindow);
+  await initSelectionsBox(dialogWindow);
   initBacklog(dialogWindow);
   initCutscenePlayer(dialogWindow);
 
@@ -69,7 +69,7 @@ export async function pushDialogWindow(options: PushDialogWindowOptions = {}) {
   const dialogText = dialogWindow?.addObject(
     new TMP_TypeWriter({
       name: "DialogText",
-      text: "你说得对，但是原神是一款由米哈游自主研发的开放世界冒险游戏。你说得对，但是原神是一款由米哈游自主研发的开放世界冒险游戏。",
+      text: "",
       fontSize: 23,
       color: "#FFFFFF",
       fontWeight: "medium",
@@ -90,7 +90,7 @@ export async function pushDialogWindow(options: PushDialogWindowOptions = {}) {
   const nameText = dialogWindow?.addObject(
     new TMP_Text({
       name: "NameText",
-      text: "电棍",
+      text: "",
       fontSize: 20,
       color: "#FFFFFF",
       fontWeight: "medium",
@@ -112,8 +112,10 @@ export async function pushDialogWindow(options: PushDialogWindowOptions = {}) {
   const normalDialogBox = dialogWindow?.getObjectByName("通常");
   const sayDialogBox = dialogWindow?.getObjectByName("吹き出し");
   const nameWindow = dialogWindow?.getObjectByName("名前枠");
+  normalDialogBox?.hide();
   selectingDialogBox?.hide();
   sayDialogBox?.hide();
+  // nameWindow?.hide();
 
   // Hook PlayDialogInternal event to animate next line
   const playDialogHandler = (e: Event) => {

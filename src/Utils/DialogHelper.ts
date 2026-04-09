@@ -21,7 +21,7 @@ export function internalExtractDialogData(lineText: string) {
   let mode = "Display";
   let name = candidate;
   let closingQuoteIndex = lineText.lastIndexOf("」");
-  console.log(closingQuoteIndex);
+  
   let content =
     closingQuoteIndex > quoteIndex
       ? lineText.substring(quoteIndex + 1, closingQuoteIndex).trim()

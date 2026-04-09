@@ -4,7 +4,7 @@ import { type EventMapping } from "@/types/events";
 import { scheduleAutoContinueTimer, setAutoContinueTimeoutHandler, skipAutoContinueTimer } from "@/Utils/AutoContinueTimer";
 import { extractDialogData } from "@/Utils/DialogHelper";
 import { getProgress, incProgress } from "../Save/Progress";
-import { resolveCurrentInstruction } from "./InstructionResolver";
+import { resolveInstruction } from "./InstructionResolver";
 import { getCurrentEvent, getCurrentInstruction, ScreenplayContext, setLastInstruction } from "./ScreenplayState";
 
 setAutoContinueTimeoutHandler(() => execUntilNextLine());
@@ -17,22 +17,20 @@ function dispatchEvent(type: string, detail: any = {}): void {
     document.dispatchEvent(new CustomEvent(type, { detail, bubbles: true, cancelable: true }));
 }
 
-function updateBlockIndex(eventBlock: EventMapping, returnValueIndex: number = 0): void {
-    const currentEvent = getCurrentEvent();
-    
+function updateBlockIndex(currentEvent: EventMapping, returnValueIndex: number = 0): void {
     if (currentEvent.instructions && currentEvent.instructions.length > 0) {
-        setLastInstruction(getCurrentInstruction());
+        setLastInstruction(getCurrentInstruction(currentEvent));
     }
 
     if (!currentEvent.instructions || currentEvent.instructions.length === 0 || ScreenplayContext.currentInstructionIndex === currentEvent.instructions.length - 1) {
-        console.log("Moving to next event block:", eventBlock);
+        console.log("Moving to next event block:", currentEvent);
         
         ScreenplayContext.passedEvIds.add(currentEvent.evId);
 
-        let nextEvId = eventBlock.returnValues[returnValueIndex];
+        let nextEvId = currentEvent.returnValues[returnValueIndex];
 
-        if (!eventBlock.hasChoices) {
-            const matchedCond = eventBlock.conditionalReturns?.find(cond =>
+        if (!currentEvent.hasChoices) {
+            const matchedCond = currentEvent.conditionalReturns?.find(cond =>
                 cond.passedEvIds.every(id => {
                     if (id < 0) {
                         return getProgress()[-id] > 0;
@@ -59,7 +57,8 @@ function updateBlockIndex(eventBlock: EventMapping, returnValueIndex: number = 0
 export function execUntilNextLine(decisionIndex: number = -1): string[] | undefined {
     while (true) {
         if (decisionIndex !== -1) {
-            updateBlockIndex(getCurrentEvent(), decisionIndex);
+            const currentEvent = getCurrentEvent();
+            updateBlockIndex(currentEvent, decisionIndex);
             decisionIndex = -1;
             continue;
         }
@@ -71,11 +70,10 @@ export function execUntilNextLine(decisionIndex: number = -1): string[] | undefi
             continue;
         }
 
-        const instruction = getCurrentInstruction();
-
-        const resolvedInstruction = resolveCurrentInstruction();
+        const instruction = getCurrentInstruction(currentEvent);
+        const resolvedInstruction = resolveInstruction(instruction);
         console.log(
-            `${currentDate}/B${getCurrentEvent().evId}/${ScreenplayContext.currentInstructionIndex}(${currentEvent.instructions.length})/${currentEvent.evFunc}:`,
+            `${currentDate}/B${currentEvent.evId}/${ScreenplayContext.currentInstructionIndex}(${currentEvent.instructions.length})/${currentEvent.evFunc}:`,
             resolvedInstruction,
         );
 
@@ -98,7 +96,8 @@ export function execUntilNextLine(decisionIndex: number = -1): string[] | undefi
             case "AutoContinue":
                 updateBlockIndex(currentEvent);
                 if (window.skipping) {
-                    continue;
+                    scheduleAutoContinueTimer(50);
+                    return;
                 }
                 scheduleAutoContinueTimer((Number(resolvedInstruction.params[0]) || 0) * 3);
                 return;

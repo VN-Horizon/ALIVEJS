@@ -174,7 +174,6 @@ export function toButton(group: SceneElement | null, options: Partial<ToButtonOp
         flags = [],
         disabled = false,
     } = options;
-    console.log(group.children)
     if (!Array.isArray(group.children) || group.children.length === 0) {
         console.error("Group must have children to elevate to Button");
         return null;
