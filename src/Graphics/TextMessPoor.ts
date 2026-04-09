@@ -1,6 +1,7 @@
-import type {SceneElementData} from "@/Scene/SceneData";
+import { loadSettings } from "@/Core/Settings";
+import type { SceneElementData } from "@/Scene/SceneData";
 import $ from "jquery";
-import {SceneElement} from "./SceneElement";
+import { SceneElement } from "./SceneElement";
 
 export interface TMP_FontOptions {
     size?: number;
@@ -87,7 +88,11 @@ export class TMP_TypeWriter extends TMP_Text {
         this.fullText = this.text;
         this.currentCharIndex = 0;
         this.isAnimating = false;
-        this.charsPerSecond = data.charsPerSecond || 30;
+        
+        const textSpeedSetting = loadSettings().textSpeed;
+        const defaultSpeed = textSpeedSetting === 10 ? 9999 : 10 + textSpeedSetting * 8; // 0->10, 5->50, 10->Instant
+        
+        this.charsPerSecond = data.charsPerSecond || defaultSpeed;
         this.timeAccumulator = 0;
 
         this.cancelAnimation();

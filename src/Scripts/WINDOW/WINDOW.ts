@@ -1,4 +1,5 @@
 import { execUntilNextLine, skipAutoContinueWait } from "@/Core/Events";
+import { loadSettings } from "@/Core/Settings";
 import type { AnimatedSceneElement } from "@/Graphics/AnimatedSceneElement";
 import { Button, toButton } from "@/Graphics/Button";
 import { TMP_Text, TMP_TypeWriter } from "@/Graphics/TextMessPoor";
@@ -66,6 +67,9 @@ export async function pushDialogWindow(options: PushDialogWindowOptions = {}) {
       await pushPauseScreen();
     },
   });
+  
+  const settings = loadSettings();
+
   const dialogText = dialogWindow?.addObject(
     new TMP_TypeWriter({
       name: "DialogText",
@@ -81,10 +85,11 @@ export async function pushDialogWindow(options: PushDialogWindowOptions = {}) {
     return;
   }
   $(dialogText.domElement).css({
+    "font-family": settings.fontFamily,
     "white-space": "pre-line",
     "line-height": "29px",
     "pointer-events": "none",
-    "text-shadow": "1px 1px 0px #000000",
+    "text-shadow": settings.dropShadow ? "1px 1px 0px #000000" : "none",
   });
 
   const nameText = dialogWindow?.addObject(
@@ -102,9 +107,10 @@ export async function pushDialogWindow(options: PushDialogWindowOptions = {}) {
     return;
   }
   $(nameText.domElement).css({
+    "font-family": settings.fontFamily,
     "white-space": "pre-line",
     "pointer-events": "none",
-    "text-shadow": "1px 1px 0px #000000",
+    "text-shadow": settings.dropShadow ? "1px 1px 0px #000000" : "none",
     "text-align": "center",
   });
 

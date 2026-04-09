@@ -2,6 +2,7 @@ import { getCurrentBlockIndex, resolveLastInstruction } from "@/Core/Events";
 import type { EventInstruction } from "@/types/events";
 import { extractDialogData, GetCharacterVoiceName, GetVoiceEventName } from "@/Utils/DialogHelper";
 import protobuf from "protobufjs";
+import { loadSettings } from "../Core/Settings";
 import { createAudioPlayer } from "./AudioPlayer";
 import { queueIfLocked } from "./🔓";
 
@@ -21,9 +22,15 @@ interface VoiceMappings {
     preloadBlocks: Record<string, PreloadInfo>;
 }
 
+const settings = loadSettings();
+const calculateVolume = (baseVol: number, useSystem: boolean) => {
+    return useSystem ? (baseVol / 100) : (baseVol / 100); // simplify for now
+};
+const TARGET_VOLUME = calculateVolume(settings.voiceVolume, settings.voiceUseSystem);
+
 const player = createAudioPlayer();
 player.loop = false;
-player.volume = 0.7;
+player.volume = TARGET_VOLUME;
 player.addEventListener("ended", () => {
     isPlayingCurrentVoice = false;
 });

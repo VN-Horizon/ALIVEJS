@@ -1,3 +1,4 @@
+import { loadSettings } from "@/Core/Settings";
 import type { IScene } from "@/Scene/Scene";
 import type { SceneElementData } from "@/Scene/SceneData";
 import $ from "jquery";
@@ -159,7 +160,19 @@ export class Background extends SceneElement {
         // Force reflow
         void this.layerInactive.offsetWidth;
 
-        const transitionCss = this.transition || "opacity 0.5s ease-in-out";
+        const settings = loadSettings();
+        const effectSpeed = settings.screenEffectsSpeed;
+        const effectEnabled = settings.screenEffectsEnabled;
+        const durationMultiplier = (!effectEnabled || effectSpeed === 10) ? 0 : 2.0 - (effectSpeed * 0.2);
+
+        let duration = 500;
+        if (this.transition) {
+            const match = this.transition.match(/(\d+\.?\d*)s/);
+            if (match) duration = parseFloat(match[1]) * 1000;
+        }
+        duration *= durationMultiplier;
+        
+        const transitionCss = this.transition ? this.transition.replace(/(\d+\.?\d*)s/, `${duration / 1000}s`) : `opacity ${duration / 1000}s ease-in-out`;
 
         $(this.layerActive).css({
             transition: transitionCss,
@@ -176,17 +189,9 @@ export class Background extends SceneElement {
         this.layerActive = this.layerInactive;
         this.layerInactive = temp;
 
-        // Parse duration heuristically for timeout
-        let duration = 500;
-        if (this.transition) {
-            const match = this.transition.match(/(\d+\.?\d*)s/);
-            if (match) duration = parseFloat(match[1]) * 1000;
-        }
-
         this._transitionTimeout = setTimeout(() => {
             this._transitionTimeout = null;
             $(this.layerInactive).css("transition", "none"); // Clean up transition on old layer
-            // Don't remove background image since transparent layers should just overlay
         }, duration) as unknown as number;
 
         this.updateScrollPosition();

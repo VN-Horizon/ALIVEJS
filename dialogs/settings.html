@@ -66,14 +66,14 @@
               <legend>文本速度</legend>
               <div class="slider-container">
                 <div class="slider-labels"><span>慢</span><span>快</span></div>
-                <input type="range" min="0" max="10" value="0" />
+                <input type="range" min="0" max="10" value="5" id="text-speed" />
               </div>
             </fieldset>
             <fieldset>
               <legend><input type="checkbox" id="screen-effects" checked /> <label for="screen-effects">画面效果速度</label></legend>
               <div class="slider-container">
                 <div class="slider-labels"><span>慢</span><span>快</span></div>
-                <input type="range" min="0" max="10" value="0" />
+                <input type="range" min="0" max="10" value="5" id="screen-effects-speed" />
               </div>
             </fieldset>
           </div>
@@ -83,8 +83,7 @@
             <div style="display: flex; gap: 10px;">
               <div class="flex-col" style="flex: 1;">
                 <div class="flex-row">
-                  <select style="width: 120px;"><option>MS ゴシック</option><option>黑体</option></select>
-                  <button>选择字体</button>
+                  <input type="text" id="font-family" value="MS Gothic" style="width: 120px;" />
                 </div>
                 <div style="margin-top: 4px;">
                   <input type="checkbox" id="drop-shadow" checked />
@@ -97,7 +96,7 @@
                     <span style="margin-left: 60px; font-size: 10px;">最大</span>
                   </div>
                   <div style="display: flex; justify-content: flex-end;">
-                  <input type="range" min="0" max="3" value="3" style="width: 100px;" />
+                  <input type="range" min="0" max="3" value="3" id="font-aa" style="width: 100px;" />
                   </div>
                 </div>
               </div>
@@ -127,7 +126,6 @@
           <fieldset style="margin: 8px 0;">
             <legend>读档对话框行为</legend>
             <div class="flex-col">
-              <div><input type="checkbox" id="load-confirm" checked /> <label for="load-confirm">读取数据时显示确认信息</label></div>
               <div><input type="checkbox" id="load-dblclick" checked /> <label for="load-dblclick">双击选择读档时，自动关闭对话框</label></div>
               <div><input type="checkbox" id="load-auto-select" checked /> <label for="load-auto-select">打开对话框时，自动选择最后存档的数据</label></div>
               <div class="checkbox-indent"><input type="checkbox" id="load-skip-auto" checked /> <label for="load-skip-auto">但是不自动选择自动存档的数据</label></div>
@@ -137,11 +135,11 @@
             <legend><input type="checkbox" id="auto-save" checked /> <label for="auto-save">启用自动存档</label></legend>
             <div class="flex-col">
               <div class="flex-row">
-                <input type="number" value="99" min="1" max="99" style="width: 40px;" />
+                <input type="number" value="20" min="1" max="20" id="auto-save-slot" style="width: 40px;" />
                 <span>号数据作为自动存档对象</span>
               </div>
               <div>自动存档时的注释 (最多255个半角字符)</div>
-              <input type="text" style="width: 100%;" />
+              <input type="text" id="auto-save-comment" value="Auto Save" style="width: 100%;" />
             </div>
           </fieldset>
         </article>
@@ -154,7 +152,7 @@
               <div class="flex-row space-between">
                 <div class="flex-col" style="width: 140px;">
                   <div><input type="checkbox" id="bgm-vol-check" checked /> <label for="bgm-vol-check">BGM 音量</label></div>
-                  <input type="range" min="0" max="100" value="25" />
+                  <input type="range" min="0" max="100" value="25" id="bgm-vol" />
                 </div>
                 <div>25%</div>
                 <div class="flex-col">
@@ -166,7 +164,7 @@
               <div class="flex-row space-between">
                 <div class="flex-col" style="width: 140px;">
                   <div><input type="checkbox" id="voice-vol-check" checked /> <label for="voice-vol-check">VOICE 音量</label></div>
-                  <input type="range" min="0" max="100" value="49" />
+                  <input type="range" min="0" max="100" value="49" id="voice-vol" />
                 </div>
                 <div>49%</div>
                 <div class="flex-col">
@@ -178,7 +176,7 @@
               <div class="flex-row space-between">
                 <div class="flex-col" style="width: 140px;">
                   <div><input type="checkbox" id="se-vol-check" checked /> <label for="se-vol-check">SE 音量</label></div>
-                  <input type="range" min="0" max="100" value="49" />
+                  <input type="range" min="0" max="100" value="49" id="se-vol" />
                 </div>
                 <div>49%</div>
                 <div class="flex-col">
@@ -195,9 +193,9 @@
         </article>
 
         <div class="footer-buttons">
-          <button onclick="closeWindow()">OK</button>
+          <button id="ok-btn">OK</button>
           <button onclick="closeWindow()">取消</button>
-          <button>应用(A)</button>
+          <button id="apply-btn">应用(A)</button>
         </div>
       </div>
     </div>
