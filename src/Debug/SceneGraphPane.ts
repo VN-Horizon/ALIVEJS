@@ -29,6 +29,7 @@ export function initSceneGraphPane(): void {
     $toolbar.append($refreshBtn);
     $container.append($toolbar, $graphHost);
     $("body").append($container);
+    $container.hide();
 
     const svgElement = d3.select($graphHost.get(0)!)
         .append("svg")
@@ -52,6 +53,12 @@ export function initSceneGraphPane(): void {
 
     $(document).on("EventsLoaded", () => {
         renderer.renderGraph();
+    });
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key.toLowerCase() === "g") {
+            $container.toggle();
+        }
     });
 }
 

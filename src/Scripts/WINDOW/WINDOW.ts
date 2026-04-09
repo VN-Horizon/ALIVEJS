@@ -94,7 +94,7 @@ export async function pushDialogWindow(options: PushDialogWindowOptions = {}) {
       fontSize: 20,
       color: "#FFFFFF",
       fontWeight: "medium",
-      transform: { x: 40, y: 288, width: 146, height: 32 },
+      transform: { x: 40, y: 291, width: 146, height: 32 },
     }),
   );
   if (!nameText) {
