@@ -86,7 +86,7 @@ async function getPsdFiles() {
       const files = await fs.readdir(folderPath);
 
       for (const file of files) {
-        if (file.toLowerCase().endsWith('.psd')) {
+        if (file.toLowerCase().endsWith('.psd') && file.toLowerCase().includes('staff')) {
           psdFiles.push({
             name: file,
             path: path.join(folderPath, file),

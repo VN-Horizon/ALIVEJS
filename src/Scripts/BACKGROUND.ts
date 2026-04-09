@@ -104,6 +104,14 @@ export async function loadBackgroundScene() {
         portrait?.updateBackgroundImage(`/assets/scenes/Portraits/${portraitFolder}/${portraitFile}.avif`);
     };
 
+    const showStaffImageHandler = (e: any) => {
+        const { stringParams } = (e as CustomEvent).detail;
+        if (stringParams.length < 2) return;
+        const [type, id] = stringParams;
+        portrait?.updateBackgroundImage(null);
+        backgroundCG?.updateBackgroundImage(`/assets/scenes/UI/${type}/${id}.avif`);
+    };
+
     // Handler to restore background image from saved state
     const restoreGraphicsHandler = (e: any) => {
         const { bg, character } = (e as CustomEvent).detail;
@@ -117,6 +125,7 @@ export async function loadBackgroundScene() {
     $(document).on("SetCharaImg", setCharaImgHandler);
     $(document).on("RestoreGraphics", restoreGraphicsHandler);
     $(document).on("FadeSystemToBlack", setCgHandler); // Reuse CG handler for fade to black
+    $(document).on("ShowStaffImage", showStaffImageHandler);
 
     backgroundScene.onDestroyCallbacks.push(() => {
         $(document).off("SetBgImg", setBgImgHandler);
@@ -125,6 +134,7 @@ export async function loadBackgroundScene() {
         $(document).off("SetCharaImg", setCharaImgHandler);
         $(document).off("RestoreGraphics", restoreGraphicsHandler);
         $(document).off("FadeSystemToBlack", setCgHandler);
+        $(document).off("ShowStaffImage", showStaffImageHandler);
     });
     return backgroundScene;
 }

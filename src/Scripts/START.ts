@@ -47,6 +47,10 @@ export async function loadStartScene(eventsPromise?: Promise<any>) {
             ScreenplayContext.currentInstructionIndex = 0;
             await loadBackgroundScene();
             await pushDialogWindow({ autoAdvance: true });
+            if (progress[4] > 0) {
+
+                document.dispatchEvent(new CustomEvent("ShowCg", { detail: { stringParams: ["S03"] }, bubbles: true, cancelable: true }));
+            }
             setTimeout(() => {
                 destroySceneByName(sceneName);
             }, 1000);

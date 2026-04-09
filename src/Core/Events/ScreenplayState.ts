@@ -46,7 +46,6 @@ export function getCurrentEvent(): EventMapping {
     return ScreenplayContext.blocks[ScreenplayContext.currentBlockIndex];
 }
 
-export function getCurrentInstruction(): EventInstruction {
-    const currentEvent = getCurrentEvent();
+export function getCurrentInstruction(currentEvent: EventMapping = getCurrentEvent()): EventInstruction {
     return currentEvent.instructions[ScreenplayContext.currentInstructionIndex];
 }

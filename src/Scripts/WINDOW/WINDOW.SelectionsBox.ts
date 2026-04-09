@@ -8,7 +8,7 @@ import { $translate } from "@/Utils/Translator";
 import $ from "jquery";
 import type { DialogWindowScene } from "./WINDOW";
 
-export function initSelectionsBox(dialogWindow: DialogWindowScene | null) {
+export async function initSelectionsBox(dialogWindow: DialogWindowScene | null) {
   if (!dialogWindow) {
     console.error("Dialog window is null in initSelectionsBox");
     return;
@@ -82,9 +82,7 @@ export function initSelectionsBox(dialogWindow: DialogWindowScene | null) {
   };
 
   // Initialize frame animation asynchronously
-  loadFrameAnimation().then(frameAnim => {
-    dialogWindow._frameAnimation = frameAnim;
-  });
+  dialogWindow._frameAnimation = await loadFrameAnimation();
 
   const OnSelectionCallback = (i: number) => {
     document.dispatchEvent(

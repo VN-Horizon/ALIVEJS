@@ -20,6 +20,31 @@ export async function loadEvents(): Promise<any> {
             console.log("Events loaded successfully!", eventMappings);
         }
 
+        eventMappings.events.map(event => {
+            if (event.instructions) {
+                const newInstructions: any[] = [];
+                event.instructions.forEach(instr => {
+                    if (instr.type === "ShowStaffA") {
+                        for (let i = 1; i <= 19; i++) {
+                            const id = i.toString().padStart(2, "0");
+                            newInstructions.push({ type: "ShowStaffImage", stringParams: ["STAFF2", id] });
+                            newInstructions.push({ type: "AutoContinue", params: [2000] });
+                        }
+                    } else if (instr.type === "ShowStaffB") {
+                        for (let i = 1; i <= 19; i++) {
+                            const id = i.toString().padStart(2, "0");
+                            newInstructions.push({ type: "ShowStaffImage", stringParams: ["STAFF1", id] });
+                            newInstructions.push({ type: "AutoContinue", params: [2000] });
+                        }
+                    } else {
+                        newInstructions.push(instr);
+                    }
+                });
+                event.instructions = newInstructions;
+            }
+            return event;
+        });
+
         // Initialize screenplay context with loaded data
         initScreenplayContext(eventMappings.events || [], eventMappings.textPool || []);
 

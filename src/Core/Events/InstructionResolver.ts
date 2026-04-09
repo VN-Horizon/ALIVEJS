@@ -21,6 +21,10 @@ export function resolveStrings(instruction: EventInstruction | null, textPool: s
 
 export function resolveLastInstruction(): ResolvedEventInstruction | null {
     const instruction = lastInstruction;
+    return resolveInstruction(instruction);
+}
+
+export function resolveInstruction(instruction: EventInstruction | null): ResolvedEventInstruction | null {
     if (!instruction) return null;
     return {
         type: instruction.type,
@@ -30,11 +34,5 @@ export function resolveLastInstruction(): ResolvedEventInstruction | null {
 }
 
 export function resolveCurrentInstruction(): ResolvedEventInstruction | null {
-    const instruction = getCurrentInstruction();
-    if (!instruction) return null;
-    return {
-        type: instruction.type,
-        params: instruction.params,
-        stringParams: resolveStrings(instruction, ScreenplayContext.textPool),
-    };
+    return resolveInstruction(getCurrentInstruction());
 }
