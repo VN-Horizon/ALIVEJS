@@ -19,7 +19,7 @@ export function initBGM() {
 
 export function playBGM(name: string) {
     if (queueIfLocked(() => playBGM(name))) {
-        console.error("Audio locked, queueing BGM:", name);
+        console.warn("Audio locked, queueing BGM:", name);
         return;
     }
     if (currentBGM) {

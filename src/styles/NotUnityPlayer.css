@@ -170,7 +170,7 @@ body {
   box-shadow: none;
   outline: none !important;
   background: transparent;
-  overflow: none;
+  overflow: visible;
 }
 
 #gameContainer div:not(#backlog-container):not(#backlog-container *),
@@ -287,7 +287,10 @@ body {
   background-size: 100% 100%;
   display: none;
 }
-
+.vn-button:disabled {
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+}
 .vn-button .state-0 {
   display: block;
 }
@@ -305,6 +308,10 @@ body {
 .vn-button.keep-base-while-hover:hover .state-0,
 .vn-button.keep-base-while-hover:focus .state-0 {
   display: block;
+}
+
+.vn-button.always-keep-base:not(:disabled) .state-0 {
+  display: block !important;
 }
 
 .vn-button:active .state-2,

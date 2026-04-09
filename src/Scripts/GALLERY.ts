@@ -1,4 +1,5 @@
 import { CharacterNameToVoiceKey } from "@/Constants";
+import { getUnlockedCG } from "@/Core/Save/UnlockedCG";
 import { toButton } from "@/Graphics/Button";
 import { SceneElement } from "@/Graphics/SceneElement";
 import { setExitListener } from "@/InputSystem/InputSystem.Keyboard";
@@ -46,25 +47,67 @@ async function initCGGallery() {
     });
 }
 
-export async function gotoCharacterGallery(characterName: string) {
-    const characterGalleryScene = await loadScene(`UI/CG_${characterName}01`);
+export async function gotoCharacterGallery(characterName: string, page: number = 1, replaceSceneName?: string) {
+    const characterGalleryScene = await loadScene(`UI/CG_${characterName}0${page}`);
     if (!characterGalleryScene) {
         console.error("characterGalleryScene is null");
         return;
     }
-    for (let i = 3; i <= 15; i++) {
-        toButton(characterGalleryScene.sceneObjects[i] as SceneElement, {
-            keepNWhileHovering: true,
+    const baseSceneObjects = [...characterGalleryScene.sceneObjects] as SceneElement[];
+    const startIndex = page === 1 ? 3 : 0;
+    const endIndex = Math.min(15, baseSceneObjects.length - 1);
+    const available = getUnlockedCG();
+
+    for (let i = startIndex; i <= endIndex; i++) {
+        const cgItem = baseSceneObjects[i] as SceneElement;
+        if (!cgItem) continue;
+        if (!Array.isArray(cgItem.children) || cgItem.children.length === 0) continue;
+        const cgNames = cgItem.sceneData.name?.split(",") || [];
+        if (cgNames.length === 0) continue;
+        if (!cgItem || !/^[A-Z]\d{2}$/.test(cgNames[0] || "")) continue;
+        const unlocked = cgNames.every(part => available.includes(part.trim()));
+        console.log(`toButton`, cgItem);
+        toButton(cgItem, {
+            flags: ["keep-base-while-hover"],
+            disabled: !unlocked,
             stateIndexes: [1, 2, 3, 0],
             callback: () => {
                 // Show full image or do something
             },
         });
     }
+    toButton(characterGalleryScene.getObjectByName("BACK"), {
+        stateIndexes: [0, 1, 1, 0],
+        callback: () => {
+            const engine = window.getEngine();
+            engine?.popScene();
+        },
+    });
+    if (page === 1) {
+        toButton(characterGalleryScene.getObjectByName("PAGE1/2"), {
+            stateIndexes: [0, 1, 2, 0],
+            flags: ["always-keep-base"],
+            callback: async () => {
+                await gotoCharacterGallery(characterName, 2, characterGalleryScene.name);
+            }
+        });
+    } else if (page === 2) {
+        toButton(characterGalleryScene.getObjectByName("PAGE2/2"), {
+            stateIndexes: [0, 1, 2, 0],
+            flags: ["always-keep-base"],
+            callback: async () => {
+                await gotoCharacterGallery(characterName, 1, characterGalleryScene.name);
+            }
+        });
+    }
     setExitListener(() => {
         const engine = window.getEngine();
         engine?.popScene();
     });
+
+    if (replaceSceneName && replaceSceneName !== characterGalleryScene.name) {
+        window.getEngine()?.removeSceneByName(replaceSceneName);
+    }
 }
 
 async function initMusicGallery() {

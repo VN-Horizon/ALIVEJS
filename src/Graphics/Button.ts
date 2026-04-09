@@ -11,8 +11,9 @@ export interface ButtonData extends SceneElementData {
     images: string[];
     z?: number;
     cursor?: string;
-    keepNWhileHovering?: boolean;
+    flags?: string[];
     callback?: () => void;
+    disabled: boolean;
 }
 
 export class Button extends FocusableElement {
@@ -24,7 +25,8 @@ export class Button extends FocusableElement {
     buttonId: string;
     cursor: string;
     isButton: boolean = true;
-    keepNWhileHovering?: boolean;
+    flags: string[];
+    disabled: boolean;
 
     constructor(data: ButtonData, parent: SceneElement | null = null, scene: IScene | null = null) {
         data.isButton = true;
@@ -37,9 +39,10 @@ export class Button extends FocusableElement {
         this.y = baseTransform[1] || 0;
         this.width = baseTransform[2] || 10;
         this.height = baseTransform[3] || 10;
+        this.disabled = data.disabled || false;
 
         this.images = data.images;
-        this.keepNWhileHovering = data.keepNWhileHovering;
+        this.flags = data.flags || [];
 
         // Preload variant images to ensure they are cached before hover/active states
         this.images.forEach(src => {
@@ -78,7 +81,8 @@ export class Button extends FocusableElement {
         this.domElement = $("<button>")
             .attr("id", this.buttonId)
             .attr("layer-name", this.sceneData.name || "Button")
-            .attr("class", ["vn-button", ...classNames].join(" "))
+            .attr("disabled", this.disabled ? "disabled" : null)
+            .attr("class", ["vn-button", ...this.flags, ...classNames].join(" "))
             .css({
                 opacity: this.opacity,
                 "mix-blend-mode": this.blendMode,
@@ -87,9 +91,6 @@ export class Button extends FocusableElement {
             })[0];
 
         const $button = $(this.domElement);
-        if (this.keepNWhileHovering) {
-            $button.addClass("keep-base-while-hover");
-        }
 
         const baseTransform = this.transforms[0] || [0, 0, 10, 10];
         for (let i = 0; i < Button.STATE_COUNT; i++) {
@@ -153,7 +154,8 @@ export interface ToButtonOptions {
     callback?: () => void;
     focusable?: boolean;
     visible?: boolean;
-    keepNWhileHovering?: boolean;
+    flags?: string[];
+    disabled?: boolean;
 }
 
 export function toButton(group: SceneElement | null, options: Partial<ToButtonOptions> = {}) {
@@ -169,9 +171,10 @@ export function toButton(group: SceneElement | null, options: Partial<ToButtonOp
         callback = null,
         focusable = true,
         visible = true,
-        keepNWhileHovering = false,
+        flags = [],
+        disabled = false,
     } = options;
-
+    console.log(group.children)
     if (!Array.isArray(group.children) || group.children.length === 0) {
         console.error("Group must have children to elevate to Button");
         return null;
@@ -202,7 +205,8 @@ export function toButton(group: SceneElement | null, options: Partial<ToButtonOp
         callback,
         focusable,
         visible,
-        keepNWhileHovering,
+        flags,
+        disabled,
     } as ButtonData;
 
     const button = new Button(buttonData, group.parent, group.scene);
