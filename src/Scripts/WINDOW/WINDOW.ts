@@ -45,6 +45,7 @@ export async function pushDialogWindow(options: PushDialogWindowOptions = {}) {
       ],
       images: ["", "", "", ""],
       zIndex: 10,
+      disabled: false,
       callback: async () => {
         onNextLineRequest();
       },
