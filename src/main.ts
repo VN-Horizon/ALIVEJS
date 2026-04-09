@@ -13,7 +13,6 @@ import { initBGM } from "./Audio/Bgm";
 import { initSE } from "./Audio/Se";
 import "./Audio/Voice";
 import "./Audio/🔓";
-import { initSceneGraphPane } from "./Debug/SceneGraphPane";
 import { loadStartScene } from "./Scripts/START";
 import { initMenuBar } from "./Utils/MenuBar";
 import { initWindowManager } from "./Utils/WindowManager";
@@ -54,9 +53,9 @@ async function init() {
       initBGM();
       initSE();
     }, 0);
-    loadStartScene(true, eventsPromise);
+    loadStartScene(eventsPromise);
     eventsPromise.then(() => {
-      initSceneGraphPane();
+      // initSceneGraphPane();
     });
   } catch (error: any) {
     console.error(error);
