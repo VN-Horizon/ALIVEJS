@@ -13,6 +13,7 @@ import { initBGM } from "./Audio/Bgm";
 import { initSE } from "./Audio/Se";
 import "./Audio/Voice";
 import "./Audio/🔓";
+import { loadSettings } from "./Core/Settings";
 import { initSceneGraphPane } from "./Debug/SceneGraphPane";
 import { loadStartScene } from "./Scripts/START";
 import { initMenuBar } from "./Utils/MenuBar";
@@ -41,6 +42,20 @@ declare global {
 async function init() {
   try {
     await initWindowManager();
+    
+    const initialSettings = loadSettings();
+    if (initialSettings.dropShadow) {
+      document.body.style.setProperty("--index-global-textshadow", "1px 1px 0px #000000");
+    } else {
+      document.body.style.setProperty("--index-global-textshadow", "none");
+    }
+
+    // Listen for settings change
+    window.addEventListener("storage", (e) => {
+      if (e.key === "alive_settings_updated") {
+        window.location.reload();
+      }
+    });
     
     let notUnityEngine = new GameEngine();
     notUnityEngine.start();

@@ -1,6 +1,7 @@
 import { getCurrentBGM } from "@/Audio/Bgm";
 import { Background } from "@/Graphics/Background";
 import { getCurrentEvent } from "../Events";
+import { loadSettings } from "../Settings";
 
 const SAVE_KEY_PREFIX = "alive_save_";
 const MAX_SAVE_SLOTS = 20;
@@ -55,7 +56,7 @@ export function getCurrentGameState(): GameState {
 }
 
 export function saveGame(slotIndex: number): boolean {
-    if (slotIndex < 0 || slotIndex >= MAX_SAVE_SLOTS) {
+    if (slotIndex < 0 || slotIndex >= MAX_SAVE_SLOTS + 1) {
         throw new Error(`Invalid slot index: ${slotIndex}`);
     }
 
@@ -73,7 +74,7 @@ export function saveGame(slotIndex: number): boolean {
 }
 
 export function loadGame(slotIndex: number) {
-    if (slotIndex < 0 || slotIndex >= MAX_SAVE_SLOTS) {
+    if (slotIndex < 0 || slotIndex >= MAX_SAVE_SLOTS + 1) {
         throw new Error(`Invalid slot index: ${slotIndex}`);
     }
 
@@ -108,4 +109,17 @@ export function applyGameState(gameState: GameState): boolean {
 
     console.log("Game state applied:", gameState);
     return true;
+}
+
+export function autoSaveGame(): boolean {
+    const settings = loadSettings();
+    if (!settings.autoSaveEnabled) return false;
+    
+    // AutoSave slot is usually 1 to 20.
+    const slot = settings.autoSaveSlot;
+    if (slot < 1 || slot > MAX_SAVE_SLOTS) return false;
+
+    // Use specific comment for auto save
+    localStorage.setItem("_temp_save_comment", settings.autoSaveComment);
+    return saveGame(slot);
 }

@@ -38,7 +38,11 @@ export async function pushPauseScreen() {
         },
     });
 
-    toButton(pauseScene.getObjectByName("CONFIG"));
+    toButton(pauseScene.getObjectByName("CONFIG"), {
+        callback: () => {
+            window.openSettings();
+        }
+    });
     toButton(pauseScene.getObjectByName("EXIT"), {
         callback: () => {
             window.exit();

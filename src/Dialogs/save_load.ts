@@ -1,5 +1,6 @@
 import "98.css";
 import $ from "jquery";
+import { loadSettings } from "../Core/Settings";
 import { closeCurrentWindow, setupWindowBehavior } from "../Utils/WindowManager";
 
 setupWindowBehavior();
@@ -39,7 +40,9 @@ $(() => {
   let selectedSlotIndex: number = -1;
 
   const SAVE_KEY_PREFIX = "alive_save_";
-  const MAX_SAVE_SLOTS = 20;
+  const MAX_SAVE_SLOTS = 21; // Increased to 21 to support slot index up to 20 for autosave
+
+  const settings = loadSettings();
 
   function setMode(mode: "save" | "load") {
     currentMode = mode;
@@ -101,7 +104,11 @@ $(() => {
       tr.on("dblclick", () => {
         selectedSlotIndex = i;
         renderTable();
-        applyAction();
+        if (currentMode === "save" && settings.saveDblclick) {
+          applyAction();
+        } else if (currentMode === "load" && settings.loadDblclick) {
+          applyAction();
+        }
       });
 
       saveTbody.append(tr);
@@ -133,6 +140,14 @@ $(() => {
     if (selectedSlotIndex === -1) return;
 
     if (currentMode === "save") {
+      const saveKey = SAVE_KEY_PREFIX + selectedSlotIndex;
+      const existingData = localStorage.getItem(saveKey);
+      if (existingData && settings.saveConfirm) {
+        if (!confirm("Are you sure you want to overwrite this save?")) {
+          return;
+        }
+      }
+
       try {
         if ('__TAURI_INTERNALS__' in window) {
            const { emit } = await import("@tauri-apps/api/event");
@@ -170,4 +185,37 @@ $(() => {
   });
 
   setMode(initialMode);
+
+  // Auto-selection logic
+  let bestSlot = -1;
+  let latestTime = 0;
+  for (let i = 0; i < MAX_SAVE_SLOTS; i++) {
+    const saveData = localStorage.getItem(SAVE_KEY_PREFIX + i);
+    if (!saveData) continue;
+    try {
+      const st = JSON.parse(saveData);
+      const t = new Date(st.timestamp).getTime();
+      
+      let isAutoSaveSlot = (i === settings.autoSaveSlot); // if i = 20, it's the auto save slot (0-20 array, but slot max 20)
+      if (initialMode === "save" && settings.saveSkipAuto && isAutoSaveSlot) continue;
+      if (initialMode === "load" && settings.loadSkipAuto && isAutoSaveSlot) continue;
+
+      if (t > latestTime) {
+        latestTime = t;
+        bestSlot = i;
+      }
+    } catch(e) {}
+  }
+  
+  if (bestSlot !== -1) {
+    if (initialMode === "save" && settings.saveAutoSelect) {
+      selectedSlotIndex = bestSlot;
+      renderTable();
+      updateButtons();
+    } else if (initialMode === "load" && settings.loadAutoSelect) {
+      selectedSlotIndex = bestSlot;
+      renderTable();
+      updateButtons();
+    }
+  }
 });

@@ -1,15 +1,22 @@
+import { loadSettings } from "../Core/Settings";
 import { createAudioPlayer } from "./AudioPlayer";
 import { queueIfLocked } from "./🔓";
 
 const seList: { [key: string]: HTMLMediaElement } = {};
 let currentSE: HTMLMediaElement | null = null;
 
+const settings = loadSettings();
+const calculateVolume = (baseVol: number, useSystem: boolean) => {
+    return useSystem ? (baseVol / 100) : (baseVol / 100);
+};
+const TARGET_VOLUME = calculateVolume(settings.seVolume, settings.seUseSystem);
+
 export function initSE() {
     for (let i = 1; i < 37; i++) {
         const audioElement = createAudioPlayer();
         audioElement.src = `/assets/audio/se/SE_${i.toString().padStart(2, "0")}.ogg`;
         audioElement.loop = false;
-        audioElement.volume = 0.5;
+        audioElement.volume = TARGET_VOLUME;
         const trackName = `se_${i.toString().padStart(2, "0")}`;
         seList[trackName] = audioElement;
     }
