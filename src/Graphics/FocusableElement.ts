@@ -4,111 +4,108 @@ import $ from "jquery";
 import { SceneElement } from "./SceneElement";
 
 export class FocusableElement extends SceneElement {
-    permanentlyNonFocusable: boolean;
-    manualEnabled: boolean | null = null; // null = follow scene, true = enabled, false = disabled
+  permanentlyNonFocusable: boolean;
+  manualEnabled: boolean | null = null; // null = follow scene, true = enabled, false = disabled
 
-    constructor(
-        data: SceneElementData & { focusable?: boolean },
-        parent: SceneElement | null = null,
-        scene: IScene | null = null,
-    ) {
-        super(data, parent, scene);
-        this.permanentlyNonFocusable = data && data.focusable === false;
+  constructor(
+    data: SceneElementData & { focusable?: boolean },
+    parent: SceneElement | null = null,
+    scene: IScene | null = null
+  ) {
+    super(data, parent, scene);
+    this.permanentlyNonFocusable = data && data.focusable === false;
 
-        if (this.permanentlyNonFocusable) {
-            console.log("Element " + (data.name || "") + " set as non-focusable by data.");
-            $(this.domElement).attr("tabindex", "-1").addClass("non-focusable");
-        } else {
-            $(this.domElement).addClass("focusable");
-        }
-
-        this.updateFocusability();
+    if (this.permanentlyNonFocusable) {
+      console.log("Element " + (data.name || "") + " set as non-focusable by data.");
+      $(this.domElement).attr("tabindex", "-1").addClass("non-focusable");
+    } else {
+      $(this.domElement).addClass("focusable");
     }
 
-    setEnabled(enabled: boolean | null) {
-        this.manualEnabled = enabled;
-        this.updateFocusability();
+    this.updateFocusability();
+  }
+
+  static updateFocusabilityRecursive(obj: FocusableElement | null) {
+    if (!obj) return;
+    if (typeof obj.updateFocusability === "function") obj.updateFocusability();
+    if (obj.children && obj.children.length) {
+      obj.children.forEach((child) =>
+        FocusableElement.updateFocusabilityRecursive(child as FocusableElement)
+      );
+    }
+  }
+
+  applyInteractableState(enabled: boolean) {
+    if (!this.domElement) return;
+    const $el = $(this.domElement);
+    if (enabled) {
+      $el.css("pointer-events", "auto");
+      $el.removeAttr("tabindex");
+      $el.prop("disabled", false);
+      $el.removeClass("non-focusable").addClass("focusable");
+    } else {
+      if (this.scene && $el.is(":focus")) this.scene.lastFocusedElement = this.domElement;
+      $el.css("pointer-events", "none");
+      $el.prop("disabled", true);
+      $el.attr("tabindex", "-1");
+      if ($el.is(":focus")) $el.trigger("blur");
+      $el.removeClass("focusable").addClass("non-focusable");
+    }
+    if (this.permanentlyNonFocusable) {
+      $el.attr("tabindex", "-1").addClass("non-focusable");
+      if ($el.is(":focus")) $el.trigger("blur");
+    }
+  }
+
+  updateFocusability() {
+    if (!this.domElement) return;
+    if (this.manualEnabled === true) {
+      this.applyInteractableState(true);
+      return;
+    }
+    if (this.manualEnabled === false) {
+      this.applyInteractableState(false);
+      return;
+    }
+    // Follow scene state when manualEnabled is null
+    const isSceneFocusable = this.scene ? this.scene.isFocusable : true;
+    this.applyInteractableState(isSceneFocusable);
+  }
+
+  setFocus() {
+    if (!this.domElement) return false;
+    const $el = $(this.domElement);
+
+    const isFocusableNow =
+      !$el.prop("disabled") &&
+      $el.attr("tabindex") !== "-1" &&
+      ($el.css("pointer-events") || "").toLowerCase() !== "none" &&
+      $el.is(":visible") &&
+      $el.hasClass("focusable") &&
+      !$el.hasClass("non-focusable") &&
+      this.scene
+        ? this.scene.isFocusable
+        : true;
+
+    if (!isFocusableNow) return false;
+
+    // Remember last focused element in the scene, if applicable
+    if (this.scene) this.scene.lastFocusedElement = this.domElement;
+
+    try {
+      // Prefer native focus with preventScroll to avoid jumping
+      if (typeof this.domElement.focus === "function") {
+        this.domElement.focus({ preventScroll: true });
+      } else {
+        $el.trigger("focus");
+      }
+    } catch (e) {
+      // Fallback if options aren't supported
+      try {
+        this.domElement.focus();
+      } catch (_) {}
     }
 
-    applyInteractableState(enabled: boolean) {
-        if (!this.domElement) return;
-        const $el = $(this.domElement);
-        if (enabled) {
-            $el.css("pointer-events", "auto");
-            $el.removeAttr("tabindex");
-            $el.prop("disabled", false);
-            $el.removeClass("non-focusable").addClass("focusable");
-        } else {
-            if (this.scene && $el.is(":focus")) this.scene.lastFocusedElement = this.domElement;
-            $el.css("pointer-events", "none");
-            $el.prop("disabled", true);
-            $el.attr("tabindex", "-1");
-            if ($el.is(":focus")) $el.blur();
-            $el.removeClass("focusable").addClass("non-focusable");
-        }
-        if (this.permanentlyNonFocusable) {
-            $el.attr("tabindex", "-1").addClass("non-focusable");
-            if ($el.is(":focus")) $el.blur();
-        }
-    }
-
-    updateFocusability() {
-        if (!this.domElement) return;
-        if (this.manualEnabled === true) {
-            this.applyInteractableState(true);
-            return;
-        }
-        if (this.manualEnabled === false) {
-            this.applyInteractableState(false);
-            return;
-        }
-        // Follow scene state when manualEnabled is null
-        const isSceneFocusable = this.scene ? this.scene.isFocusable : true;
-        this.applyInteractableState(!!isSceneFocusable);
-    }
-
-    setFocus() {
-        if (!this.domElement) return false;
-        const $el = $(this.domElement);
-
-        const isFocusableNow =
-            !$el.prop("disabled") &&
-            $el.attr("tabindex") !== "-1" &&
-            ($el.css("pointer-events") || "").toLowerCase() !== "none" &&
-            $el.is(":visible") &&
-            $el.hasClass("focusable") &&
-            !$el.hasClass("non-focusable") &&
-            this.scene
-                ? this.scene.isFocusable !== false
-                : true;
-
-        if (!isFocusableNow) return false;
-
-        // Remember last focused element in the scene, if applicable
-        if (this.scene) this.scene.lastFocusedElement = this.domElement;
-
-        try {
-            // Prefer native focus with preventScroll to avoid jumping
-            if (typeof this.domElement.focus === "function") {
-                this.domElement.focus({ preventScroll: true });
-            } else {
-                $el.trigger("focus");
-            }
-        } catch (e) {
-            // Fallback if options aren't supported
-            try {
-                this.domElement.focus();
-            } catch (_) {}
-        }
-
-        return document && document.activeElement === this.domElement;
-    }
-
-    static updateFocusabilityRecursive(obj: FocusableElement | null) {
-        if (!obj) return;
-        if (typeof obj.updateFocusability === "function") obj.updateFocusability();
-        if (obj.children && obj.children.length) {
-            obj.children.forEach(child => FocusableElement.updateFocusabilityRecursive(child as FocusableElement));
-        }
-    }
+    return document && document.activeElement === this.domElement;
+  }
 }

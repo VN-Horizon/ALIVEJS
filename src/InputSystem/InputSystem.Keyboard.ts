@@ -22,8 +22,10 @@ const NAVIGATION_KEYS: Record<string, "next" | "prev"> = {
   KeyA: "prev",
 };
 
-export type ConfirmListener = (e: JQuery.KeyUpEvent | null, focused: JQuery<HTMLElement>) => void;
-export type ExitListener = (e: JQuery.KeyDownEvent | JQuery.ContextMenuEvent | null) => void | Promise<void>;
+export type ConfirmListener = (e: JQuery.KeyUpEvent | null, focused: JQuery) => void;
+export type ExitListener = (
+  e: JQuery.KeyDownEvent | JQuery.ContextMenuEvent | null
+) => void | Promise<void>;
 
 export let confirmListener: ConfirmListener | null = null;
 export let exitListener: ExitListener | null = null;
@@ -36,9 +38,6 @@ let overrideRightKeys = false;
 window.skipping = false;
 window.isBacklogOpen = false;
 
-export function setConfirmListener(fn: ConfirmListener) {
-  confirmListener = fn;
-}
 export function setExitListener(fn: ExitListener, options = {}) {
   exitListenerOptions = { singleFlight: true, ...options };
   // Wrap the original listener if singleFlight enabled
@@ -50,7 +49,7 @@ export function setExitListener(fn: ExitListener, options = {}) {
     exitListener = fn;
     return;
   }
-  exitListener = async e => {
+  exitListener = async (e) => {
     if (exitListenerInFlight) return; // drop repeated triggers while running
     try {
       exitListenerInFlight = true;
@@ -63,11 +62,6 @@ export function setExitListener(fn: ExitListener, options = {}) {
       exitListenerInFlight = false;
     }
   };
-}
-export function clearKeyboardListeners() {
-  confirmListener = null;
-  exitListener = null;
-  exitListenerInFlight = false;
 }
 
 export function setOverrideRightKeys(override: boolean) {

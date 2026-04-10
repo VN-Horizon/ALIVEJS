@@ -26,7 +26,14 @@ export interface PushDialogWindowOptions {
 export async function pushDialogWindow(options: PushDialogWindowOptions = {}) {
   const { autoAdvance = true } = options;
   const dialogWindow = (await loadScene("UI/WINDOW", {
-    exclusionList: ["通常クリック範囲", "メッセージ文字", "選択肢文字", "名前ウィンドウ", "名前文字", "枠アニメ"],
+    exclusionList: [
+      "通常クリック範囲",
+      "メッセージ文字",
+      "選択肢文字",
+      "名前ウィンドウ",
+      "名前文字",
+      "枠アニメ",
+    ],
   })) as DialogWindowScene | null;
 
   await initSelectionsBox(dialogWindow);
@@ -50,7 +57,7 @@ export async function pushDialogWindow(options: PushDialogWindowOptions = {}) {
       callback: async () => {
         onNextLineRequest();
       },
-    }),
+    })
   );
 
   const pauseBtn = dialogWindow?.getObjectByName("システムボタン");
@@ -67,7 +74,7 @@ export async function pushDialogWindow(options: PushDialogWindowOptions = {}) {
       await pushPauseScreen();
     },
   });
-  
+
   const settings = loadSettings();
 
   const dialogText = dialogWindow?.addObject(
@@ -78,7 +85,7 @@ export async function pushDialogWindow(options: PushDialogWindowOptions = {}) {
       color: "#FFFFFF",
       fontWeight: "medium",
       transform: { x: 80, y: 346, width: 480, height: 112 },
-    }),
+    })
   );
   if (!dialogText) {
     console.error("Dialog text object not found");
@@ -100,7 +107,7 @@ export async function pushDialogWindow(options: PushDialogWindowOptions = {}) {
       color: "#FFFFFF",
       fontWeight: "medium",
       transform: { x: 40, y: 291, width: 146, height: 32 },
-    }),
+    })
   );
   if (!nameText) {
     console.error("Name text object not found");
@@ -160,7 +167,6 @@ export async function pushDialogWindow(options: PushDialogWindowOptions = {}) {
 
   document.addEventListener("PlayDialogInternal", playDialogHandler);
   dialogWindow?.onDestroyCallbacks.push(() => {
-
     document.removeEventListener("PlayDialogInternal", playDialogHandler);
   });
 
@@ -176,7 +182,7 @@ export async function pushDialogWindow(options: PushDialogWindowOptions = {}) {
   });
 
   let hiddenByAutoContinue = false;
-  setAutoContinuePauseHandler(paused => {
+  setAutoContinuePauseHandler((paused) => {
     if (!dialogWindow) return;
     if (paused) {
       if (hiddenByAutoContinue) return;

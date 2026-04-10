@@ -1,9 +1,9 @@
 import "98.css";
 import $ from "jquery";
-import { loadSettings } from "../Core/Settings";
-import { closeCurrentWindow, setupWindowBehavior } from "../Utils/WindowManager";
+import { loadSettings } from "@/Core/Settings";
+import { closeCurrentWindow, setupWindowBehavior } from "@/Utils/WindowManager";
 
-setupWindowBehavior();
+await setupWindowBehavior();
 
 declare global {
   interface Window {
@@ -12,7 +12,7 @@ declare global {
 }
 
 window.closeWindow = async () => {
-  if ('__TAURI_INTERNALS__' in window) {
+  if ("__TAURI_INTERNALS__" in window) {
     const { emit } = await import("@tauri-apps/api/event");
     await emit("save-load-closed");
   } else if (window.opener) {
@@ -23,7 +23,7 @@ window.closeWindow = async () => {
 
 $(() => {
   const urlParams = new URLSearchParams(window.location.search);
-  const initialMode = urlParams.get("mode") as "save" | "load" || "load";
+  const initialMode = (urlParams.get("mode") as "save" | "load") || "load";
 
   const closeBtn = $("#closeBtn");
   const cancelBtn = $("#cancelBtn");
@@ -34,7 +34,6 @@ $(() => {
   const tabLoad = $("#tab-load");
   const saveTbody = $("#saveTbody");
   const commentInput = $("#commentInput");
-  const contentEl = $("#content");
 
   let currentMode: "save" | "load" = initialMode;
   let selectedSlotIndex: number = -1;
@@ -65,7 +64,7 @@ $(() => {
   function formatDate(isoStr?: string) {
     if (!isoStr) return "----/--/-- --:--:--";
     const d = new Date(isoStr);
-    return `${d.getFullYear()}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getDate().toString().padStart(2,'0')} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}`;
+    return `${d.getFullYear()}/${(d.getMonth() + 1).toString().padStart(2, "0")}/${d.getDate().toString().padStart(2, "0")} ${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}:${d.getSeconds().toString().padStart(2, "0")}`;
   }
 
   function renderTable() {
@@ -92,7 +91,7 @@ $(() => {
         commentInput.val(commentText);
       }
 
-      tr.append($("<td>").text(`${(i + 1).toString().padStart(2, '0')}.`));
+      tr.append($("<td>").text(`${(i + 1).toString().padStart(2, "0")}.`));
       tr.append($("<td>").text(dateText));
       tr.append($("<td>").text(commentText));
 
@@ -105,9 +104,9 @@ $(() => {
         selectedSlotIndex = i;
         renderTable();
         if (currentMode === "save" && settings.saveDblclick) {
-          applyAction();
+          applyAction().then();
         } else if (currentMode === "load" && settings.loadDblclick) {
-          applyAction();
+          applyAction().then();
         }
       });
 
@@ -123,15 +122,15 @@ $(() => {
     const hasSelection = selectedSlotIndex !== -1;
     // For load, cannot apply if empty slot
     if (currentMode === "load" && hasSelection) {
-       const saveKey = SAVE_KEY_PREFIX + selectedSlotIndex;
-       const saveData = localStorage.getItem(saveKey);
-       if (!saveData) {
-         okBtn.prop("disabled", true);
-         applyBtn.prop("disabled", true);
-         return;
-       }
+      const saveKey = SAVE_KEY_PREFIX + selectedSlotIndex;
+      const saveData = localStorage.getItem(saveKey);
+      if (!saveData) {
+        okBtn.prop("disabled", true);
+        applyBtn.prop("disabled", true);
+        return;
+      }
     }
-    
+
     okBtn.prop("disabled", !hasSelection);
     applyBtn.prop("disabled", !hasSelection);
   }
@@ -149,11 +148,23 @@ $(() => {
       }
 
       try {
-        if ('__TAURI_INTERNALS__' in window) {
-           const { emit } = await import("@tauri-apps/api/event");
-           await emit("save-load-action", { slotIndex: selectedSlotIndex, comment: commentInput.val(), mode: currentMode });
+        if ("__TAURI_INTERNALS__" in window) {
+          const { emit } = await import("@tauri-apps/api/event");
+          await emit("save-load-action", {
+            slotIndex: selectedSlotIndex,
+            comment: commentInput.val(),
+            mode: currentMode,
+          });
         } else if (window.opener) {
-           window.opener.postMessage({ type: "save-load-action", slotIndex: selectedSlotIndex, comment: commentInput.val(), mode: currentMode }, "*");
+          window.opener.postMessage(
+            {
+              type: "save-load-action",
+              slotIndex: selectedSlotIndex,
+              comment: commentInput.val(),
+              mode: currentMode,
+            },
+            "*"
+          );
         }
         await closeCurrentWindow();
       } catch (e) {
@@ -161,11 +172,18 @@ $(() => {
       }
     } else {
       try {
-        if ('__TAURI_INTERNALS__' in window) {
-           const { emit } = await import("@tauri-apps/api/event");
-           await emit("save-load-action", { slotIndex: selectedSlotIndex, mode: currentMode });
+        if ("__TAURI_INTERNALS__" in window) {
+          const { emit } = await import("@tauri-apps/api/event");
+          await emit("save-load-action", { slotIndex: selectedSlotIndex, mode: currentMode });
         } else if (window.opener) {
-           window.opener.postMessage({ type: "save-load-action", slotIndex: selectedSlotIndex, mode: currentMode }, "*");
+          window.opener.postMessage(
+            {
+              type: "save-load-action",
+              slotIndex: selectedSlotIndex,
+              mode: currentMode,
+            },
+            "*"
+          );
         }
         await closeCurrentWindow();
       } catch (e) {
@@ -177,11 +195,11 @@ $(() => {
   okBtn.on("click", applyAction);
   applyBtn.on("click", applyAction);
 
-  cancelBtn.on("click", () => {
-    window.closeWindow();
+  cancelBtn.on("click", async () => {
+    await window.closeWindow();
   });
-  closeBtn.on("click", () => {
-    window.closeWindow();
+  closeBtn.on("click", async () => {
+    await window.closeWindow();
   });
 
   setMode(initialMode);
@@ -195,8 +213,8 @@ $(() => {
     try {
       const st = JSON.parse(saveData);
       const t = new Date(st.timestamp).getTime();
-      
-      let isAutoSaveSlot = (i === settings.autoSaveSlot); // if i = 20, it's the auto save slot (0-20 array, but slot max 20)
+
+      let isAutoSaveSlot = i === settings.autoSaveSlot; // if i = 20, it's the auto save slot (0-20 array, but slot max 20)
       if (initialMode === "save" && settings.saveSkipAuto && isAutoSaveSlot) continue;
       if (initialMode === "load" && settings.loadSkipAuto && isAutoSaveSlot) continue;
 
@@ -204,9 +222,9 @@ $(() => {
         latestTime = t;
         bestSlot = i;
       }
-    } catch(e) {}
+    } catch (e) {}
   }
-  
+
   if (bestSlot !== -1) {
     if (initialMode === "save" && settings.saveAutoSelect) {
       selectedSlotIndex = bestSlot;

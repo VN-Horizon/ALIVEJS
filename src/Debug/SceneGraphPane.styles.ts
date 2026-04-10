@@ -3,11 +3,11 @@ import $ from "jquery";
 import { SCENE_GRAPH_PANE_ID, SCENE_GRAPH_STYLE_ID } from "./SceneGraphPane.constants";
 
 export function ensureSceneGraphPaneStyles(width: number, height: number): void {
-    if (document.getElementById(SCENE_GRAPH_STYLE_ID)) {
-        return;
-    }
+  if (document.getElementById(SCENE_GRAPH_STYLE_ID)) {
+    return;
+  }
 
-    $("head").append(`
+  $("head").append(`
         <style id="${SCENE_GRAPH_STYLE_ID}">
             #${SCENE_GRAPH_PANE_ID} {
                 position: fixed;

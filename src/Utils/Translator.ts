@@ -1,4 +1,3 @@
-
 function plainizeText(text: string | null | undefined) {
   if (text === undefined || text === null) return "";
   return String(text).replace(/\s+/g, "");
@@ -23,7 +22,9 @@ export async function initTranslation() {
       offset += 4;
 
       // Read the first string
-      const _secondString = new TextDecoder("utf-8").decode(new Uint8Array(buffer, offset, _secondLength));
+      const _secondString = new TextDecoder("utf-8").decode(
+        new Uint8Array(buffer, offset, _secondLength)
+      );
       offset += _secondLength;
 
       // Read the length of the second string
@@ -31,7 +32,9 @@ export async function initTranslation() {
       offset += 4;
 
       // Read the second string
-      const thirdString = new TextDecoder("utf-8").decode(new Uint8Array(buffer, offset, thirdLength));
+      const thirdString = new TextDecoder("utf-8").decode(
+        new Uint8Array(buffer, offset, thirdLength)
+      );
       offset += thirdLength;
 
       map[_secondString] = thirdString;

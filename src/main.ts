@@ -35,14 +35,14 @@ declare global {
     isBacklogOpen: boolean;
     skipping: boolean;
     ScreenplayContext: ScreenplayContextState;
-    tWindow: TWindow|undefined;
+    tWindow: TWindow | undefined;
   }
 }
 
 async function init() {
   try {
     await initWindowManager();
-    
+
     const initialSettings = loadSettings();
     if (initialSettings.dropShadow) {
       document.body.style.setProperty("--index-global-textshadow", "1px 1px 0px #000000");
@@ -56,7 +56,7 @@ async function init() {
         window.location.reload();
       }
     });
-    
+
     let notUnityEngine = new GameEngine();
     notUnityEngine.start();
     window.getEngine = () => notUnityEngine;
@@ -64,12 +64,12 @@ async function init() {
     $("body").css("opacity", "1");
     console.log("Initializing application...");
     const eventsPromise = loadEvents();
-    initTranslation();
+    initTranslation().then();
     setTimeout(() => {
       initBGM();
       initSE();
     }, 0);
-    loadStartScene(eventsPromise);
+    loadStartScene(eventsPromise).then();
     eventsPromise.then(() => {
       initSceneGraphPane();
     });
