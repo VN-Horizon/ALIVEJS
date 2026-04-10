@@ -1,10 +1,15 @@
-import { getCurrentPlayingVoiceId, getVoiceKey, playCharacterVoice, stopCurrentVoice } from "@/Audio/Voice";
+import {
+  getCurrentPlayingVoiceId,
+  getVoiceKey,
+  playCharacterVoice,
+  stopCurrentVoice,
+} from "@/Audio/Voice";
 import $ from "jquery";
 import { getBacklogEntries } from "./WINDOW.Backlog.State";
 import type { BacklogEntry } from "./WINDOW.Backlog.Types";
 
-export let backlogContainer: JQuery<HTMLElement>;
-export let backlogContent: JQuery<HTMLElement>;
+export let backlogContainer: JQuery;
+export let backlogContent: JQuery;
 
 export function createBacklogUI() {
   const gameWidth = 640;
@@ -17,19 +22,21 @@ export function createBacklogUI() {
       height: `${gameHeight}px`,
     });
 
-  backlogContent = $("<div>").attr("id", "backlog-content")
+  backlogContent = $("<div>").attr("id", "backlog-content");
   backlogContainer.append(backlogContent);
   $("#gameContainer").append(backlogContainer);
 }
 
-export function renderEntry(entry: BacklogEntry, prevIsCharacter: boolean): JQuery<HTMLElement> {
+export function renderEntry(entry: BacklogEntry, prevIsCharacter: boolean): JQuery {
   const hasCharacterName = Boolean(entry.characterName);
-  const entryDiv = $("<div>").attr("class", "backlog-entry").css({
-    "margin-top": prevIsCharacter !== hasCharacterName ? "24px" : "0",
-  });
+  const entryDiv = $("<div>")
+    .attr("class", "backlog-entry")
+    .css({
+      "margin-top": prevIsCharacter !== hasCharacterName ? "24px" : "0",
+    });
 
   if (hasCharacterName) {
-    const nameSpan = $("<span>").text(entry.characterName).attr("class", "backlog-character-name")
+    const nameSpan = $("<span>").text(entry.characterName).attr("class", "backlog-character-name");
     entryDiv.append(nameSpan);
   }
 
@@ -37,16 +44,16 @@ export function renderEntry(entry: BacklogEntry, prevIsCharacter: boolean): JQue
     const { voiceName, eventName, lineNumber } = entry.voiceInfo;
     const voiceKey = getVoiceKey(voiceName, eventName, lineNumber);
 
-    const voiceBtn = $("<span>").html("▷&nbsp;")
-    .attr("class", "backlog-voice-btn")
-    .attr("data-voice-btn-key", voiceKey || "");
+    const voiceBtn = $("<span>")
+      .html("▷&nbsp;")
+      .attr("class", "backlog-voice-btn")
+      .attr("data-voice-btn-key", voiceKey || "");
     entryDiv.append(voiceBtn);
 
     entryDiv.css({ cursor: "pointer" });
-    entryDiv.hover(
-      () => voiceBtn.css("color", "#00CC00"),
-      () => voiceBtn.css("color", "#00FF00")
-    );
+    entryDiv
+      .on("mouseenter", () => voiceBtn.css("color", "#00CC00"))
+      .on("mouseleave", () => voiceBtn.css("color", "#00FF00"));
 
     entryDiv.on("click", async () => {
       if (getCurrentPlayingVoiceId() === voiceKey) {
@@ -66,8 +73,8 @@ export function renderEntry(entry: BacklogEntry, prevIsCharacter: boolean): JQue
 export function updateBacklogDisplay() {
   backlogContent.empty();
   let prevIsCharacter = true;
-  
-  getBacklogEntries().forEach(entry => {
+
+  getBacklogEntries().forEach((entry) => {
     const entryDiv = renderEntry(entry, prevIsCharacter);
     prevIsCharacter = Boolean(entry.characterName);
     backlogContent.append(entryDiv);

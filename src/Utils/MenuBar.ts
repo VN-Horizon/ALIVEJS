@@ -1,44 +1,44 @@
 import { execUntilNextLine } from "../Core/Events";
-import { applyGameState, loadGame, saveGame } from "../Core/Save/GameSave";
-import { destroyScene } from "../Scene/SceneManagement";
-import { loadBackgroundScene } from "../Scripts/BACKGROUND";
-import { pushDialogWindow } from "../Scripts/WINDOW/WINDOW";
+import { applyGameState, loadGame, saveGame } from "@/Core/Save/GameSave";
+import { destroyScene } from "@/Scene/SceneManagement";
+import { loadBackgroundScene } from "@/Scripts/BACKGROUND";
+import { pushDialogWindow } from "@/Scripts/WINDOW/WINDOW";
 
 export function initMenuBar() {
-  const menuItems = document.querySelectorAll(".menu-bar-item");
+  const menuItems = $(".menu-bar-item");
   if (menuItems.length === 0) return;
 
   let isMenuOpen = false;
 
   function closeAllMenus() {
-    menuItems.forEach(item => {
-      item.classList.remove("open");
-      item.querySelector("button")?.blur();
+    menuItems.each((_, item) => {
+      $(item).removeClass("open");
+      $(item).find("button")?.trigger("blur");
     });
   }
 
-  const saveMenu = document.getElementById("menu-save");
-  const loadMenu = document.getElementById("menu-load");
+  const saveMenu = $("menu-save");
+  const loadMenu = $("menu-load");
 
-  saveMenu?.addEventListener("click", async () => {
-    if (saveMenu.getAttribute("aria-disabled") === "true") return;
+  saveMenu.on("click", async () => {
+    if (saveMenu.attr("aria-disabled") === "true") return;
     const slotIndex = await window.openSaveLoadDialog("save");
     if (slotIndex !== null) {
       saveGame(slotIndex);
     }
   });
 
-  loadMenu?.addEventListener("click", async () => {
-    if (loadMenu.getAttribute("aria-disabled") === "true") return;
+  loadMenu?.on("click", async () => {
+    if (loadMenu.attr("aria-disabled") === "true") return;
     const slotIndex = await window.openSaveLoadDialog("load");
     if (slotIndex !== null) {
       const gameState = loadGame(slotIndex);
       if (gameState) {
         // Check if we are outside of dialogue.
-        if (saveMenu?.getAttribute("aria-disabled") === "true") {
+        if (saveMenu?.attr("aria-disabled") === "true") {
           await loadBackgroundScene();
           await pushDialogWindow({ autoAdvance: false });
-          saveMenu?.removeAttribute("aria-disabled");
+          saveMenu?.removeAttr("aria-disabled");
         }
         if (window.getEngine().getTopScene()?.name === "UI/SYSTEM") {
           destroyScene();
@@ -49,16 +49,16 @@ export function initMenuBar() {
     }
   });
 
-  menuItems.forEach(item => {
-    const button = item.querySelector("button");
+  menuItems.each((_, item) => {
+    const button = $(item).find("button");
     if (!button) return;
 
-    button.addEventListener("click", e => {
+    button.on("click", (e) => {
       e.stopPropagation();
       if (item.classList.contains("open")) {
         closeAllMenus();
         isMenuOpen = false;
-        button.blur(); // Remove focus so the button style doesn't stay pressed
+        button.trigger("blur"); // Remove focus so the button style doesn't stay pressed
       } else {
         closeAllMenus();
         item.classList.add("open");
@@ -66,24 +66,24 @@ export function initMenuBar() {
       }
     });
 
-    item.addEventListener("mouseenter", () => {
+    $(item).on("mouseenter", () => {
       if (isMenuOpen && !item.classList.contains("open")) {
         closeAllMenus();
         item.classList.add("open");
-        button.focus();
+        button.trigger("focus");
       }
     });
   });
 
-  document.querySelectorAll(".menu > li:not(.divider)").forEach(li => {
-    li.addEventListener("click", () => {
+  $(".menu > li:not(.divider)").each((_, li) => {
+    $(li).on("click", () => {
       closeAllMenus();
       isMenuOpen = false;
       (document.activeElement as HTMLElement).blur();
     });
   });
 
-  document.addEventListener("click", () => {
+  $(document).on("click", () => {
     if (isMenuOpen) {
       closeAllMenus();
       isMenuOpen = false;

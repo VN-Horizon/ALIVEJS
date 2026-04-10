@@ -1,25 +1,25 @@
 import $ from "jquery";
 
 export async function setupWindowBehavior() {
-  if ('__TAURI_INTERNALS__' in window) {
+  if ("__TAURI_INTERNALS__" in window) {
     const { getCurrentWindow } = await import("@tauri-apps/api/window");
     const tWindow = getCurrentWindow();
     window.tWindow = tWindow;
-    
-    tWindow.listen('tauri://blur', () => {
-      document.querySelectorAll('.title-bar').forEach(el => el.classList.add('inactive'));
+
+    await tWindow.listen("tauri://blur", () => {
+      document.querySelectorAll(".title-bar").forEach((el) => el.classList.add("inactive"));
     });
-    tWindow.listen('tauri://focus', () => {
-      document.querySelectorAll('.title-bar').forEach(el => el.classList.remove('inactive'));
+    await tWindow.listen("tauri://focus", () => {
+      document.querySelectorAll(".title-bar").forEach((el) => el.classList.remove("inactive"));
     });
-    
+
     return tWindow;
   } else {
     $(() => {
       $(".title-bar").hide();
       $(".window").css({
         boxShadow: "none",
-        border: "none"
+        border: "none",
       });
       window.dispatchEvent(new Event("resize"));
     });
@@ -28,7 +28,7 @@ export async function setupWindowBehavior() {
 }
 
 export async function closeCurrentWindow() {
-  if ('__TAURI_INTERNALS__' in window) {
+  if ("__TAURI_INTERNALS__" in window) {
     try {
       const { getCurrentWindow } = await import("@tauri-apps/api/window");
       await getCurrentWindow().close();
@@ -40,11 +40,19 @@ export async function closeCurrentWindow() {
   window.close();
 }
 
-export async function openDialog(id: string, url: string, title: string, width: number, height: number, browserWidth: number = width, browserHeight: number = height) {
-  if ('__TAURI_INTERNALS__' in window) {
+export async function openDialog(
+  id: string,
+  url: string,
+  title: string,
+  width: number,
+  height: number,
+  browserWidth: number = width,
+  browserHeight: number = height
+) {
+  if ("__TAURI_INTERNALS__" in window) {
     try {
       const { WebviewWindow } = await import("@tauri-apps/api/webviewWindow");
-      
+
       const existing = await WebviewWindow.getByLabel(id);
       if (existing) {
         await existing.show();
@@ -63,18 +71,30 @@ export async function openDialog(id: string, url: string, title: string, width: 
         maximizable: false,
         minimizable: false,
       });
-      webview.once("tauri://error", function (e) {
+      await webview.once("tauri://error", function (e) {
         console.error("Failed to open dialog with Tauri WebviewWindow", e);
-        const win = window.open(url, id, `width=${browserWidth},height=${browserHeight},toolbar=0,menubar=0,location=0,status=0,scrollbars=0,resizable=0`);
+        const win = window.open(
+          url,
+          id,
+          `width=${browserWidth},height=${browserHeight},toolbar=0,menubar=0,location=0,status=0,scrollbars=0,resizable=0`
+        );
         if (win) win.focus();
       });
     } catch (e) {
       console.error("Failed to open dialog with Tauri WebviewWindow 2", e);
-      const win = window.open(url, id, `width=${browserWidth},height=${browserHeight},toolbar=0,menubar=0,location=0,status=0,scrollbars=0,resizable=0`);
+      const win = window.open(
+        url,
+        id,
+        `width=${browserWidth},height=${browserHeight},toolbar=0,menubar=0,location=0,status=0,scrollbars=0,resizable=0`
+      );
       if (win) win.focus();
     }
   } else {
-    const win = window.open(url, id, `width=${browserWidth},height=${browserHeight},toolbar=0,menubar=0,location=0,status=0,scrollbars=0,resizable=0`);
+    const win = window.open(
+      url,
+      id,
+      `width=${browserWidth},height=${browserHeight},toolbar=0,menubar=0,location=0,status=0,scrollbars=0,resizable=0`
+    );
     if (win) win.focus();
   }
 }
@@ -82,7 +102,7 @@ export async function openDialog(id: string, url: string, title: string, width: 
 export async function initWindowManager() {
   const tWindow = await setupWindowBehavior();
   if (tWindow) {
-    tWindow.listen('tauri://resize', async () => {
+    await tWindow.listen("tauri://resize", async () => {
       const isMaximized = await tWindow.isMaximized();
       $("#toggleMaximizeBtn").attr("aria-label", isMaximized ? "Restore" : "Maximize");
     });
@@ -97,13 +117,21 @@ export async function initWindowManager() {
   };
 
   window.openSettings = async () => {
-    await openDialog("settings", "/dialogs/settings.html", "Alive renewal 设置", 480, 500, 480, 420);
+    await openDialog(
+      "settings",
+      "/dialogs/settings.html",
+      "Alive renewal 设置",
+      480,
+      500,
+      480,
+      420
+    );
   };
 
   window.openSaveLoadDialog = (mode: "save" | "load") => {
     return new Promise((resolve) => {
       const url = `/dialogs/save_load.html?mode=${mode}`;
-      if ('__TAURI_INTERNALS__' in window) {
+      if ("__TAURI_INTERNALS__" in window) {
         import("@tauri-apps/api/event").then(({ listen }) => {
           let unlistenClose: () => void;
           let unlistenAction: () => void;
@@ -116,7 +144,7 @@ export async function initWindowManager() {
           listen("save-load-closed", () => {
             cleanup();
             resolve(null);
-          }).then(u => unlistenClose = u);
+          }).then((u) => (unlistenClose = u));
 
           listen("save-load-action", (event: any) => {
             cleanup();
@@ -128,7 +156,7 @@ export async function initWindowManager() {
             } else {
               resolve(null);
             }
-          }).then(u => unlistenAction = u);
+          }).then((u) => (unlistenAction = u));
 
           openDialog("save_load", url, "Save/Load", 450, 600);
         });
@@ -155,14 +183,14 @@ export async function initWindowManager() {
     });
   };
 
-  window.exit = (timeout: number=600) => {
+  window.exit = (timeout: number = 600) => {
     $("#black-overlay").fadeIn(timeout, async () => {
       window.tWindow?.close() || window.close();
     });
   };
 
   window.minimize = () => {
-    window.tWindow?.minimize()
+    window.tWindow?.minimize();
   };
 
   window.toggleMaximize = () => {

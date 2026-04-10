@@ -5,7 +5,12 @@ import { $translate } from "@/Utils/Translator";
 import $ from "jquery";
 import type { DialogWindowScene } from "./WINDOW";
 import { addBacklogEntry } from "./WINDOW.Backlog.State";
-import { backlogContainer, backlogContent, createBacklogUI, updateBacklogDisplay } from "./WINDOW.Backlog.UI";
+import {
+  backlogContainer,
+  backlogContent,
+  createBacklogUI,
+  updateBacklogDisplay,
+} from "./WINDOW.Backlog.UI";
 
 let uiUpdateInterval: number | null = null;
 
@@ -18,7 +23,7 @@ export const openBacklog = () => {
 
   uiUpdateInterval = window.setInterval(() => {
     const currentVoiceId = getCurrentPlayingVoiceId();
-    $("[data-voice-btn-key]").each(function() {
+    $("[data-voice-btn-key]").each(function () {
       const btnKey = $(this).attr("data-voice-btn-key");
       if (btnKey && btnKey === currentVoiceId) {
         $(this).html("□&nbsp;&nbsp;");
@@ -47,9 +52,14 @@ export const toggleBacklog = () => {
 export function onPlayDialog(e: CustomEvent) {
   const { stringParams, params } = e.detail;
   const [characterName, dialogContent] = stringParams;
-  
+
   let voiceInfo;
-  if (params && params.length >= 3 && stringParams[0] && AllowedVoiceNames.includes(stringParams[0])) {
+  if (
+    params &&
+    params.length >= 3 &&
+    stringParams[0] &&
+    AllowedVoiceNames.includes(stringParams[0])
+  ) {
     const blockIndex = params[1];
     const lineCount = params[2];
     const eventName = GetVoiceEventName(blockIndex + 1);
@@ -57,7 +67,7 @@ export function onPlayDialog(e: CustomEvent) {
       voiceInfo = {
         voiceName: stringParams[0],
         eventName,
-        lineNumber: lineCount.toString().padStart(3, "0")
+        lineNumber: lineCount.toString().padStart(3, "0"),
       };
     }
   }
@@ -65,7 +75,7 @@ export function onPlayDialog(e: CustomEvent) {
   addBacklogEntry({
     characterName: $translate(characterName) || "",
     dialogText: dialogContent || "",
-    voiceInfo
+    voiceInfo,
   });
 }
 

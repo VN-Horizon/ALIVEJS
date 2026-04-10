@@ -21,7 +21,7 @@ export function internalExtractDialogData(lineText: string) {
   let mode = "Display";
   let name = candidate;
   let closingQuoteIndex = lineText.lastIndexOf("」");
-  
+
   let content =
     closingQuoteIndex > quoteIndex
       ? lineText.substring(quoteIndex + 1, closingQuoteIndex).trim()
@@ -43,7 +43,7 @@ export function internalExtractDialogData(lineText: string) {
 }
 
 export function GetVoiceEventName(index: number) {
-  var currentIndex = index.toString().padStart(4, "0");
+  const currentIndex = index.toString().padStart(4, "0");
   return `REN${currentIndex}`;
 }
 

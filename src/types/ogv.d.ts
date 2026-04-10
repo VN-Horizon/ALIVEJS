@@ -1,21 +1,22 @@
 declare module "ogv" {
-    export class OGVPlayer extends HTMLElement {
-        src: string;
-        loop: boolean;
-        volume: number;
-        currentTime: number;
-        play(): Promise<void>;
-        pause(): void;
-    }
+  export class OGVPlayer extends HTMLElement {
+    src: string;
+    loop: boolean;
+    volume: number;
 
-    export const OGVLoader: {
-        base: string;
-    };
+    play(): Promise<void>;
 
-    const ogv: {
-        OGVPlayer: typeof OGVPlayer;
-        OGVLoader: typeof OGVLoader;
-    };
+    pause(): void;
+  }
 
-    export default ogv;
+  export const OGVLoader: {
+    base: string;
+  };
+
+  const ogv: {
+    OGVPlayer: typeof OGVPlayer;
+    OGVLoader: typeof OGVLoader;
+  };
+
+  export default ogv;
 }

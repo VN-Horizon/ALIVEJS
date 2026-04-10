@@ -1,7 +1,7 @@
 import "98.css";
-import { closeCurrentWindow, setupWindowBehavior } from "../Utils/WindowManager";
+import { closeCurrentWindow, setupWindowBehavior } from "@/Utils/WindowManager";
 
-setupWindowBehavior();
+await setupWindowBehavior();
 
 declare global {
   interface Window {

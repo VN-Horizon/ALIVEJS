@@ -1,5 +1,5 @@
 import { AnimatedSceneElement } from "@/Graphics/AnimatedSceneElement";
-import { toButton, type Button } from "@/Graphics/Button";
+import { type Button, toButton } from "@/Graphics/Button";
 import type { FocusableElement } from "@/Graphics/FocusableElement";
 import { SceneElement } from "@/Graphics/SceneElement";
 import { TMP_Text } from "@/Graphics/TextMessPoor";
@@ -37,7 +37,7 @@ export async function initSelectionsBox(dialogWindow: DialogWindowScene | null) 
       fontWeight: "medium",
       zIndex: 11,
       transform: { x: 70, y: 238, width: 502, height: 86 },
-    }),
+    })
   );
   $(selectionsText?.domElement).css({
     "white-space": "pre-line",
@@ -50,7 +50,9 @@ export async function initSelectionsBox(dialogWindow: DialogWindowScene | null) 
   // Load the frame animation data from the scene JSON
   const loadFrameAnimation = async () => {
     const sceneData = await $.getJSON("/assets/scenes/UI/WINDOW/WINDOW.json");
-    const frameAnimNode = sceneData.children.find((child: SceneElementData) => child.name === "枠アニメ");
+    const frameAnimNode = sceneData.children.find(
+      (child: SceneElementData) => child.name === "枠アニメ"
+    );
 
     if (!frameAnimNode) {
       console.error("枠アニメ not found in WINDOW.json");
@@ -64,7 +66,9 @@ export async function initSelectionsBox(dialogWindow: DialogWindowScene | null) 
       autoPlay: false,
     };
 
-    const frameAnim = dialogWindow.addObject(new AnimatedSceneElement(frameAnimData, null, dialogWindow));
+    const frameAnim = dialogWindow.addObject(
+      new AnimatedSceneElement(frameAnimData, null, dialogWindow)
+    );
 
     // Create frame children from the JSON data
     frameAnimNode.children.forEach((childData: SceneElementData, index: number) => {
@@ -88,7 +92,7 @@ export async function initSelectionsBox(dialogWindow: DialogWindowScene | null) 
     document.dispatchEvent(
       new CustomEvent("MakeDecisionInternal", {
         detail: { params: [i - 1] },
-      }),
+      })
     );
     closeSelectionsBox();
   };
@@ -134,7 +138,7 @@ export async function initSelectionsBox(dialogWindow: DialogWindowScene | null) 
     frameAnim.setFrame(9);
     frameAnim.fps = -60; // Negative fps for reverse playback
     selectionsText?.hide();
-    selectionButtons.forEach(btn => btn?.hide());
+    selectionButtons.forEach((btn) => btn?.hide());
     const nextLineBtn = dialogWindow.getObjectByName("NextLineButton");
     if (!nextLineBtn) return;
     frameAnim.onComplete = () => {
