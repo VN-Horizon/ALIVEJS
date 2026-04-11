@@ -34,7 +34,7 @@ export interface IGameEngine {
 
   popScene(): any;
 
-  removeSceneByName(name: string): any;
+  removeSceneByName(name: string, options?: { instant?: boolean }): any;
 
   getTopScene(): any;
 
@@ -178,33 +178,38 @@ export class GameEngine implements IGameEngine {
   popScene(): IScene | null {
     if (this.scenes.length === 0) return null;
 
-    // Remove and destroy the top scene
-    const scene = this.scenes.pop();
-    scene.destroy();
+    const scene = this.scenes.pop()!;
     this.scenePaths.pop();
+    scene.setFocusable(false);
 
     // Enable focus on the new top scene
     if (this.scenes.length > 0) {
       this.scenes[this.scenes.length - 1].setFocusable(true);
     }
 
+    void scene.fadeOutAndDestroy();
     return scene;
   }
 
-  removeSceneByName(name: string): IScene | null {
+  removeSceneByName(name: string, options?: { instant?: boolean }): IScene | null {
     const index = this.scenes.findIndex((scene) => scene.name === name);
     if (index === -1) return null;
 
     const wasTopScene = index === this.scenes.length - 1;
     const [scene] = this.scenes.splice(index, 1);
     this.scenePaths.splice(index, 1);
-    scene.destroy();
+    scene.setFocusable(false);
 
     // If top scene was removed, restore focusability to the new top scene.
     if (wasTopScene && this.scenes.length > 0) {
       this.scenes[this.scenes.length - 1].setFocusable(true);
     }
 
+    if (options?.instant) {
+      scene.destroy();
+    } else {
+      void scene.fadeOutAndDestroy();
+    }
     return scene;
   }
 

@@ -2,8 +2,11 @@ import { CharacterNameToVoiceKey } from "@/Constants";
 import { getUnlockedCG } from "@/Core/Save/UnlockedCG";
 import { toButton } from "@/Graphics/Button";
 import { SceneElement } from "@/Graphics/SceneElement";
-import { setExitListener } from "@/InputSystem/InputSystem.Keyboard";
+import {
+  setExitListener
+} from "@/InputSystem/InputSystem.Keyboard";
 import { loadScene } from "@/Scene/SceneManagement";
+import { pushCgPlayerScene } from "./GALLERY/GALLERY.CgPlayer";
 
 export async function initGallery() {
   // Load gallery data from JSON
@@ -54,7 +57,9 @@ export async function gotoCharacterGallery(
   page: number = 1,
   replaceSceneName?: string
 ) {
-  const characterGalleryScene = await loadScene(`UI/CG_${characterName}0${page}`);
+  const characterGalleryScene = await loadScene(`UI/CG_${characterName}0${page}`, {
+    skipEntranceFade: Boolean(replaceSceneName),
+  });
   if (!characterGalleryScene) {
     console.error("characterGalleryScene is null");
     return;
@@ -72,13 +77,12 @@ export async function gotoCharacterGallery(
     if (cgNames.length === 0) continue;
     if (!cgItem || !/^[A-Z]\d{2}$/.test(cgNames[0] || "")) continue;
     const unlocked = cgNames.every((part) => available.includes(part.trim()));
-    console.log(`toButton`, cgItem);
     toButton(cgItem, {
       flags: ["keep-base-while-hover"],
       disabled: !unlocked,
       stateIndexes: [1, 2, 3, 0],
       callback: () => {
-        // Show full image or do something
+        pushCgPlayerScene(cgNames);
       },
     });
   }
@@ -112,7 +116,7 @@ export async function gotoCharacterGallery(
   });
 
   if (replaceSceneName && replaceSceneName !== characterGalleryScene.name) {
-    window.getEngine()?.removeSceneByName(replaceSceneName);
+    window.getEngine()?.removeSceneByName(replaceSceneName, { instant: true });
   }
 }
 

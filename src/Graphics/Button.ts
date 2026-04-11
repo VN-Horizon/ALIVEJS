@@ -40,6 +40,7 @@ export class Button extends FocusableElement {
     this.width = baseTransform[2] || 10;
     this.height = baseTransform[3] || 10;
     this.disabled = data.disabled || false;
+    this.manualEnabled = this.disabled ? false : null;
 
     this.images = data.images;
     this.flags = data.flags || [];
@@ -59,6 +60,7 @@ export class Button extends FocusableElement {
 
     Button.ensureSharedStyles();
     this.recreateDOMAsButton();
+    this.updateFocusability();
     if (data.callback) this.onClick(data.callback);
   }
 

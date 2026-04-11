@@ -11,6 +11,7 @@ export interface LoadSceneOptions {
   override?: boolean;
   singleInstance?: boolean;
   exclusionList?: string[];
+  skipEntranceFade?: boolean;
 }
 
 export async function loadScene(
@@ -22,7 +23,12 @@ export async function loadScene(
   }
 ): Promise<Scene | null> {
   console.log(`Loading scene: ${path}`);
-  const { override = false, singleInstance = true, exclusionList = [] } = options;
+  const {
+    override = false,
+    singleInstance = true,
+    exclusionList = [],
+    skipEntranceFade = false,
+  } = options;
   const engine = window.getEngine();
   if (singleInstance) {
     if (engine.isMountedScene(path)) {
@@ -54,6 +60,11 @@ export async function loadScene(
     }
     await Promise.all(loadPromises);
     engine.pushScene(scene);
+    if (skipEntranceFade) {
+      $(scene.rootElement).stop(true).css("opacity", "1");
+    } else {
+      scene.fadeInEntrance();
+    }
     console.log("Scene loaded successfully:", path);
     return scene;
   } catch (error) {
@@ -112,6 +123,7 @@ export function createBlankScene(name = "Blank") {
   }
   const scene = new Scene(name, engine);
   engine.pushScene(scene);
+  scene.fadeInEntrance();
   return scene;
 }
 

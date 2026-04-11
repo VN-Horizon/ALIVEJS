@@ -81,3 +81,15 @@ export function loadSettings(): GameSettings {
 export function saveSettings(settings: GameSettings) {
   localStorage.setItem("alive_settings", JSON.stringify(settings));
 }
+
+export const SCENE_STACK_TRANSITION_BASE_MS = 300;
+
+export function getScreenEffectsTransitionDurationMs(
+  baseDurationMs: number = SCENE_STACK_TRANSITION_BASE_MS
+): number {
+  const settings = loadSettings();
+  const effectSpeed = settings.screenEffectsSpeed;
+  const effectEnabled = settings.screenEffectsEnabled;
+  const durationMultiplier = !effectEnabled || effectSpeed === 10 ? 0 : 2.0 - effectSpeed * 0.2;
+  return Math.round(baseDurationMs * durationMultiplier);
+}
