@@ -1,3 +1,4 @@
+import { getScreenEffectsTransitionDurationMs } from "@/Core/Settings";
 import type { GameEngine } from "@/Core/NotUnityEngine";
 import { FocusableElement } from "@/Graphics/FocusableElement";
 import { type ISceneElement, SceneElement } from "@/Graphics/SceneElement";
@@ -36,6 +37,10 @@ export interface IScene {
   hide(): void;
 
   show(): void;
+
+  fadeInEntrance(durationMs?: number): void;
+
+  fadeOutAndDestroy(durationMs?: number): Promise<void>;
 }
 
 export class Scene implements IScene {
@@ -63,6 +68,7 @@ export class Scene implements IScene {
       width: "100%",
       height: "100%",
       overflow: "visible",
+      opacity: "0",
     });
     engine.container.appendChild(this.rootElement);
   }
@@ -176,5 +182,36 @@ export class Scene implements IScene {
 
   show() {
     this.rootElement.style.display = "";
+  }
+
+  fadeInEntrance(durationMs?: number) {
+    const ms = durationMs !== undefined ? durationMs : getScreenEffectsTransitionDurationMs();
+    if (ms <= 0) {
+      $(this.rootElement).stop(true).css("opacity", "1");
+      return;
+    }
+    $(this.rootElement).stop(true).fadeTo(ms, 1);
+  }
+
+  fadeOutAndDestroy(durationMs?: number): Promise<void> {
+    const ms = durationMs !== undefined ? durationMs : getScreenEffectsTransitionDurationMs();
+    if (ms <= 0) {
+      this.destroy();
+      return Promise.resolve();
+    }
+    return new Promise((resolve) => {
+      const $root = $(this.rootElement);
+      if (!$root.length || !this.rootElement.isConnected) {
+        this.destroy();
+        resolve();
+        return;
+      }
+      $root.stop(true).fadeTo(ms, 0, () => {
+        if (this.rootElement.isConnected) {
+          this.destroy();
+        }
+        resolve();
+      });
+    });
   }
 }

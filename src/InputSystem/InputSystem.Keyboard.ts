@@ -38,7 +38,7 @@ let overrideRightKeys = false;
 window.skipping = false;
 window.isBacklogOpen = false;
 
-export function setExitListener(fn: ExitListener, options = {}) {
+export function setExitListener(fn: ExitListener | null, options = {}) {
   exitListenerOptions = { singleFlight: true, ...options };
   // Wrap the original listener if singleFlight enabled
   if (!fn) {
@@ -62,6 +62,10 @@ export function setExitListener(fn: ExitListener, options = {}) {
       exitListenerInFlight = false;
     }
   };
+}
+
+export function setConfirmListener(fn: ConfirmListener | null) {
+  confirmListener = fn;
 }
 
 export function setOverrideRightKeys(override: boolean) {
