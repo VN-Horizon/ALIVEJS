@@ -7,9 +7,6 @@ import type { SceneElementData } from "./SceneData";
 const currentExclusionList: string[] = [];
 const loadingScenes = new Set();
 
-// Global counter to ensure newer scenes always stack above older ones
-let __sceneZCounter = 0;
-
 export interface LoadSceneOptions {
   override?: boolean;
   singleInstance?: boolean;
@@ -50,8 +47,7 @@ export async function loadScene(
       return null;
     }
     // Each newly loaded scene gets a increasing base z offset.
-    const scene = new Scene(path, engine, __sceneZCounter * 114514); // large gap to avoid overlap
-    __sceneZCounter++;
+    const scene = new Scene(path, engine); // large gap to avoid overlap
     const loadPromises: Promise<any>[] = [];
     if (sceneData.children) {
       createSceneObjects(sceneData.children, null, scene, loadPromises);
@@ -114,8 +110,7 @@ export function createBlankScene(name = "Blank") {
     console.error("Engine not initialized");
     return null;
   }
-  const scene = new Scene(name, engine, __sceneZCounter * 114514);
-  __sceneZCounter++;
+  const scene = new Scene(name, engine);
   engine.pushScene(scene);
   return scene;
 }
