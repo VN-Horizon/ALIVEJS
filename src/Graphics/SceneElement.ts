@@ -116,7 +116,6 @@ export class SceneElement implements ISceneElement {
 
   // Build base style object
   buildBaseStyle(extra = {}) {
-    const zBase = this.scene?.baseZOffset || 0;
     let x = this.transform.x;
     let y = this.transform.y;
     let translateX = x;
@@ -143,7 +142,7 @@ export class SceneElement implements ISceneElement {
       opacity: this.opacity,
       "mix-blend-mode": this.blendMode,
       transform: `translate(${translateX}px, ${translateY}px) rotate(${this.transform.rotation}rad)`,
-      "z-index": zBase + this.transform.z,
+      "z-index": this.transform.z,
       ...extra,
     };
   }

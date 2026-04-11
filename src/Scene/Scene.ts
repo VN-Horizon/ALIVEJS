@@ -6,7 +6,6 @@ import $ from "jquery";
 export interface IScene {
   name: string;
   engine: any;
-  baseZOffset: number;
   /** Root DOM node for this scene; all root-level elements are mounted here. */
   rootElement: HTMLElement;
   sceneObjects: ISceneElement[];
@@ -42,7 +41,6 @@ export interface IScene {
 export class Scene implements IScene {
   name: string;
   engine: GameEngine;
-  baseZOffset: number = 0;
   rootElement: HTMLElement;
   sceneObjects: ISceneElement[] = [];
   isFocusable = false;
@@ -53,10 +51,9 @@ export class Scene implements IScene {
   onAfterFocusCallbacks: Array<() => void> = [];
   onAfterUnfocusCallbacks: Array<() => void> = [];
 
-  constructor(name: string, engine: GameEngine, baseZOffset: number = 0) {
+  constructor(name: string, engine: GameEngine) {
     this.name = name;
     this.engine = engine;
-    this.baseZOffset = baseZOffset;
     this.rootElement = document.createElement("div");
     this.rootElement.dataset.sceneRoot = name;
     Object.assign(this.rootElement.style, {
