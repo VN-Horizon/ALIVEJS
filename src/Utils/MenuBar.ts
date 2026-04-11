@@ -1,8 +1,9 @@
-import { execUntilNextLine } from "../Core/Events";
 import { applyGameState, loadGame, saveGame } from "@/Core/Save/GameSave";
 import { destroyScene } from "@/Scene/SceneManagement";
 import { loadBackgroundScene } from "@/Scripts/BACKGROUND";
 import { pushDialogWindow } from "@/Scripts/WINDOW/WINDOW";
+import $ from "jquery";
+import { execUntilNextLine } from "../Core/Events";
 
 export function initMenuBar() {
   const menuItems = $(".menu-bar-item");
