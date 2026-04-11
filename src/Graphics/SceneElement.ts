@@ -225,6 +225,10 @@ export class SceneElement implements ISceneElement {
       if (this.domElement.parentNode !== this.parent.domElement) {
         $(this.parent.domElement).append($element);
       }
+    } else if (this.scene?.rootElement) {
+      if (this.domElement.parentNode !== this.scene.rootElement) {
+        $(this.scene.rootElement).append($element);
+      }
     } else if (engine) {
       if (this.domElement.parentNode !== engine.container) {
         $(engine.container).append($element);
@@ -244,23 +248,19 @@ export class SceneElement implements ISceneElement {
 
   hide(fromParent = false) {
     if (fromParent) {
-      // Store original visibility state when hiding from parent
       this.originallyVisible = this.visible;
     }
     this.visible = false;
     this.updateDOMStyle();
-    this.children.forEach((child) => child.hide(true));
   }
 
   show(fromParent = false) {
     if (fromParent) {
-      // Restore original visibility state when showing from parent
       this.visible = this.originallyVisible;
     } else {
       this.visible = true;
     }
     this.updateDOMStyle();
-    this.children.forEach((child) => child.show(true));
   }
 }
 

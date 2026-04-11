@@ -153,11 +153,11 @@ export class AnimatedSceneElement extends SceneElement {
     // Only show the current frame, keep others hidden
     this.children.forEach((child, index) => {
       if (index === this.currentFrame) {
-        child.show(true);
+        child.visible = child.originallyVisible;
       } else {
         child.visible = false;
-        child.updateDOMStyle();
       }
+      child.updateDOMStyle();
     });
   }
 
@@ -167,6 +167,5 @@ export class AnimatedSceneElement extends SceneElement {
     }
     this.visible = false;
     this.updateDOMStyle();
-    this.children.forEach((child) => child.hide(true));
   }
 }

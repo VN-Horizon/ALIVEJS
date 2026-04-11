@@ -7,6 +7,8 @@ export interface IScene {
   name: string;
   engine: any;
   baseZOffset: number;
+  /** Root DOM node for this scene; all root-level elements are mounted here. */
+  rootElement: HTMLElement;
   sceneObjects: ISceneElement[];
   isFocusable: boolean;
   lastFocusedElement: HTMLElement | JQuery.PlainObject | null;
@@ -41,6 +43,7 @@ export class Scene implements IScene {
   name: string;
   engine: GameEngine;
   baseZOffset: number = 0;
+  rootElement: HTMLElement;
   sceneObjects: ISceneElement[] = [];
   isFocusable = false;
   lastFocusedElement: HTMLElement | JQuery.PlainObject | null = null;
@@ -54,6 +57,17 @@ export class Scene implements IScene {
     this.name = name;
     this.engine = engine;
     this.baseZOffset = baseZOffset;
+    this.rootElement = document.createElement("div");
+    this.rootElement.dataset.sceneRoot = name;
+    Object.assign(this.rootElement.style, {
+      position: "absolute",
+      left: "0",
+      top: "0",
+      width: "100%",
+      height: "100%",
+      overflow: "visible",
+    });
+    engine.container.appendChild(this.rootElement);
   }
 
   addObject<T extends ISceneElement>(obj: T): T | undefined {
@@ -152,6 +166,7 @@ export class Scene implements IScene {
     this.onDestroyCallbacks.forEach((callback) => callback());
     this.sceneObjects.forEach((obj) => obj.destroy?.());
     this.sceneObjects = [];
+    this.rootElement.remove();
   }
 
   update(deltaTime: number) {
@@ -159,10 +174,10 @@ export class Scene implements IScene {
   }
 
   hide() {
-    this.sceneObjects.forEach((obj) => obj.hide?.(true));
+    this.rootElement.style.display = "none";
   }
 
   show() {
-    this.sceneObjects.forEach((obj) => obj.show?.(true));
+    this.rootElement.style.display = "";
   }
 }

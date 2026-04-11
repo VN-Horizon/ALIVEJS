@@ -23,18 +23,58 @@ export interface PushDialogWindowOptions {
   autoAdvance?: boolean;
 }
 
+export const DIALOG_WINDOW_PATH = "UI/WINDOW";
+
+export const DIALOG_WINDOW_EXCLUSION_LIST = [
+  "通常クリック範囲",
+  "メッセージ文字",
+  "選択肢文字",
+  "名前ウィンドウ",
+  "名前文字",
+  "枠アニメ",
+] as const;
+
+/** Load WINDOW assets and mount the scene hidden. Does not register input/dialog listeners. */
+export async function preloadDialogWindowScene(): Promise<void> {
+  const engine = window.getEngine?.();
+  if (!engine || engine.isMountedScene(DIALOG_WINDOW_PATH)) return;
+  const scene = await loadScene(DIALOG_WINDOW_PATH, {
+    exclusionList: [...DIALOG_WINDOW_EXCLUSION_LIST],
+  });
+  scene?.hide();
+}
+
 export async function pushDialogWindow(options: PushDialogWindowOptions = {}) {
   const { autoAdvance = true } = options;
-  const dialogWindow = (await loadScene("UI/WINDOW", {
-    exclusionList: [
-      "通常クリック範囲",
-      "メッセージ文字",
-      "選択肢文字",
-      "名前ウィンドウ",
-      "名前文字",
-      "枠アニメ",
-    ],
-  })) as DialogWindowScene | null;
+  const engine = window.getEngine();
+  if (!engine) {
+    console.error("Game engine not available");
+    return;
+  }
+
+  let dialogWindow = engine.getSceneByName(DIALOG_WINDOW_PATH) as DialogWindowScene | null;
+  if (!dialogWindow) {
+    dialogWindow = (await loadScene(DIALOG_WINDOW_PATH, {
+      exclusionList: [...DIALOG_WINDOW_EXCLUSION_LIST],
+    })) as DialogWindowScene | null;
+  }
+  if (!dialogWindow) {
+    console.error("Failed to load dialog window");
+    return;
+  }
+
+  dialogWindow.show();
+
+  const alreadyWired = dialogWindow.getObjectByName("DialogText") != null;
+  if (alreadyWired) {
+    setExitListener(() => pushPauseScreen());
+    setOverrideRightKeys(true);
+    dialogWindow.getObjectByName<Button>("NextLineButton")?.setFocus();
+    if (autoAdvance) {
+      onNextLineRequest();
+    }
+    return;
+  }
 
   await initSelectionsBox(dialogWindow);
   initBacklog(dialogWindow);
@@ -225,7 +265,7 @@ export async function pushDialogWindow(options: PushDialogWindowOptions = {}) {
 export function onNextLineRequest() {
   if (skipAutoContinueWait()) return;
 
-  const dialogWindow = window.getEngine().getSceneByName("UI/WINDOW");
+  const dialogWindow = window.getEngine().getSceneByName(DIALOG_WINDOW_PATH);
   if (!dialogWindow) return;
 
   const dialogText = dialogWindow.getObjectByName<TMP_TypeWriter>("DialogText");

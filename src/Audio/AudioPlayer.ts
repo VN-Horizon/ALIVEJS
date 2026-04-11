@@ -1,3 +1,4 @@
+import $ from "jquery";
 import * as ogvModule from "ogv";
 
 let audioSupportRef: boolean | null = null;

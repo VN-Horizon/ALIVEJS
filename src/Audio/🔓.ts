@@ -34,9 +34,8 @@ $(function () {
     silentAudio.src =
       "data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAAB9AAACABAAZGF0YQIAAAAAAA==";
 
-    // Keep the element in the DOM until playback settles to avoid interrupted play() on some browsers.
     silentAudio.style.display = "none";
-    $(document).append(silentAudio);
+    (document.body ?? document.documentElement).appendChild(silentAudio);
 
     silentAudio
       .play()
