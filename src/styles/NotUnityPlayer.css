@@ -68,6 +68,7 @@ ul.menu {
   position: absolute;
   width: max-content;
   z-index: 99999999;
+  text-shadow: none !important;
 }
 
 ul.menu > li:not(.divider) {

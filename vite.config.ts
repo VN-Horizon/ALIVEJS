@@ -1,7 +1,28 @@
+import fs from "node:fs";
 import path from "path";
+import type { Plugin } from "vite";
 import { defineConfig } from "vite";
 
 const host = process.env.TAURI_DEV_HOST;
+
+function copyAssetsToDist(): Plugin {
+  let outDir = "";
+  let assetsSrc = "";
+  return {
+    name: "copy-assets-to-dist",
+    apply: "build",
+    configResolved(config) {
+      outDir = path.resolve(config.root, config.build.outDir);
+      assetsSrc = path.resolve(config.root, "assets");
+    },
+    closeBundle() {
+      if (!fs.existsSync(assetsSrc)) return;
+      const assetsDest = path.join(outDir, "assets");
+      fs.mkdirSync(outDir, { recursive: true });
+      fs.cpSync(assetsSrc, assetsDest, { recursive: true });
+    },
+  };
+}
 
 export default defineConfig(async () => ({
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
@@ -30,6 +51,7 @@ export default defineConfig(async () => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  plugins: [copyAssetsToDist()],
   build: {
     outDir: "dist",
     target: "esnext",

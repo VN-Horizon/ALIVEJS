@@ -1,10 +1,50 @@
+import { toggleDialogWindowVisibility } from "@/Scripts/WINDOW/WINDOW.DialogHider";
 import $ from "jquery";
+
+function isMobilePlatform(): boolean {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent || "";
+  if (/android|iphone|ipod|ipad|iemobile|webos|blackberry|opera mini/i.test(ua)) {
+    return true;
+  }
+  const uaData = (navigator as Navigator & { userAgentData?: { mobile?: boolean } }).userAgentData;
+  return uaData?.mobile === true;
+}
+
+function applyEmbeddedWindowChrome() {
+  $(() => {
+    $(".title-bar").hide();
+    $(".window").css({
+      boxShadow: "none",
+      border: "none",
+      padding: "0",
+      borderColor: "transparent",
+    });
+    $(".menu-bar").css({
+      position: "fixed",
+      top: "0",
+      left: "0",
+      right: "0",
+      height: "20px",
+      zIndex: "99999999",
+    });
+    $(".window-body").css({
+      margin: "0",
+    });
+    window.dispatchEvent(new Event("resize"));
+  });
+}
 
 export async function setupWindowBehavior() {
   if ("__TAURI_INTERNALS__" in window) {
     const { getCurrentWindow } = await import("@tauri-apps/api/window");
     const tWindow = getCurrentWindow();
     window.tWindow = tWindow;
+
+    if (isMobilePlatform()) {
+      applyEmbeddedWindowChrome();
+      return tWindow;
+    }
 
     await tWindow.listen("tauri://blur", () => {
       document.querySelectorAll(".title-bar").forEach((el) => el.classList.add("inactive"));
@@ -15,14 +55,7 @@ export async function setupWindowBehavior() {
 
     return tWindow;
   } else {
-    $(() => {
-      $(".title-bar").hide();
-      $(".window").css({
-        boxShadow: "none",
-        border: "none",
-      });
-      window.dispatchEvent(new Event("resize"));
-    });
+    applyEmbeddedWindowChrome();
   }
   return null;
 }
@@ -127,6 +160,12 @@ export async function initWindowManager() {
       420
     );
   };
+
+  window.toggleBacklog = () => {
+    document.dispatchEvent(new CustomEvent("toggleBacklog", { bubbles: true }));
+  };
+
+  window.toggleDialogWindowVisibility = toggleDialogWindowVisibility;
 
   window.openSaveLoadDialog = (mode: "save" | "load") => {
     return new Promise((resolve) => {
