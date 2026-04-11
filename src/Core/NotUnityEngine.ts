@@ -30,6 +30,8 @@ export interface IGameEngine {
 
   pushScene(scene: any): void;
 
+  bringSceneLayerToFront(scene: IScene): void;
+
   popScene(): any;
 
   removeSceneByName(name: string): any;
@@ -159,6 +161,18 @@ export class GameEngine implements IGameEngine {
 
     // Enable focusability only on the new scene
     scene.setFocusable(true);
+  }
+
+  bringSceneLayerToFront(scene: IScene) {
+    const idx = this.scenes.indexOf(scene);
+    if (idx === -1) return;
+    this.scenes.splice(idx, 1);
+    this.scenePaths.splice(idx, 1);
+    this.scenes.push(scene);
+    this.scenePaths.push(scene.name);
+    this.scenes.forEach((s) => s.setFocusable(false));
+    scene.setFocusable(true);
+    this.container.appendChild(scene.rootElement);
   }
 
   popScene(): IScene | null {

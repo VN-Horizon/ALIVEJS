@@ -63,6 +63,7 @@ export async function pushDialogWindow(options: PushDialogWindowOptions = {}) {
     return;
   }
 
+  engine.bringSceneLayerToFront(dialogWindow);
   dialogWindow.show();
 
   const alreadyWired = dialogWindow.getObjectByName("DialogText") != null;

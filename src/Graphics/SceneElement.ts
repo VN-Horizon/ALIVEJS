@@ -35,7 +35,7 @@ export class SceneElement implements ISceneElement {
 
   anchor: AnchorType = "top-left";
   sceneData: SceneElementData = {};
-  scene: IScene | null = null; // reference to owning Scene to access baseZOffset
+  scene: IScene | null = null;
   domElement: HTMLElement | JQuery.PlainObject | null = null;
   visible: boolean = true;
   originallyVisible: boolean = true; // Store original visibility state
@@ -63,7 +63,7 @@ export class SceneElement implements ISceneElement {
 
     this.anchor = data.anchor || "top-left";
     this.sceneData = data;
-    this.scene = scene; // reference to owning Scene to access baseZOffset
+    this.scene = scene;
     this.domElement = null;
     this.visible = data.visible !== false;
     this.originallyVisible = this.visible; // Store original visibility state

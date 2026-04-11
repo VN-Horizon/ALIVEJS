@@ -51,10 +51,9 @@ export class Toggle extends Button {
 
   updateDOMStyle() {
     if (!this.domElement) return;
-    const baseZOffset = this.scene?.baseZOffset || 0;
     $(this.domElement).css({
       opacity: this.opacity,
-      "z-index": this.transform.z + baseZOffset,
+      "z-index": this.transform.z,
       "mix-blend-mode": this.blendMode,
       display: this.visible ? "block" : "none",
       cursor: this.cursor,
