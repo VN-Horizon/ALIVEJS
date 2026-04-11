@@ -7,6 +7,8 @@ declare global {
     openVersionInfo: () => void;
     openCodecVersionInfo: () => void;
     openSettings: () => void;
+    toggleBacklog: () => void;
+    toggleDialogWindowVisibility: () => void;
     openSaveLoadDialog: (mode: "save" | "load") => Promise<number | null>;
     getEngine: () => GameEngine;
     exit: () => void;
