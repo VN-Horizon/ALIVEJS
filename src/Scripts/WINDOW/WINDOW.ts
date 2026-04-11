@@ -3,6 +3,7 @@ import { loadSettings } from "@/Core/Settings";
 import type { AnimatedSceneElement } from "@/Graphics/AnimatedSceneElement";
 import { Button, toButton } from "@/Graphics/Button";
 import { TMP_Text, TMP_TypeWriter } from "@/Graphics/TextMessPoor";
+import { toToggle } from "@/Graphics/Toggle";
 import { setExitListener, setOverrideRightKeys } from "@/InputSystem/InputSystem.Keyboard";
 import type { IScene } from "@/Scene/Scene";
 import { loadScene } from "@/Scene/SceneManagement";
@@ -169,7 +170,6 @@ export async function pushDialogWindow(options: PushDialogWindowOptions = {}) {
   normalDialogBox?.hide();
   selectingDialogBox?.hide();
   sayDialogBox?.hide();
-  // nameWindow?.hide();
 
   // Hook PlayDialogInternal event to animate next line
   const playDialogHandler = (e: Event) => {
@@ -211,15 +211,33 @@ export async function pushDialogWindow(options: PushDialogWindowOptions = {}) {
     document.removeEventListener("PlayDialogInternal", playDialogHandler);
   });
 
+
+  const skipToggle = toToggle(dialogWindow?.getObjectByName("早送りボタン"), {
+    stateIndexes: [0, 1, 3, 2],
+    z: 10,
+    focusable: false,
+    initialOn: window.skipping,
+    onToggleChange: (on: boolean) => {
+      console.log("onToggleChange", on);
+      window.skipping = on;
+      if (on) {
+        onNextLineRequest();
+      }
+    },
+  });
+
   // Handle skip mode starting
-  const skipModeStartHandler = () => {
+  const skipModeHandler = () => {
     if (window.skipping) {
       onNextLineRequest();
     }
+    skipToggle?.setOn(window.skipping, false);
   };
-  document.addEventListener("SkipModeStarted", skipModeStartHandler);
+  $(document).on("SkipModeStarted", skipModeHandler);
+  $(document).on("SkipModeEnded", skipModeHandler);
   dialogWindow?.onDestroyCallbacks.push(() => {
-    document.removeEventListener("SkipModeStarted", skipModeStartHandler);
+    $(document).off("SkipModeStarted", skipModeHandler);
+    $(document).off("SkipModeEnded", skipModeHandler);
   });
 
   let hiddenByAutoContinue = false;

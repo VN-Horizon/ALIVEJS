@@ -342,3 +342,42 @@ body {
 .vn-button:disabled .state-2 {
   display: none;
 }
+
+/* Toggle: four layers = off, off+hover, on, on+hover (overrides generic .vn-button visibility only when .vn-toggle is present; rules above are unchanged). */
+.vn-button.vn-toggle:not(:disabled) .button-state-layer {
+  display: none !important;
+}
+
+.vn-button.vn-toggle:not(.is-on):not(:disabled) .state-0 {
+  display: block !important;
+}
+
+.vn-button.vn-toggle:not(.is-on):not(:disabled):hover .state-0 {
+  display: none !important;
+}
+
+.vn-button.vn-toggle:not(.is-on):not(:disabled):hover .state-1 {
+  display: block !important;
+}
+
+.vn-button.vn-toggle.is-on:not(:disabled) .state-2 {
+  display: block !important;
+}
+
+.vn-button.vn-toggle.is-on:not(:disabled):hover .state-2 {
+  display: none !important;
+}
+
+.vn-button.vn-toggle.is-on:not(:disabled):hover .state-3 {
+  display: block !important;
+}
+
+.vn-button.vn-toggle:disabled .state-3 {
+  display: block !important;
+}
+
+.vn-button.vn-toggle:disabled .state-0,
+.vn-button.vn-toggle:disabled .state-1,
+.vn-button.vn-toggle:disabled .state-2 {
+  display: none !important;
+}
