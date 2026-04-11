@@ -57,7 +57,7 @@ export class Scene implements IScene {
     this.rootElement = document.createElement("div");
     this.rootElement.dataset.sceneRoot = name;
     Object.assign(this.rootElement.style, {
-      position: "absolute",
+      isolation: "isolate",
       left: "0",
       top: "0",
       width: "100%",
