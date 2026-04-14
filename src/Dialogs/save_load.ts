@@ -1,7 +1,12 @@
 import "98.css";
-import $ from "jquery";
 import { loadSettings } from "@/Core/Settings";
-import { closeCurrentWindow, setupWindowBehavior } from "@/Utils/WindowManager";
+import {
+  closeCurrentWindow,
+  getWebDialogPostMessageTarget,
+  isEmbeddedDialog,
+  setupWindowBehavior,
+} from "@/Utils/WindowManager";
+import $ from "jquery";
 
 await setupWindowBehavior();
 
@@ -12,11 +17,12 @@ declare global {
 }
 
 window.closeWindow = async () => {
-  if ("__TAURI_INTERNALS__" in window) {
+  if (!isEmbeddedDialog() && "__TAURI_INTERNALS__" in window) {
     const { emit } = await import("@tauri-apps/api/event");
     await emit("save-load-closed");
-  } else if (window.opener) {
-    window.opener.postMessage({ type: "save-load-closed" }, "*");
+  } else {
+    const target = getWebDialogPostMessageTarget();
+    if (target) target.postMessage({ type: "save-load-closed" }, "*");
   }
   await closeCurrentWindow();
 };
@@ -148,23 +154,26 @@ $(() => {
       }
 
       try {
-        if ("__TAURI_INTERNALS__" in window) {
+        if (!isEmbeddedDialog() && "__TAURI_INTERNALS__" in window) {
           const { emit } = await import("@tauri-apps/api/event");
           await emit("save-load-action", {
             slotIndex: selectedSlotIndex,
             comment: commentInput.val(),
             mode: currentMode,
           });
-        } else if (window.opener) {
-          window.opener.postMessage(
-            {
-              type: "save-load-action",
-              slotIndex: selectedSlotIndex,
-              comment: commentInput.val(),
-              mode: currentMode,
-            },
-            "*"
-          );
+        } else {
+          const target = getWebDialogPostMessageTarget();
+          if (target) {
+            target.postMessage(
+              {
+                type: "save-load-action",
+                slotIndex: selectedSlotIndex,
+                comment: commentInput.val(),
+                mode: currentMode,
+              },
+              "*"
+            );
+          }
         }
         await closeCurrentWindow();
       } catch (e) {
@@ -172,18 +181,21 @@ $(() => {
       }
     } else {
       try {
-        if ("__TAURI_INTERNALS__" in window) {
+        if (!isEmbeddedDialog() && "__TAURI_INTERNALS__" in window) {
           const { emit } = await import("@tauri-apps/api/event");
           await emit("save-load-action", { slotIndex: selectedSlotIndex, mode: currentMode });
-        } else if (window.opener) {
-          window.opener.postMessage(
-            {
-              type: "save-load-action",
-              slotIndex: selectedSlotIndex,
-              mode: currentMode,
-            },
-            "*"
-          );
+        } else {
+          const target = getWebDialogPostMessageTarget();
+          if (target) {
+            target.postMessage(
+              {
+                type: "save-load-action",
+                slotIndex: selectedSlotIndex,
+                mode: currentMode,
+              },
+              "*"
+            );
+          }
         }
         await closeCurrentWindow();
       } catch (e) {

@@ -18,8 +18,8 @@ export function initMenuBar() {
     });
   }
 
-  const saveMenu = $("menu-save");
-  const loadMenu = $("menu-load");
+  const saveMenu = $("#menu-save");
+  const loadMenu = $("#menu-load");
 
   saveMenu.on("click", async () => {
     if (saveMenu.attr("aria-disabled") === "true") return;
