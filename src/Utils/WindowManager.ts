@@ -1,5 +1,8 @@
 import { toggleDialogWindowVisibility } from "@/Scripts/WINDOW/WINDOW.DialogHider";
+import { EMBEDDED_WEB_DIALOG_CLOSE, openWebEmbeddedDialog } from "@/Utils/WebEmbeddedDialog";
 import $ from "jquery";
+
+export { getWebDialogPostMessageTarget, isEmbeddedDialog } from "@/Utils/WebEmbeddedDialog";
 
 function isMobilePlatform(): boolean {
   if (typeof navigator === "undefined") return false;
@@ -13,7 +16,7 @@ function isMobilePlatform(): boolean {
 
 function applyEmbeddedWindowChrome() {
   $(() => {
-    $(".title-bar").hide();
+    $("#app-main-title-bar").hide();
     $(".window").css({
       boxShadow: "none",
       border: "none",
@@ -47,10 +50,10 @@ export async function setupWindowBehavior() {
     }
 
     await tWindow.listen("tauri://blur", () => {
-      document.querySelectorAll(".title-bar").forEach((el) => el.classList.add("inactive"));
+      document.getElementById("app-main-title-bar")?.classList.add("inactive");
     });
     await tWindow.listen("tauri://focus", () => {
-      document.querySelectorAll(".title-bar").forEach((el) => el.classList.remove("inactive"));
+      document.getElementById("app-main-title-bar")?.classList.remove("inactive");
     });
 
     return tWindow;
@@ -61,6 +64,11 @@ export async function setupWindowBehavior() {
 }
 
 export async function closeCurrentWindow() {
+  const w = window as Window & { __ALIVE_EMBEDDED_DIALOG__?: boolean; __ALIVE_EMBEDDED_DIALOG_ID__?: string };
+  if (w.__ALIVE_EMBEDDED_DIALOG__ && window.parent !== window && w.__ALIVE_EMBEDDED_DIALOG_ID__) {
+    window.parent.postMessage({ type: EMBEDDED_WEB_DIALOG_CLOSE, id: w.__ALIVE_EMBEDDED_DIALOG_ID__ }, "*");
+    return;
+  }
   if ("__TAURI_INTERNALS__" in window) {
     try {
       const { getCurrentWindow } = await import("@tauri-apps/api/window");
@@ -82,7 +90,7 @@ export async function openDialog(
   browserWidth: number = width,
   browserHeight: number = height
 ) {
-  if ("__TAURI_INTERNALS__" in window) {
+  if ("__TAURI_INTERNALS__" in window && !isMobilePlatform()) {
     try {
       const { WebviewWindow } = await import("@tauri-apps/api/webviewWindow");
 
@@ -123,12 +131,7 @@ export async function openDialog(
       if (win) win.focus();
     }
   } else {
-    const win = window.open(
-      url,
-      id,
-      `width=${browserWidth},height=${browserHeight},toolbar=0,menubar=0,location=0,status=0,scrollbars=0,resizable=0`
-    );
-    if (win) win.focus();
+    openWebEmbeddedDialog(id, url, title, browserWidth, browserHeight);
   }
 }
 
@@ -170,7 +173,7 @@ export async function initWindowManager() {
   window.openSaveLoadDialog = (mode: "save" | "load") => {
     return new Promise((resolve) => {
       const url = `/dialogs/save_load.html?mode=${mode}`;
-      if ("__TAURI_INTERNALS__" in window) {
+      if ("__TAURI_INTERNALS__" in window && !isMobilePlatform()) {
         import("@tauri-apps/api/event").then(({ listen }) => {
           let unlistenClose: () => void;
           let unlistenAction: () => void;
