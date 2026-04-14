@@ -102,6 +102,24 @@ export function openWebEmbeddedDialog(id: string, url: string, title: string, wi
 
   const shell = document.createElement("div") as WebDialogShell;
   shell.dataset.aliveWebDialog = id;
+  const DIALOG_VIEWPORT_MARGIN = 12;
+  const applyViewportBoundedSize = () => {
+    const vv = window.visualViewport;
+    const viewportWidth = vv?.width ?? window.innerWidth;
+    const viewportHeight = vv?.height ?? window.innerHeight;
+    const boundedWidth = Math.max(
+      240,
+      Math.min(width, Math.floor(Math.max(0, viewportWidth - DIALOG_VIEWPORT_MARGIN * 2)))
+    );
+    const boundedHeight = Math.max(
+      180,
+      Math.min(height, Math.floor(Math.max(0, viewportHeight - DIALOG_VIEWPORT_MARGIN * 2)))
+    );
+    shell.style.width = `${boundedWidth}px`;
+    shell.style.height = `${boundedHeight}px`;
+    shell.style.maxWidth = `calc(100vw - ${DIALOG_VIEWPORT_MARGIN * 2}px)`;
+    shell.style.maxHeight = `calc(100dvh - ${DIALOG_VIEWPORT_MARGIN * 2}px)`;
+  };
   shell.style.cssText = [
     "position:fixed",
     "z-index:2147483646",
@@ -128,6 +146,8 @@ export function openWebEmbeddedDialog(id: string, url: string, title: string, wi
 
   const teardown = () => {
     window.removeEventListener("message", onHostMessage);
+    window.removeEventListener("resize", applyViewportBoundedSize);
+    window.visualViewport?.removeEventListener("resize", applyViewportBoundedSize);
     if (shell.isConnected) shell.remove();
   };
   shell.__aliveWebDialogCleanup = teardown;
@@ -146,13 +166,28 @@ export function openWebEmbeddedDialog(id: string, url: string, title: string, wi
     (cw as Window & { __ALIVE_EMBEDDED_DIALOG_ID__?: string }).__ALIVE_EMBEDDED_DIALOG_ID__ = id;
     try {
       const doc = cw.document;
+      doc.documentElement.style.height = "100%";
+      doc.documentElement.style.overflow = "auto";
+      doc.body.style.height = "100%";
+      doc.body.style.minHeight = "0";
+      doc.body.style.overflow = "auto";
       doc.querySelectorAll(".window").forEach((el) => {
         (el as HTMLElement).style.flex = "1";
         (el as HTMLElement).style.minHeight = "0";
+        (el as HTMLElement).style.height = "100%";
       });
       doc.querySelectorAll(".window-body").forEach((el) => {
         (el as HTMLElement).style.flex = "1";
         (el as HTMLElement).style.minHeight = "0";
+        (el as HTMLElement).style.overflow = "auto";
+      });
+      doc.querySelectorAll(".tab-content").forEach((el) => {
+        (el as HTMLElement).style.minHeight = "0";
+        (el as HTMLElement).style.overflow = "auto";
+      });
+      doc.querySelectorAll(".sunken-panel, textarea").forEach((el) => {
+        (el as HTMLElement).style.minHeight = "0";
+        (el as HTMLElement).style.overflow = "auto";
       });
       const innerTitleBar = doc.querySelector(".title-bar") as HTMLElement | null;
       if (innerTitleBar) {
@@ -163,6 +198,10 @@ export function openWebEmbeddedDialog(id: string, url: string, title: string, wi
       /* cross-origin */
     }
   });
+
+  applyViewportBoundedSize();
+  window.addEventListener("resize", applyViewportBoundedSize, { passive: true });
+  window.visualViewport?.addEventListener("resize", applyViewportBoundedSize, { passive: true });
 
   document.body.appendChild(shell);
   iframe.focus({ preventScroll: true });
