@@ -15,7 +15,12 @@ export function internalExtractDialogData(lineText: string) {
   if (quoteIndex <= 0) return ["", lineText, "Hidden"];
 
   let candidate = lineText.slice(0, quoteIndex).trim();
-  if (candidate.length <= 0 || candidate.length >= 8) return ["", lineText, "Hidden"];
+  if (candidate.length <= 0 || candidate.length >= 10) return ["", lineText, "Hidden"];
+
+  let endQuoteIndex = lineText.lastIndexOf("」");
+  if (endQuoteIndex !== lineText.length - 1 && !AllowedCharacterNames.includes(candidate)) {
+    return ["", lineText, "Hidden"];
+  }
 
   // 检测角色名称显示模式
   let mode = "Display";
@@ -35,9 +40,6 @@ export function internalExtractDialogData(lineText: string) {
   }
 
   // 如果提取的名字不在角色列表中，则将整行作为内容并隐藏名字显示
-  if (!AllowedCharacterNames.includes(name)) {
-    return ["", lineText, "Hidden"];
-  }
 
   return [name, content, mode];
 }

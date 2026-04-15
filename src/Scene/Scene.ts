@@ -1,7 +1,7 @@
-import { getScreenEffectsTransitionDurationMs } from "@/Core/Settings";
+import { FocusableElement } from "@/Components/FocusableElement";
+import { type ISceneElement, SceneElement } from "@/Components/SceneElement";
 import type { GameEngine } from "@/Core/NotUnityEngine";
-import { FocusableElement } from "@/Graphics/FocusableElement";
-import { type ISceneElement, SceneElement } from "@/Graphics/SceneElement";
+import { getScreenEffectsTransitionDurationMs } from "@/Core/Settings";
 import $ from "jquery";
 
 export interface IScene {

@@ -1,5 +1,5 @@
-import { Background } from "@/Graphics/Background";
-import { Button } from "@/Graphics/Button";
+import { Background } from "@/Components/Background";
+import { Button } from "@/Components/Button";
 import { confirmListener, setConfirmListener, setExitListener } from "@/InputSystem/InputSystem.Keyboard";
 import { createBlankScene } from "@/Scene/SceneManagement";
 

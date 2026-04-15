@@ -1,4 +1,4 @@
-import { SceneElement } from "@/Graphics/SceneElement";
+import { SceneElement } from "@/Components/SceneElement";
 import type { IScene } from "@/Scene/Scene";
 import type { SceneElementData } from "@/Scene/SceneData";
 import $ from "jquery";

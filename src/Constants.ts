@@ -16,6 +16,11 @@ export const AllowedCharacterNames = [
   "繭",
   "ウェイトレス",
   "学生Ａ",
+  "春菜（菜摘）",
+  "悠",
+  "千尋",
+  "ヴァル（夜美）",
+  "アルテイシア",
 ];
 
 export const AllowedVoiceNames = [

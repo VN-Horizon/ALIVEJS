@@ -1,8 +1,8 @@
-import { AnimatedSceneElement } from "@/Graphics/AnimatedSceneElement";
-import { type Button, toButton } from "@/Graphics/Button";
-import type { FocusableElement } from "@/Graphics/FocusableElement";
-import { SceneElement } from "@/Graphics/SceneElement";
-import { TMP_Text } from "@/Graphics/TextMessPoor";
+import { AnimatedSceneElement } from "@/Components/AnimatedSceneElement";
+import { type Button, toButton } from "@/Components/Button";
+import type { FocusableElement } from "@/Components/FocusableElement";
+import { SceneElement } from "@/Components/SceneElement";
+import { TMP_Text } from "@/Components/TextMessPoor";
 import type { SceneElementData } from "@/Scene/SceneData";
 import { $translate } from "@/Utils/Translator";
 import $ from "jquery";

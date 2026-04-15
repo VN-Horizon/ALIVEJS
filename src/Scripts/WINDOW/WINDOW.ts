@@ -1,9 +1,9 @@
+import type { AnimatedSceneElement } from "@/Components/AnimatedSceneElement";
+import { Button, toButton } from "@/Components/Button";
+import { TMP_Text, TMP_TypeWriter } from "@/Components/TextMessPoor";
+import { toToggle } from "@/Components/Toggle";
 import { execUntilNextLine, skipAutoContinueWait } from "@/Core/Events";
 import { loadSettings } from "@/Core/Settings";
-import type { AnimatedSceneElement } from "@/Graphics/AnimatedSceneElement";
-import { Button, toButton } from "@/Graphics/Button";
-import { TMP_Text, TMP_TypeWriter } from "@/Graphics/TextMessPoor";
-import { toToggle } from "@/Graphics/Toggle";
 import { setExitListener, setOverrideRightKeys } from "@/InputSystem/InputSystem.Keyboard";
 import type { IScene } from "@/Scene/Scene";
 import { loadScene } from "@/Scene/SceneManagement";

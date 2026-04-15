@@ -1,6 +1,6 @@
+import { Background } from "@/Components/Background";
 import { addUnlockedCG } from "@/Core/Save/UnlockedCG";
 import { setCurrentDate } from "@/Debug/DateDebugger";
-import { Background } from "@/Graphics/Background";
 import { createBlankScene } from "@/Scene/SceneManagement";
 import $ from "jquery";
 

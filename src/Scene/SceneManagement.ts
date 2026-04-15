@@ -1,5 +1,5 @@
-import { AnimatedSceneElement } from "@/Graphics/AnimatedSceneElement";
-import { SceneElement } from "@/Graphics/SceneElement";
+import { AnimatedSceneElement } from "@/Components/AnimatedSceneElement";
+import { SceneElement } from "@/Components/SceneElement";
 import $ from "jquery";
 import { Scene } from "./Scene";
 import type { SceneElementData } from "./SceneData";

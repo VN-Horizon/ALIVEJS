@@ -6,9 +6,8 @@ import {
   SCENE_GRAPH_PANE_ID,
   SCENE_GRAPH_REFRESH_LABEL,
   SCENE_GRAPH_WIDTH,
-} from "./SceneGraphPane.constants";
-import { createSceneGraphRenderer } from "./SceneGraphPane.renderer";
-import { ensureSceneGraphPaneStyles } from "./SceneGraphPane.styles";
+} from "./Constants";
+import { createSceneGraphRenderer } from "./Renderer";
 
 let isInitialized = false;
 
@@ -21,8 +20,6 @@ export function initSceneGraphPane(): void {
   const currentWidth = SCENE_GRAPH_WIDTH;
   const currentHeight = window.innerHeight * SCENE_GRAPH_HEIGHT_RATIO;
 
-  ensureSceneGraphPaneStyles(currentWidth, currentHeight);
-
   const $container = $("<div>").attr("id", SCENE_GRAPH_PANE_ID);
   const $toolbar = $("<div>").addClass("scene-graph-pane__toolbar");
   const $refreshBtn = $("<button>")
@@ -33,6 +30,10 @@ export function initSceneGraphPane(): void {
 
   $toolbar.append($refreshBtn);
   $container.append($toolbar, $graphHost);
+  $container.css({
+    width: `${currentWidth}px`,
+    height: `${currentHeight}px`,
+  });
   $("body").append($container);
   $container.hide();
 

@@ -3,8 +3,9 @@ import { type EventMappingsPayload } from "@/types/events";
 import $ from "jquery";
 import protobuf from "protobufjs";
 import { initScreenplayContext } from "./ScreenplayState";
+import { ExpandStaffCutscene } from "./StaffCSLoader";
 
-export async function loadEvents(): Promise<any> {
+export async function loadEvents(): Promise<EventMappingsPayload> {
   try {
     const root = await protobuf.load("/assets/events/events.proto");
     const EventMappings = root.lookupType("events.EventMappings");
@@ -16,37 +17,11 @@ export async function loadEvents(): Promise<any> {
       defaults: true, // includes default values
     }) as EventMappingsPayload;
 
-    if (eventMappings.events && eventMappings.events.length > 0) {
-      console.log("Events loaded successfully!", eventMappings);
-    }
-
-    eventMappings.events.map((event) => {
-      if (event.instructions) {
-        const newInstructions: any[] = [];
-        event.instructions.forEach((instr) => {
-          if (instr.type === "ShowStaffA") {
-            for (let i = 1; i <= 19; i++) {
-              const id = i.toString().padStart(2, "0");
-              newInstructions.push({ type: "ShowStaffImage", stringParams: ["STAFF2", id] });
-              newInstructions.push({ type: "AutoContinue", params: [2000] });
-            }
-          } else if (instr.type === "ShowStaffB") {
-            for (let i = 1; i <= 19; i++) {
-              const id = i.toString().padStart(2, "0");
-              newInstructions.push({ type: "ShowStaffImage", stringParams: ["STAFF1", id] });
-              newInstructions.push({ type: "AutoContinue", params: [2000] });
-            }
-          } else {
-            newInstructions.push(instr);
-          }
-        });
-        event.instructions = newInstructions;
-      }
-      return event;
-    });
+    console.log("Events loaded successfully!", eventMappings);
+    const expandedEventMappings = ExpandStaffCutscene(eventMappings);
 
     // Initialize screenplay context with loaded data
-    initScreenplayContext(eventMappings.events || [], eventMappings.textPool || []);
+    initScreenplayContext(expandedEventMappings.events || [], expandedEventMappings.textPool || []);
 
     $(document).on("RestoreSave", (e: any) => {
       const {
@@ -79,7 +54,7 @@ export async function loadEvents(): Promise<any> {
 
     document.dispatchEvent(new CustomEvent("EventsLoaded", { bubbles: true, cancelable: true }));
 
-    return eventMappings;
+    return expandedEventMappings;
   } catch (error) {
     console.error("Error loading events:", error);
     throw error;
