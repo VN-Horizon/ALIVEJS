@@ -1,9 +1,9 @@
+import { toButton } from "@/Components/Button";
+import { SceneElement } from "@/Components/SceneElement";
 import { CharacterNameToVoiceKey } from "@/Constants";
 import { getUnlockedCG } from "@/Core/Save/UnlockedCG";
-import { toButton } from "@/Graphics/Button";
-import { SceneElement } from "@/Graphics/SceneElement";
 import {
-  setExitListener
+    setExitListener
 } from "@/InputSystem/InputSystem.Keyboard";
 import { loadScene } from "@/Scene/SceneManagement";
 import { pushCgPlayerScene } from "./GALLERY/GALLERY.CgPlayer";

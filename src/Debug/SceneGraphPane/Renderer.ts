@@ -1,5 +1,5 @@
+import { execUntilNextLine } from "@/Core/Events";
 import * as d3 from "d3";
-import { execUntilNextLine } from "../Core/Events";
 import {
   ACTIVE_NODE_COLOR,
   CHOICE_NODE_COLOR,
@@ -12,9 +12,9 @@ import {
   SCENE_GRAPH_LINK_DISTANCE,
   SCENE_GRAPH_MAX_ZOOM,
   SCENE_GRAPH_MIN_ZOOM,
-} from "./SceneGraphPane.constants";
-import { buildSceneGraphData, getScreenplayContext } from "./SceneGraphPane.data";
-import type { SceneGraphLink, SceneGraphNode } from "./SceneGraphPane.types";
+} from "./Constants";
+import { buildSceneGraphData, getScreenplayContext } from "./SceneGraphData";
+import type { SceneGraphLink, SceneGraphNode } from "./Types";
 
 interface SceneGraphRenderer {
   renderGraph: () => void;

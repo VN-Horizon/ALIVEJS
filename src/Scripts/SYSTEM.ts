@@ -1,9 +1,9 @@
-import { execUntilNextLine } from "../Core/Events";
+import { toBackground } from "@/Components/Background";
+import { toButton } from "@/Components/Button";
 import { applyGameState, loadGame, saveGame } from "@/Core/Save/GameSave";
-import { toBackground } from "@/Graphics/Background";
-import { toButton } from "@/Graphics/Button";
 import { setExitListener, setOverrideRightKeys } from "@/InputSystem/InputSystem.Keyboard";
 import { destroyScene, loadScene } from "@/Scene/SceneManagement";
+import { execUntilNextLine } from "../Core/Events";
 
 export async function pushPauseScreen() {
   const pauseScene = await loadScene("UI/SYSTEM", { singleInstance: true });

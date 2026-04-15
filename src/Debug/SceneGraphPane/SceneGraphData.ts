@@ -6,13 +6,13 @@ import {
   END_NODE_COLOR,
   END_NODE_ID,
   FUNCTION_NODE_COLOR,
-} from "./SceneGraphPane.constants";
+} from "./Constants";
 import type {
   SceneGraphBlock,
   SceneGraphContext,
   SceneGraphLink,
   SceneGraphNode,
-} from "./SceneGraphPane.types";
+} from "./Types";
 
 export function buildSceneGraphData(): { nodes: SceneGraphNode[]; links: SceneGraphLink[] } {
   const screenplayContext = getScreenplayContext();

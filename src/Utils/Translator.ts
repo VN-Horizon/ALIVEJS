@@ -1,3 +1,6 @@
+import { resolveStrings } from "@/Core/Events";
+import { internalExtractDialogData } from "./DialogHelper";
+
 function plainizeText(text: string | null | undefined) {
   if (text === undefined || text === null) return "";
   return String(text).replace(/\s+/g, "");
@@ -44,23 +47,22 @@ export async function initTranslation() {
       }
     }
     window.translationPlainMap = plainMap; // Normalized lookup by whitespace-insensitive key
-    // const arr: string[] = []
-    // window.ScreenplayContext.blocks.forEach(block => {
-    //   block.instructions.forEach(instruction => {
-    //     if (instruction.type !== "PlayDialog") return; // Only translate dialog for now
-    //     if (instruction.stringParams) {
-    //       const raw = resolveStrings(instruction, window.ScreenplayContext.textPool);
-    //       let [name, content, mode] = internalExtractDialogData(raw[0]);
-    //       const translated = $translate(content);
-    //       if (translated === content) {
-    //         arr.push(content);
-    //         return;
-    //       }
-    //     }
-    //   });
-    // });
-    // console.log(JSON.stringify(arr));
-    // console.log(arr.length)
+    const arr: string[] = []
+    window.ScreenplayContext.blocks.forEach(block => {
+      block.instructions.forEach(instruction => {
+        if (instruction.type !== "PlayDialog") return; // Only translate dialog for now
+        if (instruction.stringParams) {
+          const raw = resolveStrings(instruction, window.ScreenplayContext.textPool);
+          let [, content] = internalExtractDialogData(raw[0]);
+          const translated = $translate(content);
+          if (content.replaceAll(/[・！？]/g, "").trim().length === 0) return;
+          if (translated !== content) return;
+          arr.push(content);
+        }
+      });
+    });
+    console.log(JSON.stringify(arr));
+    console.log(arr.length)
 
     return map;
   } catch (err) {

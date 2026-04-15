@@ -1,4 +1,4 @@
-import { CutscenePlayer } from "@/Graphics/CutscenePlayer";
+import { CutscenePlayer } from "@/Components/CutscenePlayer";
 import type { IScene } from "@/Scene/Scene";
 import $ from "jquery";
 

@@ -46,7 +46,7 @@ async function init() {
     console.log("Initializing application...");
     const eventsPromise = loadEvents();
     const dialogWindowPreload = preloadDialogWindowScene();
-    initTranslation().then();
+    // initTranslation().then();
     setTimeout(() => {
       initBGM();
       initSE();
@@ -54,6 +54,7 @@ async function init() {
     await dialogWindowPreload;
     loadStartScene(eventsPromise).then();
     eventsPromise.then(() => {
+      initTranslation();
       initSceneGraphPane();
     });
   } catch (error: any) {

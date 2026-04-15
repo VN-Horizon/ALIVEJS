@@ -1,5 +1,4 @@
 export const SCENE_GRAPH_PANE_ID = "scene-graph-pane";
-export const SCENE_GRAPH_STYLE_ID = "scene-graph-pane-style";
 
 export const SCENE_GRAPH_WIDTH = 400;
 export const SCENE_GRAPH_HEIGHT_RATIO = 0.9;
