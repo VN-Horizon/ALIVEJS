@@ -8,7 +8,7 @@ import { setExitListener, setOverrideRightKeys } from "@/InputSystem/InputSystem
 import { destroySceneByName, loadScene } from "@/Scene/SceneManagement";
 import { runWipeOutIn } from "@/Utils/WipeTransition";
 import $ from "jquery";
-import { execUntilNextLine, ScreenplayContext } from "../Core/Events";
+import { execUntilNextLine, ScreenplayContext, setOneShotDispatchDelays } from "../Core/Events";
 import { loadBackgroundScene } from "./BACKGROUND";
 import { initGallery } from "./GALLERY";
 import { pushDialogWindow } from "./WINDOW/WINDOW";
@@ -53,12 +53,22 @@ export async function loadStartScene(eventsPromise?: Promise<any>) {
       ScreenplayContext.currentBlockIndex = ScreenplayContext.evIdToBlockIndex[512] || 0;
       ScreenplayContext.currentEvId = 512;
       ScreenplayContext.currentInstructionIndex = 0;
+      setOneShotDispatchDelays({ SetCharaImg: 300, PlayDialogInternal: 600 });
       const wipePromise = runWipeOutIn(
         "topToBottom",
         getScreenEffectsTransitionDurationMs(),
         async () => {
           destroySceneByName(sceneName, { instant: true });
           await Promise.all([loadBackgroundScene(), pushDialogWindow({ autoAdvance: true })]);
+          const dialogWindow = window.getEngine().getSceneByName("UI/WINDOW");
+          if (dialogWindow) {
+            $(dialogWindow.rootElement).css("opacity", "0");
+            dialogWindow.hide();
+            setTimeout(() => {
+              dialogWindow.show();
+              dialogWindow.fadeInEntrance(300);
+            }, 600);
+          }
           if (progress[4] > 0) {
             document.dispatchEvent(
               new CustomEvent("ShowCg", {

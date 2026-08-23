@@ -26,7 +26,30 @@ export function skipAutoContinueWait(): boolean {
   return false;
 }
 
+let oneShotDispatchDelays: Partial<Record<string, number>> = {};
+let pendingDelayedDispatches = 0;
+
+export function setOneShotDispatchDelays(delays: Partial<Record<string, number>>): void {
+  oneShotDispatchDelays = { ...delays };
+}
+
 function dispatchEvent(type: string, detail: any = {}): void {
+  const delay = oneShotDispatchDelays[type];
+  if (delay !== undefined) {
+    delete oneShotDispatchDelays[type];
+    if (delay > 0) {
+      pendingDelayedDispatches++;
+      setTimeout(() => {
+        document.dispatchEvent(new CustomEvent(type, { detail, bubbles: true, cancelable: true }));
+        pendingDelayedDispatches--;
+        if (pendingDelayedDispatches <= 0) {
+          pendingDelayedDispatches = 0;
+          oneShotDispatchDelays = {};
+        }
+      }, delay);
+      return;
+    }
+  }
   document.dispatchEvent(new CustomEvent(type, { detail, bubbles: true, cancelable: true }));
 }
 
@@ -72,6 +95,8 @@ function updateBlockIndex(currentEvent: EventMapping, returnValueIndex: number =
 }
 
 export function execUntilNextLine(decisionIndex: number = -1): string[] | undefined {
+  if (pendingDelayedDispatches > 0) return undefined;
+
   while (true) {
     if (decisionIndex !== -1) {
       const currentEvent = getCurrentEvent();
