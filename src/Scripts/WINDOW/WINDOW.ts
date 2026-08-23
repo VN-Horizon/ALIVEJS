@@ -4,6 +4,7 @@ import { TMP_Text, TMP_TypeWriter } from "@/Components/TextMessPoor";
 import { toToggle } from "@/Components/Toggle";
 import { execUntilNextLine, skipAutoContinueWait } from "@/Core/Events";
 import { loadSettings } from "@/Core/Settings";
+import { isLineRead, markLineRead, READ_LINE_COLOR } from "@/Core/Save/ReadLines";
 import { setExitListener, setOverrideRightKeys } from "@/InputSystem/InputSystem.Keyboard";
 import type { IScene } from "@/Scene/Scene";
 import { loadScene } from "@/Scene/SceneManagement";
@@ -194,6 +195,9 @@ export async function pushDialogWindow(options: PushDialogWindowOptions = {}) {
     nameWindow?.syncDom();
 
     // Animate the dialog text
+    const read = isLineRead(params[1], params[3]);
+    markLineRead(params[1], params[3]);
+    $(dialogText.domElement).css("color", read ? READ_LINE_COLOR : "#FFFFFF");
     dialogText.animateText(dialogContent + " ▾");
 
     // Auto-advance when skipping

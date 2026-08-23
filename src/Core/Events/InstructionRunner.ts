@@ -124,14 +124,17 @@ export function execUntilNextLine(decisionIndex: number = -1): string[] | undefi
     dispatchEvent(instruction.type, resolvedInstruction);
 
     switch (resolvedInstruction.type) {
-      case "PlayDialog":
+      case "PlayDialog": {
+        const lineBlockIndex = ScreenplayContext.currentBlockIndex;
+        const lineInstructionIndex = ScreenplayContext.currentInstructionIndex;
         updateBlockIndex(currentEvent);
         const [text, voice, prm2] = extractDialogData(resolvedInstruction.stringParams[0]);
         dispatchEvent("PlayDialogInternal", {
-          params: [prm2, ScreenplayContext.currentBlockIndex, resolvedInstruction.params[1]],
+          params: [prm2, lineBlockIndex, resolvedInstruction.params[1], lineInstructionIndex],
           stringParams: [text, voice],
         });
         return [text];
+      }
 
       case "ShowDecision":
         const choices = resolvedInstruction.stringParams.filter(Boolean);
