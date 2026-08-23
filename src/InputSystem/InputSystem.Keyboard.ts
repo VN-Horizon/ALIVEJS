@@ -159,3 +159,26 @@ $(document).on("contextmenu", function (e) {
     e.preventDefault();
   }
 });
+$(document).on("wheel", function (e) {
+  const wheelEvent = e.originalEvent as WheelEvent | undefined;
+  if (!wheelEvent || window.isSelecting) return;
+
+  if (!window.isBacklogOpen) {
+    if (wheelEvent.deltaY < 0) {
+      document.dispatchEvent(new CustomEvent("toggleBacklog", { bubbles: true }));
+      e.preventDefault();
+    }
+    return;
+  }
+
+  if (wheelEvent.deltaY < 0) return;
+
+  const backlogContent = document.getElementById("backlog-content");
+  if (!backlogContent) return;
+  const atBottom =
+    backlogContent.scrollTop + backlogContent.clientHeight >= backlogContent.scrollHeight - 1;
+  if (atBottom) {
+    document.dispatchEvent(new CustomEvent("toggleBacklog", { bubbles: true }));
+    e.preventDefault();
+  }
+});
