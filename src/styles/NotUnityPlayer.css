@@ -175,6 +175,13 @@ body {
   z-index: 114514;
 }
 
+#wipe-overlay {
+  position: absolute;
+  inset: 0;
+  background: black;
+  z-index: 114513;
+}
+
 #gameContainer {
   position: absolute;
   top: 50%;

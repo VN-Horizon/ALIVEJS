@@ -135,9 +135,9 @@ export function destroyScene() {
   }
 }
 
-export function destroySceneByName(name: string) {
+export function destroySceneByName(name: string, options?: { instant?: boolean }) {
   const engine = window.getEngine();
   if (engine) {
-    engine.removeSceneByName(name);
+    engine.removeSceneByName(name, options);
   }
 }

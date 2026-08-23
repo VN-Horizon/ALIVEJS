@@ -3,8 +3,10 @@ import { toButton } from "@/Components/Button";
 import { applyGameState, loadGame } from "@/Core/Save/GameSave";
 import { getProgress } from "@/Core/Save/Progress";
 import { getUnlockedCG } from "@/Core/Save/UnlockedCG";
+import { getScreenEffectsTransitionDurationMs } from "@/Core/Settings";
 import { setExitListener, setOverrideRightKeys } from "@/InputSystem/InputSystem.Keyboard";
 import { destroySceneByName, loadScene } from "@/Scene/SceneManagement";
+import { runWipeOutIn } from "@/Utils/WipeTransition";
 import $ from "jquery";
 import { execUntilNextLine, ScreenplayContext } from "../Core/Events";
 import { loadBackgroundScene } from "./BACKGROUND";
@@ -51,20 +53,24 @@ export async function loadStartScene(eventsPromise?: Promise<any>) {
       ScreenplayContext.currentBlockIndex = ScreenplayContext.evIdToBlockIndex[512] || 0;
       ScreenplayContext.currentEvId = 512;
       ScreenplayContext.currentInstructionIndex = 0;
-      await loadBackgroundScene();
-      await pushDialogWindow({ autoAdvance: true });
-      if (progress[4] > 0) {
-        document.dispatchEvent(
-          new CustomEvent("ShowCg", {
-            detail: { stringParams: ["S03"] },
-            bubbles: true,
-            cancelable: true,
-          })
-        );
-      }
-      setTimeout(() => {
-        destroySceneByName(sceneName);
-      }, 1000);
+      const wipePromise = runWipeOutIn(
+        "topToBottom",
+        getScreenEffectsTransitionDurationMs(),
+        async () => {
+          destroySceneByName(sceneName, { instant: true });
+          await Promise.all([loadBackgroundScene(), pushDialogWindow({ autoAdvance: true })]);
+          if (progress[4] > 0) {
+            document.dispatchEvent(
+              new CustomEvent("ShowCg", {
+                detail: { stringParams: ["S03"] },
+                bubbles: true,
+                cancelable: true,
+              })
+            );
+          }
+        }
+      );
+      await wipePromise;
     },
   });
 
