@@ -1,5 +1,6 @@
 import { toggleDialogWindowVisibility } from "@/Scripts/WINDOW/WINDOW.DialogHider";
 import { initFullscreen } from "@/Utils/Fullscreen";
+import { showConfirmDialog } from "@/Utils/ConfirmDialog";
 import { EMBEDDED_WEB_DIALOG_CLOSE, openWebEmbeddedDialog } from "@/Utils/WebEmbeddedDialog";
 import $ from "jquery";
 
@@ -225,6 +226,16 @@ export async function initWindowManager() {
         openDialog("save_load", url, "Save/Load", 450, 520);
       }
     });
+  };
+
+  window.confirmReturnToMainMenu = async () => {
+    const ok = await showConfirmDialog({
+      title: "确认",
+      message: "确定要回到主界面吗？\n未保存的进度将丢失。",
+    });
+    if (ok) {
+      window.location.reload();
+    }
   };
 
   window.exit = (timeout: number = 600) => {

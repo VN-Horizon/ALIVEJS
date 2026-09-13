@@ -11,6 +11,8 @@ declare global {
     toggleFullscreen: () => void | Promise<void>;
     toggleDialogWindowVisibility: () => void;
     openSaveLoadDialog: (mode: "save" | "load") => Promise<number | null>;
+    confirmReturnToMainMenu: () => void;
+    confirmOpen: boolean;
     getEngine: () => GameEngine;
     exit: () => void;
     minimize: () => void;

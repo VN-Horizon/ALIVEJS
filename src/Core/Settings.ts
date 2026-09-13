@@ -15,6 +15,8 @@ export interface GameSettings {
   loadAutoSelect: boolean;
   loadSkipAuto: boolean;
 
+  skipOnlyRead: boolean;
+
   autoSaveEnabled: boolean;
   autoSaveSlot: number;
   autoSaveComment: string;
@@ -48,6 +50,8 @@ export const DEFAULT_SETTINGS: GameSettings = {
   loadDblclick: true,
   loadAutoSelect: true,
   loadSkipAuto: true,
+
+  skipOnlyRead: true,
 
   autoSaveEnabled: true,
   autoSaveSlot: 20,

@@ -47,6 +47,9 @@ document.addEventListener("DOMContentLoaded", () => {
   (document.getElementById("load-skip-auto") as HTMLInputElement).checked =
     currentSettings.loadSkipAuto;
 
+  (document.getElementById("skip-only-read") as HTMLInputElement).checked =
+    currentSettings.skipOnlyRead;
+
   (document.getElementById("auto-save") as HTMLInputElement).checked =
     currentSettings.autoSaveEnabled;
   (document.getElementById("auto-save-slot") as HTMLInputElement).value = String(
@@ -98,6 +101,8 @@ document.addEventListener("DOMContentLoaded", () => {
     s.loadDblclick = (document.getElementById("load-dblclick") as HTMLInputElement).checked;
     s.loadAutoSelect = (document.getElementById("load-auto-select") as HTMLInputElement).checked;
     s.loadSkipAuto = (document.getElementById("load-skip-auto") as HTMLInputElement).checked;
+
+    s.skipOnlyRead = (document.getElementById("skip-only-read") as HTMLInputElement).checked;
 
     s.autoSaveEnabled = (document.getElementById("auto-save") as HTMLInputElement).checked;
     s.autoSaveSlot = parseInt(

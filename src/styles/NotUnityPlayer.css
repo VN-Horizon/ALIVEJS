@@ -175,6 +175,46 @@ body {
   z-index: 114514;
 }
 
+.alive-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 2147483647;
+}
+
+.alive-confirm-window {
+  width: min(340px, calc(100vw - 24px));
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-family: "Microsoft YaHei", sans-serif;
+  font-size: 12px;
+  text-shadow: none;
+}
+
+.alive-confirm-window .window-body {
+  background-color: #c0c0c0;
+  overflow: visible;
+}
+
+.alive-confirm-message {
+  padding: 12px;
+  white-space: pre-line;
+  line-height: 1.6;
+}
+
+.alive-confirm-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 0 12px 12px;
+}
+
+.alive-confirm-footer button {
+  width: 75px;
+}
+
 #wipe-overlay {
   position: absolute;
   inset: 0;

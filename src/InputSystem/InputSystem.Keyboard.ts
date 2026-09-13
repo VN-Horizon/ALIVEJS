@@ -73,6 +73,7 @@ export function setOverrideRightKeys(override: boolean) {
   // remove all right-click listeners if overriding
   $(document).off("contextmenu");
   $(document).on("contextmenu", function (e) {
+    if (window.confirmOpen) return;
     if (exitListener && !overrideRightKeys) {
       exitListener(e);
       e.preventDefault();
@@ -81,8 +82,14 @@ export function setOverrideRightKeys(override: boolean) {
 }
 
 $(document).on("keydown", function (e) {
+  if (window.confirmOpen) return;
   // Handle Ctrl key for skipping
-  if (e.key === "Control" && !window.skipping && !window.isSelecting) {
+  if (
+    e.key === "Control" &&
+    !(e.originalEvent as KeyboardEvent | undefined)?.repeat &&
+    !window.skipping &&
+    !window.isSelecting
+  ) {
     // Ctrl key
     window.skipping = true;
     // Trigger the first line advance immediately
@@ -131,6 +138,7 @@ $(document).on("keydown", function (e) {
   }
 });
 $(document).on("keyup", function (e) {
+  if (window.confirmOpen) return;
   // Handle Ctrl key release to stop skipping
   if (e.key === "Control" && window.skipping) {
     // Ctrl key
@@ -154,12 +162,14 @@ $(document).on("keyup", function (e) {
   }
 });
 $(document).on("contextmenu", function (e) {
+  if (window.confirmOpen) return;
   if (exitListener && !overrideRightKeys) {
     exitListener(e);
     e.preventDefault();
   }
 });
 $(document).on("wheel", function (e) {
+  if (window.confirmOpen) return;
   const wheelEvent = e.originalEvent as WheelEvent | undefined;
   if (!wheelEvent || window.isSelecting) return;
 
@@ -182,3 +192,14 @@ $(document).on("wheel", function (e) {
     e.preventDefault();
   }
 });
+
+document.addEventListener(
+  "contextmenu",
+  (e) => {
+    if (!window.isBacklogOpen || window.confirmOpen) return;
+    e.stopPropagation();
+    e.preventDefault();
+    document.dispatchEvent(new CustomEvent("toggleBacklog", { bubbles: true }));
+  },
+  true
+);

@@ -138,6 +138,9 @@ dist
 psd_src/**/*.psd
 audio_src/audio/
 
+# LibreOffice lock files
+.~lock.*
+
 target/
 src-tauri/target/
 

@@ -1,5 +1,6 @@
 # https://schema.tauri.app/config/2
 productName = "alivejs"
+mainBinaryName = "alivejs"
 version = "0.1.0"
 identifier = "org.loclab.alivejs"
 

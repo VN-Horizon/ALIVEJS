@@ -20,7 +20,7 @@ function pointerClientInRootViewport(ev: PointerEvent): { x: number; y: number }
   return { x, y };
 }
 
-function attachDraggablePanel(
+export function attachDraggablePanel(
   handle: HTMLElement,
   panel: HTMLElement,
   excludeFromDrag: Element | null,

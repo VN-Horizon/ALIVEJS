@@ -2,6 +2,7 @@ import { toBackground } from "@/Components/Background";
 import { toButton } from "@/Components/Button";
 import { applyGameState, loadGame, saveGame } from "@/Core/Save/GameSave";
 import { setExitListener, setOverrideRightKeys } from "@/InputSystem/InputSystem.Keyboard";
+import { showConfirmDialog } from "@/Utils/ConfirmDialog";
 import { destroyScene, loadScene } from "@/Scene/SceneManagement";
 import { execUntilNextLine } from "../Core/Events";
 
@@ -44,8 +45,14 @@ export async function pushPauseScreen() {
     },
   });
   toButton(pauseScene.getObjectByName("EXIT"), {
-    callback: () => {
-      window.exit();
+    callback: async () => {
+      const ok = await showConfirmDialog({
+        title: "确认",
+        message: "确定要退出游戏吗？\n未保存的进度将丢失。",
+      });
+      if (ok) {
+        window.exit();
+      }
     },
   });
   const feather = pauseScene.getObjectByName("羽セット");

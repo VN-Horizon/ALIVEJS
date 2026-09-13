@@ -202,11 +202,15 @@ export async function pushDialogWindow(options: PushDialogWindowOptions = {}) {
 
     // Auto-advance when skipping
     if (window.skipping) {
-      setTimeout(() => {
-        if (window.skipping) {
-          onNextLineRequest();
-        }
-      }, 0);
+      if (loadSettings().skipOnlyRead && !read) {
+        stopSkipping();
+      } else {
+        setTimeout(() => {
+          if (window.skipping) {
+            onNextLineRequest();
+          }
+        }, 0);
+      }
     }
   };
 
@@ -283,6 +287,11 @@ export async function pushDialogWindow(options: PushDialogWindowOptions = {}) {
   if (autoAdvance) {
     onNextLineRequest();
   }
+}
+
+function stopSkipping(): void {
+  window.skipping = false;
+  document.dispatchEvent(new CustomEvent("SkipModeEnded", { bubbles: true }));
 }
 
 export function onNextLineRequest() {
