@@ -1,11 +1,15 @@
+import { playBGM, getCurrentBGM } from "@/Audio/Bgm";
 import { toButton } from "@/Components/Button";
 import { SceneElement } from "@/Components/SceneElement";
+import { toToggle, type Toggle } from "@/Components/Toggle";
 import { CharacterNameToVoiceKey } from "@/Constants";
 import { getUnlockedCG } from "@/Core/Save/UnlockedCG";
+import { getScreenEffectsTransitionDurationMs } from "@/Core/Settings";
 import {
     setExitListener
 } from "@/InputSystem/InputSystem.Keyboard";
 import { loadScene } from "@/Scene/SceneManagement";
+import $ from "jquery";
 import { pushCgPlayerScene } from "./GALLERY/GALLERY.CgPlayer";
 
 export async function initGallery() {
@@ -120,6 +124,112 @@ export async function gotoCharacterGallery(
   }
 }
 
+function fadeElementOpacity(element: SceneElement | null, opacity: number, ms: number) {
+  if (!element?.domElement) return Promise.resolve();
+  element.show();
+  if (ms <= 0) {
+    element.opacity = opacity;
+    element.updateDOMStyle();
+    return Promise.resolve();
+  }
+  return new Promise<void>((resolve) => {
+    $(element.domElement).stop(true).fadeTo(ms, opacity, () => {
+      element.opacity = opacity;
+      resolve();
+    });
+  });
+}
+
 async function initMusicGallery() {
   const musicGalleryScene = await loadScene("UI/MUSIC");
+  if (!musicGalleryScene) {
+    console.error("Failed to load MUSIC gallery scene");
+    return;
+  }
+
+  const score1 = musicGalleryScene.getObjectByName("SCORE1");
+  const score2 = musicGalleryScene.getObjectByName("SCORE2");
+  if (score2) {
+    score2.opacity = 0;
+    score2.updateDOMStyle();
+  }
+  for (let i = 16; i <= 30; i++) {
+    musicGalleryScene.getObjectByName(i.toString().padStart(2, "0"))?.hide();
+  }
+
+  const trackButtons: Array<Toggle | null> = [];
+  const currentBgm = getCurrentBGM();
+  let currentPage = 1;
+  let pageTransitioning = false;
+
+  const setPlayingTrack = (trackIndex: number) => {
+    playBGM(`M${trackIndex.toString().padStart(2, "0")}`);
+    trackButtons.forEach((button, i) => {
+      button?.setOn(i + 1 === trackIndex, false);
+    });
+  };
+
+  for (let i = 1; i <= 30; i++) {
+    const item = musicGalleryScene.getObjectByName(i.toString().padStart(2, "0"));
+    const hoverLayer = item?.children?.[0];
+    trackButtons.push(
+      toToggle(item, {
+        stateIndexes: [-1, 2, 0, 2, 1],
+        defaultTransform: [
+          hoverLayer?.x ?? null,
+          hoverLayer?.y ?? null,
+          hoverLayer?.width ?? null,
+          hoverLayer?.height ?? null,
+        ],
+        visible: i <= 15,
+        initialOn: currentBgm === `M${i.toString().padStart(2, "0")}`,
+        callback: () => {
+          setPlayingTrack(i);
+        },
+      })
+    );
+  }
+
+  const applyTrackPage = (page: number) => {
+    trackButtons.forEach((button, i) => {
+      const onThisPage = page === 1 ? i < 15 : i >= 15;
+      if (onThisPage) button?.show();
+      else button?.hide();
+      button?.setOn(false, false);
+    });
+  };
+
+  const gotoPage = async (page: number) => {
+    if (page === currentPage || pageTransitioning) return;
+    pageTransitioning = true;
+    const ms = getScreenEffectsTransitionDurationMs();
+    applyTrackPage(page);
+    await Promise.all([
+      fadeElementOpacity(page === 1 ? score1 : score2, 1, ms),
+      fadeElementOpacity(page === 1 ? score2 : score1, 0, ms),
+    ]);
+    currentPage = page;
+    pageTransitioning = false;
+  };
+
+  toButton(musicGalleryScene.getObjectByName("タブ１"), {
+    stateIndexes: [-1, -1, -1, -1],
+    defaultTransform: [294, 56, 36, 136],
+    z: 10,
+    callback: () => {
+      void gotoPage(1);
+    },
+  });
+  toButton(musicGalleryScene.getObjectByName("タブ２"), {
+    stateIndexes: [-1, -1, -1, -1],
+    defaultTransform: [294, 196, 36, 100],
+    z: 10,
+    callback: () => {
+      void gotoPage(2);
+    },
+  });
+
+  setExitListener(() => {
+    window.getEngine()?.popScene();
+  });
 }

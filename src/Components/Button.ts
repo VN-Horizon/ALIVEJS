@@ -80,6 +80,10 @@ export class Button extends FocusableElement {
       $(this.domElement).remove();
     }
 
+    if (this.images[4] && !classNames.includes("has-press-state") && !this.flags.includes("has-press-state")) {
+      classNames.push("has-press-state");
+    }
+
     this.domElement = $("<button>")
       .attr("id", this.buttonId)
       .attr("layer-name", this.sceneData.name || "Button")
@@ -95,7 +99,8 @@ export class Button extends FocusableElement {
     const $button = $(this.domElement);
 
     const baseTransform = this.transforms[0] || [0, 0, 10, 10];
-    for (let i = 0; i < Button.STATE_COUNT; i++) {
+    const stateCount = Math.max(Button.STATE_COUNT, this.images.length, this.transforms.length);
+    for (let i = 0; i < stateCount; i++) {
       const current = this.transforms[i] || baseTransform;
       const imageSrc = this.images[i] || "";
       const layerX = (current[0] || 0) - (baseTransform[0] || 0);

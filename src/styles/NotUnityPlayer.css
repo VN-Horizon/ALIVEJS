@@ -428,3 +428,12 @@ body {
 .vn-button.vn-toggle:disabled .state-2 {
   display: none !important;
 }
+
+/* Optional 5th layer: press. Opt-in via has-press-state so 4-state toggles stay unchanged. */
+.vn-button.vn-toggle.has-press-state:not(:disabled):active .button-state-layer {
+  display: none !important;
+}
+
+.vn-button.vn-toggle.has-press-state:not(:disabled):active .state-4 {
+  display: block !important;
+}

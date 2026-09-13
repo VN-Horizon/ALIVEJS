@@ -14,15 +14,16 @@ import { pushDialogWindow } from "./WINDOW/WINDOW";
 export async function loadStartScene(eventsPromise?: Promise<any>) {
   let sceneName = "UI/START";
   const progress = getProgress();
+  console.log(progress);
   if (progress[1] + progress[2] + progress[3] > 0) {
     playBGM("M22");
     sceneName = "UI/START01";
   }
-  if (progress[1] > 0 && progress[2] > 0 && progress[3] > 0) {
+  else if (progress[1] > 0 && progress[2] > 0 && progress[3] > 0) {
     playBGM("M27");
     sceneName = "UI/START02";
   }
-  if (progress[4] > 0) {
+  else if (progress[4] > 0) {
     playBGM("M20");
     sceneName = "UI/START03";
   } else {
