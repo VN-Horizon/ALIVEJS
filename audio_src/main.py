@@ -42,7 +42,7 @@ def recompress_bgm(source_root: Path, output_root: Path) -> tuple[int, int]:
 
 	output_root.mkdir(parents=True, exist_ok=True)
 
-	for index, source_file in enumerate(source_files, start=1):
+	for index, source_file in enumerate[Path](source_files, start=1):
 		destination_file = output_root / f"M{index:02d}.ogg"
 
 		try:

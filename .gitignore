@@ -136,6 +136,7 @@ dist
 .pnp.*
 
 psd_src/**/*.psd
+audio_src/audio/
 
 target/
 src-tauri/target/
