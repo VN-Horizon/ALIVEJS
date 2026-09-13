@@ -92,7 +92,7 @@ function performCrossfade(oldAudio: HTMLMediaElement | null, newAudio: HTMLMedia
 }
 
 export function initBGM() {
-  for (let i = 0; i < 22; i++) {
+  for (let i = 1; i <= 30; i++) {
     const audioElement = createAudioPlayer();
     audioElement.src = `/assets/audio/bgm/M${i.toString().padStart(2, "0")}.ogg`;
     audioElement.loop = true;
@@ -101,6 +101,7 @@ export function initBGM() {
     bgmList[trackName] = audioElement;
   }
   console.log("BGM initialized");
+  console.log(bgmList);
 }
 
 export function playBGM(name: string) {

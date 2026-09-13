@@ -61,8 +61,7 @@ export async function initTranslation() {
         }
       });
     });
-    console.log(JSON.stringify(arr));
-    console.log(arr.length)
+    console.log(`Loaded ${arr.length} translations`);
 
     return map;
   } catch (err) {

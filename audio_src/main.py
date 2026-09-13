@@ -23,7 +23,7 @@ def transcode_mp3_to_ogg(source_file: Path, destination_file: Path) -> None:
 
 def recompress_bgm(source_root: Path, output_root: Path) -> tuple[int, int]:
 	source_files = sorted(
-		p for p in source_root.rglob("*") if p.is_file() and p.suffix.lower() == ".mp3"
+		p for p in source_root.rglob("*") if p.is_file() and p.suffix.lower() == ".wav"
 	)
 	if not source_files:
 		return 0, 0
@@ -40,10 +40,10 @@ def recompress_bgm(source_root: Path, output_root: Path) -> tuple[int, int]:
 		sys.stdout.write(f"\r[{bar}] {done}/{total} ({percent:5.1f}%)")
 		sys.stdout.flush()
 
+	output_root.mkdir(parents=True, exist_ok=True)
+
 	for index, source_file in enumerate(source_files, start=1):
-		rel_path = source_file.relative_to(source_root)
-		destination_file = (output_root / rel_path).with_suffix(".ogg")
-		destination_file.parent.mkdir(parents=True, exist_ok=True)
+		destination_file = output_root / f"M{index:02d}.ogg"
 
 		try:
 			transcode_mp3_to_ogg(source_file, destination_file)
@@ -61,7 +61,7 @@ def recompress_bgm(source_root: Path, output_root: Path) -> tuple[int, int]:
 
 def main() -> int:
 	parser = argparse.ArgumentParser(
-		description="Recompress MP3 files to .ogg (64k bitrate, compression level 10)."
+		description="Recompress WAV files to .ogg (64k bitrate, compression level 10)."
 	)
 	parser.parse_args()
 

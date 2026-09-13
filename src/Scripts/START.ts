@@ -15,13 +15,18 @@ export async function loadStartScene(eventsPromise?: Promise<any>) {
   let sceneName = "UI/START";
   const progress = getProgress();
   if (progress[1] + progress[2] + progress[3] > 0) {
+    playBGM("M22");
     sceneName = "UI/START01";
   }
   if (progress[1] > 0 && progress[2] > 0 && progress[3] > 0) {
+    playBGM("M27");
     sceneName = "UI/START02";
   }
   if (progress[4] > 0) {
+    playBGM("M20");
     sceneName = "UI/START03";
+  } else {
+    playBGM("M28");
   }
   const startScene = await loadScene(sceneName);
   if (!startScene) {
@@ -132,6 +137,5 @@ export async function loadStartScene(eventsPromise?: Promise<any>) {
     });
   });
 
-  playBGM("M07");
   setOverrideRightKeys(false);
 }
