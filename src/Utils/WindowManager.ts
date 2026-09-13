@@ -1,4 +1,5 @@
 import { toggleDialogWindowVisibility } from "@/Scripts/WINDOW/WINDOW.DialogHider";
+import { initFullscreen } from "@/Utils/Fullscreen";
 import { EMBEDDED_WEB_DIALOG_CLOSE, openWebEmbeddedDialog } from "@/Utils/WebEmbeddedDialog";
 import $ from "jquery";
 
@@ -137,6 +138,7 @@ export async function openDialog(
 
 export async function initWindowManager() {
   const tWindow = await setupWindowBehavior();
+  initFullscreen();
   if (tWindow) {
     await tWindow.listen("tauri://resize", async () => {
       const isMaximized = await tWindow.isMaximized();

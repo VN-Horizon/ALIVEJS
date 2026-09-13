@@ -8,6 +8,7 @@ declare global {
     openCodecVersionInfo: () => void;
     openSettings: () => void;
     toggleBacklog: () => void;
+    toggleFullscreen: () => void | Promise<void>;
     toggleDialogWindowVisibility: () => void;
     openSaveLoadDialog: (mode: "save" | "load") => Promise<number | null>;
     getEngine: () => GameEngine;

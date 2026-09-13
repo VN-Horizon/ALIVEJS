@@ -10,6 +10,35 @@
   user-select: none;
 }
 
+html.app-fullscreen {
+  background: #000 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+html.app-fullscreen body {
+  background: #000 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+html.app-fullscreen #app-main-title-bar,
+html.app-fullscreen .menu-bar {
+  display: none !important;
+}
+
+html.app-fullscreen .window {
+  box-shadow: none !important;
+  border: none !important;
+  padding: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+html.app-fullscreen .window-body {
+  margin: 0 !important;
+}
+
 .menu-bar {
   display: flex;
 }
